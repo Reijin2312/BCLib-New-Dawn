@@ -1,5 +1,6 @@
 package org.betterx.bclib.mixin.client;
 
+import org.betterx.bclib.client.BCLibClient;
 import org.betterx.bclib.interfaces.CustomColorProvider;
 
 import net.minecraft.client.Minecraft;
@@ -31,11 +32,7 @@ public abstract class MinecraftMixin {
     private void bclib_onMCInit(GameConfig args, CallbackInfo info) {
         BuiltInRegistries.BLOCK.forEach(block -> {
             if (block instanceof CustomColorProvider provider) {
-                blockColors.register(
-                        (state, level, pos, tintIndex) -> provider.getProvider()
-                                                                  .getColor(state, level, pos, tintIndex),
-                        block
-                );
+                blockColors.register(BCLibClient.createBlockTintSources(provider), block);
             }
         });
     }

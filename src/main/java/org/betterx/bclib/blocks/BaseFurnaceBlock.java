@@ -17,7 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.client.data.models.model.ModelTemplates;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
-import net.minecraft.client.renderer.block.model.VariantMutator;
+import net.minecraft.client.renderer.block.dispatch.VariantMutator;
 import net.minecraft.resources.Identifier;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.MenuProvider;
@@ -70,20 +70,19 @@ public abstract class BaseFurnaceBlock extends FurnaceBlock implements RenderLay
     @OnlyIn(Dist.CLIENT)
     public void provideBlockModels(Object modelGenerator) {
         WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        final var baseTexture = TextureMapping.getBlockTexture(this);
         TextureMapping mapping = new TextureMapping()
-                .put(TextureSlot.TOP, baseTexture.withSuffix("_top"))
-                .put(TextureSlot.SIDE, baseTexture.withSuffix("_side"))
-                .put(TextureSlot.FRONT, baseTexture.withSuffix("_front"))
-                .put(TextureSlot.BOTTOM, baseTexture.withSuffix("_top"));
+                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(this, "_top"))
+                .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(this, "_side"))
+                .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(this, "_front"))
+                .put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(this, "_top"));
         final var furnaceModel = ModelTemplates.CUBE_ORIENTABLE_TOP_BOTTOM.create(this, mapping, generator.modelOutput());
 
         TextureMapping mappingGlow = new TextureMapping()
-                .put(TextureSlot.TOP, baseTexture.withSuffix("_top"))
-                .put(TextureSlot.SIDE, baseTexture.withSuffix("_side"))
-                .put(TextureSlot.FRONT, baseTexture.withSuffix("_front_on"))
-                .put(TextureSlot.BOTTOM, baseTexture.withSuffix("_top"))
-                .put(BCLModels.GLOW, baseTexture.withSuffix("_glow"));
+                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(this, "_top"))
+                .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(this, "_side"))
+                .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(this, "_front_on"))
+                .put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(this, "_top"))
+                .put(BCLModels.GLOW, TextureMapping.getBlockTexture(this, "_glow"));
         final var glowModel = BCLModels.FURNACE_GLOW.createWithSuffix(this, "_lit", mappingGlow, generator.modelOutput());
 
         final Object prop = DatagenModelDispatch.propertyDispatchInitial(LIT, FACING);

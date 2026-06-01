@@ -10,6 +10,7 @@ import org.betterx.wover.tag.api.predefined.ToolTags;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -78,9 +79,9 @@ public class LootUtil {
         return false;
     }
 
-    public static boolean isCorrectTool(ItemLike block, BlockState state, ItemStack tool) {
+    public static boolean isCorrectTool(ItemLike block, BlockState state, ItemInstance tool) {
         if (tool == null) return false;
-        if (state != null && tool.isCorrectToolForDrops(state)) return true;
+        if (state != null && tool instanceof ItemStack stack && stack.isCorrectToolForDrops(state)) return true;
 
         if (block instanceof AddMineableAxe) {
             if (tool.is(ItemTags.AXES) || tool.is(ToolTags.COMMON_AXES)) return true;
@@ -98,7 +99,8 @@ public class LootUtil {
             if (tool.is(ItemTags.SWORDS) || tool.is(ToolTags.COMMON_SWORDS)) return true;
         }
         if (block instanceof AddMineableShears) {
-            if (BaseShearsItem.isShear(tool)) return true;
+            if (tool instanceof ItemStack stack && BaseShearsItem.isShear(stack)) return true;
+            if (tool.is(CommonItemTags.SHEARS)) return true;
         }
         if (block instanceof AddMineableHammer) {
             if (tool.is(CommonItemTags.HAMMERS)) return true;

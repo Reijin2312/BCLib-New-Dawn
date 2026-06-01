@@ -173,7 +173,8 @@ public class AdvancementManager {
         }
 
         public static Builder create(ItemLike icon, AdvancementType type) {
-            return create(new ItemStack(icon), type);
+            return create(icon, type, (displayBuilder) -> {
+            });
         }
 
         public static Builder create(ItemStack icon, AdvancementType type) {
@@ -182,7 +183,33 @@ public class AdvancementManager {
         }
 
         public static Builder create(Item icon, AdvancementType type, Consumer<DisplayBuilder> displayAdapter) {
-            return create(new ItemStack(icon), type, displayAdapter);
+            return create((ItemLike) icon, type, displayAdapter);
+        }
+
+        public static Builder create(
+                ItemLike icon,
+                AdvancementType type,
+                Consumer<DisplayBuilder> displayAdapter
+        ) {
+            Item item = icon == null ? Items.AIR : icon.asItem();
+            var id = BuiltInRegistries.ITEM.getKey(item);
+            boolean canBuild = true;
+            if (id == null || item == Items.AIR) {
+                canBuild = false;
+                id = BuiltInRegistries.ITEM.getDefaultKey();
+            }
+
+            String baseName = "advancements." + id.getNamespace() + "." + id.getPath() + ".";
+            Builder b = new Builder(id, type);
+            var displayBuilder = b.startDisplay(
+                    item,
+                    Component.translatable(baseName + "title"),
+                    Component.translatable(baseName + "description")
+            );
+            if (displayAdapter != null) displayAdapter.accept(displayBuilder);
+            b = displayBuilder.endDisplay();
+            b.canBuild = canBuild;
+            return b;
         }
 
         public static Builder create(
@@ -250,7 +277,17 @@ public class AdvancementManager {
                 Component title,
                 Component description
         ) {
-            return startDisplay(new ItemStack(icon), title, description);
+            Item item = icon == null ? Items.AIR : icon.asItem();
+            if (item == Items.AIR) {
+                canBuild = false;
+            } else {
+                var id = BuiltInRegistries.ITEM.getKey(item);
+                if (id == null) {
+                    canBuild = false;
+                }
+            }
+            DisplayBuilder dp = DISPLAY_BUILDER.get().reset(this);
+            return dp.icon(item).title(title).description(description);
         }
 
         public DisplayBuilder startDisplay(
@@ -458,12 +495,12 @@ public class AdvancementManager {
         }
 
         public DisplayBuilder icon(ItemLike value) {
-            display.icon = new ItemStack(value);
+            display.setIcon(value);
             return this;
         }
 
         public DisplayBuilder icon(ItemStack value) {
-            display.icon = value;
+            display.setIcon(value);
             return this;
         }
 

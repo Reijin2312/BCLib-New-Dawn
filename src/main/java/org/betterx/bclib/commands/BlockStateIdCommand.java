@@ -13,7 +13,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
 
 public class BlockStateIdCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> register(LiteralArgumentBuilder<CommandSourceStack> bnContext) {
@@ -36,11 +35,11 @@ public class BlockStateIdCommand {
 
         String blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
         StringBuilder props = new StringBuilder();
-        state.getValues().forEach((Property<?> property, Comparable<?> value) -> {
+        state.getValues().forEach(value -> {
             if (props.length() > 0) {
                 props.append(",");
             }
-            props.append(property.getName()).append("=").append(value);
+            props.append(value.property().getName()).append("=").append(value.valueName());
         });
 
         String display = props.length() > 0 ? blockId + "[" + props + "]" : blockId;

@@ -6,7 +6,6 @@ import org.betterx.bclib.client.models.PatternsHelper;
 import org.betterx.bclib.interfaces.ItemModelProvider;
 import org.betterx.wover.item.api.ItemRegistry;
 
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
@@ -32,7 +31,7 @@ public class BaseSpawnEggItem extends SpawnEggItem implements ItemModelProvider 
     }
 
     @Override
-    public BlockModel getItemModel(Identifier resourceLocation) {
+    public Object getItemModel(Identifier resourceLocation) {
         Optional<String> pattern = PatternsHelper.createJson(BasePatterns.ITEM_SPAWN_EGG, resourceLocation);
         return ModelsHelper.fromPattern(pattern);
     }

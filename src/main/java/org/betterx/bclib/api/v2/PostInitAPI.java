@@ -5,14 +5,11 @@ import org.betterx.bclib.behaviours.interfaces.BehaviourCompostable;
 import org.betterx.bclib.blocks.BaseBarrelBlock;
 import org.betterx.bclib.blocks.BaseChestBlock;
 import org.betterx.bclib.blocks.BaseFurnaceBlock;
-import org.betterx.bclib.client.render.BCLRenderLayer;
 import org.betterx.bclib.client.render.BaseChestBlockEntityRenderer;
 import org.betterx.bclib.interfaces.PostInitable;
-import org.betterx.bclib.interfaces.RenderLayerProvider;
 import org.betterx.bclib.items.tool.BaseShearsItem;
 import org.betterx.bclib.registry.BaseBlockEntities;
 
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
@@ -20,8 +17,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
-
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 
 import com.google.common.collect.Lists;
 
@@ -69,14 +64,6 @@ public class PostInitAPI {
     }
 
     private static void processBlockClient(Block block) {
-        if (block instanceof RenderLayerProvider) {
-            BCLRenderLayer layer = ((RenderLayerProvider) block).getRenderLayer();
-            if (layer == BCLRenderLayer.CUTOUT) {
-                ItemBlockRenderTypes.setRenderLayer(block, ChunkSectionLayer.CUTOUT);
-            } else if (layer == BCLRenderLayer.TRANSLUCENT) {
-                ItemBlockRenderTypes.setRenderLayer(block, ChunkSectionLayer.TRANSLUCENT);
-            }
-        }
         if (block instanceof BaseChestBlock) {
             BaseChestBlockEntityRenderer.registerRenderLayer(block);
         }

@@ -100,7 +100,7 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
                     state,
                     blockState,
                     Direction.UP,
-                    blockState.getLightBlock()
+                    blockState.getLightDampening()
             );
             return i < 5;
         }

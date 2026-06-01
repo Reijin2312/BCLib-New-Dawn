@@ -7,10 +7,10 @@ buildscript {
         gradlePluginPortal()
     }
 }
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
-
-archivesBaseName = project.archives_base_name
+ext.archivesBaseName = project.archives_base_name
+base {
+    archivesName = project.archives_base_name
+}
 version = project.mod_version
 group = project.maven_group
 
@@ -37,6 +37,8 @@ repositories {
 }
 
 java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
     withSourcesJar()
 }
 
@@ -126,13 +128,23 @@ dependencies {
 processResources {
     println "Version: ${project.mod_version}"
     inputs.property "version", project.mod_version
+    inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "neoforge_version", project.neoforge_version
+    inputs.property "minecraft_version_range", project.minecraft_version_range
+    inputs.property "neoforge_version_range", project.neoforge_version_range
+    inputs.property "wunderlib_version", project.wunderlib_version
+    inputs.property "wover_version", project.wover_version
 
     filesMatching("META-INF/neoforge.mods.toml") {
         expand(
                 "mod_id": project.archives_base_name,
                 "version": project.mod_version,
                 "minecraft_version": project.minecraft_version,
-                "neoforge_version": project.neoforge_version
+                "neoforge_version": project.neoforge_version,
+                "minecraft_version_range": project.minecraft_version_range,
+                "neoforge_version_range": project.neoforge_version_range,
+                "wunderlib_version": project.wunderlib_version,
+                "wover_version": project.wover_version
         )
     }
 }
@@ -147,7 +159,7 @@ tasks.matching { it.name == "createMinecraftArtifacts" }.configureEach {
     tasks.withType(JavaCompile).configureEach {
         def refmapOutput = layout.buildDirectory.file("resources/main/${refmapName}").get().asFile
         options.encoding = "UTF-8"
-        it.options.release = 21
+        it.options.release = 25
         options.compilerArgs += [
             "-AoutRefMapFile=${refmapOutput}",
             "-AoutTsrgFile=${mixinOutMappingsFile.get().asFile}",
@@ -351,8 +363,9 @@ tasks.register("fixMixinRefmap") {
 }
 
 javadoc {
+    dependsOn("fixMixinRefmap")
     options {
-        source = "17"
+        source = "25"
         encoding = "UTF-8"
         charSet = "UTF-8"
         tags = ["reason"]
@@ -438,7 +451,7 @@ tasks.matching { it.name in ["runData", "runClientData"] }.configureEach {
 
 tasks.matching { it.name == "runClientData" }.configureEach {
     doFirst {
-        // EMI runtime currently targets older mappings (ResourceLocation) and crashes named datagen on 1.21.11.
+        // EMI runtime currently targets older mappings (ResourceLocation) and crashes named datagen on this API line.
         if (hasProperty("classpath")) {
             classpath = classpath.filter { file -> !file.name.startsWith("emi-neoforge-") }
         }

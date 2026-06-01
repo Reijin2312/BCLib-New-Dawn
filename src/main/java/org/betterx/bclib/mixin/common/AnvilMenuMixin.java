@@ -203,7 +203,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
     private void bcl_updateResult() {
         if (bcl_currentRecipe == null) return;
         AnvilRecipeInput recipeInput = this.bcl_AnvilRecipeInput(bcl_currentRecipe.value().getAllowedTools());
-        resultSlots.setItem(0, bcl_currentRecipe.value().assemble(recipeInput, this.player.level().registryAccess()));
+        resultSlots.setItem(0, bcl_currentRecipe.value().assemble(recipeInput));
         broadcastChanges();
     }
 

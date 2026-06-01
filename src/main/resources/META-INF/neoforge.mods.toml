@@ -15,28 +15,28 @@ logoFile="assets/bclib/icon.png"
 [[dependencies.${mod_id}]]
 modId="neoforge"
 mandatory=true
-versionRange="[${neoforge_version},)"
+versionRange="${neoforge_version_range}"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="minecraft"
 mandatory=true
-versionRange="[${minecraft_version}]"
+versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="wunderlib"
 mandatory=true
-versionRange="[21.11.1,)"
+versionRange="[${wunderlib_version},)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="wover"
 mandatory=true
-versionRange="[21.11.1,)"
+versionRange="[${wover_version},)"
 ordering="NONE"
 side="BOTH"
 

@@ -8,7 +8,7 @@ import de.ambertation.wunderlib.ui.vanilla.LayoutScreen;
 import org.betterx.bclib.BCLib;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -41,7 +41,7 @@ class ProgressLogoRender extends CustomRenderComponent<ProgressLogoRender> {
 
     @Override
     protected void customRender(
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             int x,
             int y,
             float deltaTicks,

@@ -26,8 +26,8 @@ public interface BiomeGenerationSettingsAccessor {
     @Accessor(value = "featureSet")
     void bclib_setFeatureSet(Supplier<Set<PlacedFeature>> featureSet);
 
-    @Accessor(value = "flowerFeatures")
-    void bclib_setFlowerFeatures(Supplier<List<ConfiguredFeature<?, ?>>> flowerFeatures);
+    @Accessor(value = "boneMealFeatures")
+    void bclib_setBoneMealFeatures(Supplier<List<ConfiguredFeature<?, ?>>> boneMealFeatures);
 
     @Accessor(value = "carvers")
     HolderSet<ConfiguredWorldCarver<?>> bclib_getCarvers();

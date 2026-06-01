@@ -11,13 +11,15 @@ import org.betterx.bclib.config.Configs;
 import org.betterx.wover.core.api.Logger;
 import org.betterx.wover.state.api.WorldConfig;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
+import net.minecraft.client.gui.screens.GenericWaitingScreen;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFile;
@@ -31,6 +33,8 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -171,8 +175,7 @@ public class DataFixerAPI {
     ) {
         if (currentAccess != null) {
             try {
-                EditWorldScreen.makeBackupAndShowToast(currentAccess);
-                return true;
+                return createBackupAndShowToast(currentAccess);
             } catch (RuntimeException ex) {
                 LOGGER.warn(
                         "Failed to create backup of level {} using existing access, retrying with reopened access",
@@ -185,14 +188,87 @@ public class DataFixerAPI {
         boolean didOpen = false;
         try (LevelStorageSource.LevelStorageAccess access = storageSource.createAccess(levelID);) {
             didOpen = true;
-            EditWorldScreen.makeBackupAndShowToast(access);
-            return true;
+            return createBackupAndShowToast(access);
         } catch (IOException ex) {
             if (!didOpen) {
-                SystemToast.onWorldAccessFailure(Minecraft.getInstance(), levelID);
+                runOnMinecraftThread(() -> SystemToast.onWorldAccessFailure(Minecraft.getInstance(), levelID));
             }
             LOGGER.warn("Failed to create backup of level {}", levelID, ex);
             return false;
+        }
+    }
+
+    private static boolean createBackupAndShowToast(LevelStorageAccess access) {
+        Minecraft minecraft = Minecraft.getInstance();
+        runOnMinecraftThread(() -> minecraft.setScreenAndShow(
+                GenericWaitingScreen.createWaitingWithoutButton(
+                        Component.translatable("selectWorld.waitingForBackup.title"),
+                        Component.translatable("selectWorld.waitingForBackup.message").withStyle(ChatFormatting.GRAY)
+                )
+        ));
+
+        final long size;
+        try {
+            size = access.makeWorldBackup();
+        } catch (IOException ex) {
+            LOGGER.warn("Failed to create backup of level {}", access.getLevelId(), ex);
+            showBackupToast(
+                    minecraft,
+                    Component.translatable("selectWorld.edit.backupFailed"),
+                    Component.literal(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage())
+            );
+            return false;
+        }
+
+        showBackupToast(
+                minecraft,
+                Component.translatable("selectWorld.edit.backupCreated", access.getLevelId()),
+                Component.translatable("selectWorld.edit.backupSize", Mth.ceil(size / 1048576.0D))
+        );
+        return true;
+    }
+
+    private static void showBackupToast(Minecraft minecraft, Component title, Component message) {
+        runOnMinecraftThread(() -> minecraft.getToastManager()
+                                            .addToast(SystemToast.multiline(
+                                                    minecraft,
+                                                    SystemToast.SystemToastId.WORLD_BACKUP,
+                                                    title,
+                                                    message
+                                            )));
+    }
+
+    private static void runOnMinecraftThread(Runnable runner) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.isSameThread()) {
+            runner.run();
+            return;
+        }
+
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        client.execute(() -> {
+            try {
+                runner.run();
+                future.complete(null);
+            } catch (Throwable ex) {
+                future.completeExceptionally(ex);
+            }
+        });
+
+        try {
+            future.get();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(ex);
+        } catch (ExecutionException ex) {
+            Throwable cause = ex.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            throw new RuntimeException(cause == null ? ex : cause);
         }
     }
 

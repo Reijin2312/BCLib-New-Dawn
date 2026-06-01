@@ -8,6 +8,8 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.criterion.RecipeUnlockedTrigger;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.nbt.CompoundTag;
@@ -15,12 +17,14 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.ItemLike;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,10 +44,20 @@ public abstract class BCLBaseRecipeBuilder<I extends BaseRecipeBuilder<I>, R ext
             @NotNull ItemLike output,
             boolean dualInput
     ) {
-        this(id, new ItemStack(output, 1), dualInput);
+        super(id, output);
+        this.advancement = Advancement.Builder.advancement();
+        this.dualInput = dualInput;
+        this.group("");
     }
 
     protected BCLBaseRecipeBuilder(@NotNull Identifier id, @NotNull ItemStack output, boolean dualInput) {
+        super(id, output);
+        this.advancement = Advancement.Builder.advancement();
+        this.dualInput = dualInput;
+        this.group("");
+    }
+
+    protected BCLBaseRecipeBuilder(@NotNull Identifier id, @NotNull ItemStackTemplate output, boolean dualInput) {
         super(id, output);
         this.advancement = Advancement.Builder.advancement();
         this.dualInput = dualInput;
@@ -72,14 +86,44 @@ public abstract class BCLBaseRecipeBuilder<I extends BaseRecipeBuilder<I>, R ext
         setupAdvancementForResult();
         final AdvancementHolder advancementHolder = advancement.build(createAdvancementId());
 
-        if (this.outputTagConsumer != null)
-            CustomData.update(BCLDataComponents.ANVIL_ENTITY_DATA, this.output, this.outputTagConsumer);
-
         final R recipe = createRecipe(id);
         ctx.accept(recipeKey(id), recipe, advancementHolder);
     }
 
     protected abstract R createRecipe(Identifier id);
+
+    @Override
+    protected ItemStackTemplate outputTemplate() {
+        final ItemStackTemplate template = super.outputTemplate();
+        if (this.outputTagConsumer == null) {
+            return template;
+        }
+
+        final DataComponentPatch.Builder builder = DataComponentPatch.builder();
+        for (var entry : template.components().entrySet()) {
+            applyPatchEntry(builder, entry.getKey(), entry.getValue());
+        }
+
+        final CompoundTag tag = new CompoundTag();
+        this.outputTagConsumer.accept(tag);
+        if (!tag.isEmpty()) {
+            builder.set(BCLDataComponents.ANVIL_ENTITY_DATA, CustomData.of(tag));
+        }
+        return new ItemStackTemplate(template.item(), template.count(), builder.build());
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void applyPatchEntry(DataComponentPatch.Builder builder, DataComponentType type, Optional<?> value) {
+        if (value.isPresent()) {
+            builder.set(type, value.get());
+        } else {
+            builder.remove(type);
+        }
+    }
+
+    protected ItemStack outputStack() {
+        return this.outputTemplate().create();
+    }
 
     @SuppressWarnings("removal")
     protected void setupAdvancementForResult() {

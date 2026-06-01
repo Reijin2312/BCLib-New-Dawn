@@ -9,6 +9,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.equipment.ArmorType;
 
@@ -16,13 +17,43 @@ public class BaseArmorItem extends Item implements ItemModelProvider, ItemTagPro
     private final ArmorType armorType;
 
     public BaseArmorItem(Holder<ArmorMaterial> material, ArmorType type, Properties settings) {
-        super(settings.humanoidArmor(material.value(), type));
-        this.armorType = type;
+        this(material.value(), type, settings, null);
+    }
+
+    public BaseArmorItem(
+            Holder<ArmorMaterial> material,
+            ArmorType type,
+            Properties settings,
+            ItemAttributeModifiers customAttributes
+    ) {
+        this(material.value(), type, settings, customAttributes);
     }
 
     public BaseArmorItem(ArmorMaterial material, ArmorType type, Properties settings) {
-        super(settings.humanoidArmor(material, type));
+        this(material, type, settings, null);
+    }
+
+    public BaseArmorItem(
+            ArmorMaterial material,
+            ArmorType type,
+            Properties settings,
+            ItemAttributeModifiers customAttributes
+    ) {
+        super(applyArmorSettings(settings, material, type, customAttributes));
         this.armorType = type;
+    }
+
+    private static Properties applyArmorSettings(
+            Properties settings,
+            ArmorMaterial material,
+            ArmorType type,
+            ItemAttributeModifiers customAttributes
+    ) {
+        settings.humanoidArmor(material, type);
+        if (customAttributes != null) {
+            settings.attributes(customAttributes);
+        }
+        return settings;
     }
 
     @Override

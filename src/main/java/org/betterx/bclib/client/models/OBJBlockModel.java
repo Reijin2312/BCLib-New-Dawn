@@ -5,21 +5,19 @@ import org.betterx.bclib.util.BlocksHelper;
 import org.betterx.bclib.util.MHelper;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.block.model.TextureSlots;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelDebugName;
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.QuadCollection;
-import net.minecraft.client.resources.model.UnbakedGeometry;
+import net.minecraft.client.resources.model.cuboid.ItemTransforms;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
+import net.minecraft.client.resources.model.geometry.UnbakedGeometry;
+import net.minecraft.client.resources.model.sprite.Material;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-import net.neoforged.neoforge.client.RenderTypeGroup;
 import net.neoforged.neoforge.client.model.AbstractUnbakedModel;
 import net.neoforged.neoforge.client.model.StandardModelParameters;
 
@@ -58,7 +56,6 @@ public class OBJBlockModel extends AbstractUnbakedModel {
                 Boolean.TRUE,
                 net.minecraft.client.resources.model.UnbakedModel.GuiLight.SIDE,
                 null,
-                RenderTypeGroup.EMPTY,
                 Map.of()
         ));
 
@@ -78,7 +75,7 @@ public class OBJBlockModel extends AbstractUnbakedModel {
     private static TextureSlots.Data createTextureSlots(Identifier[] textureIDs, int particleIndex) {
         TextureSlots.Data.Builder builder = new TextureSlots.Data.Builder();
         for (int i = 0; i < textureIDs.length; i++) {
-            builder.addTexture(Integer.toString(i), new Material(net.minecraft.client.resources.model.ModelManager.BLOCK_OR_ITEM, textureIDs[i]));
+            builder.addTexture(Integer.toString(i), new Material(textureIDs[i]));
         }
         if (textureIDs.length > 0) {
             int safeParticleIndex = Math.max(0, Math.min(textureIDs.length - 1, particleIndex));
@@ -222,16 +219,16 @@ public class OBJBlockModel extends AbstractUnbakedModel {
 
         @Override
         public QuadCollection bake(TextureSlots slots, ModelBaker baker, ModelState state, ModelDebugName debugName) {
-            TextureAtlasSprite[] sprites = new TextureAtlasSprite[Math.max(1, textureCount)];
-            for (int i = 0; i < sprites.length; i++) {
-                sprites[i] = baker.sprites().resolveSlot(slots, Integer.toString(i), debugName);
+            Material.Baked[] materials = new Material.Baked[Math.max(1, textureCount)];
+            for (int i = 0; i < materials.length; i++) {
+                materials[i] = baker.materials().resolveSlot(slots, Integer.toString(i), debugName);
             }
 
             QuadCollection.Builder builder = new QuadCollection.Builder();
-            quadsUnbaked.forEach(quad -> builder.addUnculledFace(quad.bake(sprites, state)));
+            quadsUnbaked.forEach(quad -> builder.addUnculledFace(quad.bake(materials, state)));
             for (Map.Entry<Direction, List<UnbakedQuad>> entry : quadsUnbakedMap.entrySet()) {
                 Direction cullDir = entry.getKey();
-                entry.getValue().forEach(quad -> builder.addCulledFace(cullDir, quad.bake(sprites, state)));
+                entry.getValue().forEach(quad -> builder.addCulledFace(cullDir, quad.bake(materials, state)));
             }
             return builder.build();
         }

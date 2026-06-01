@@ -21,7 +21,8 @@ import com.mojang.math.Quadrant;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
-import net.minecraft.client.renderer.block.model.VariantMutator;
+import net.minecraft.client.renderer.block.dispatch.VariantMutator;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
@@ -91,13 +92,13 @@ public abstract class BaseTrapdoorBlock extends TrapDoorBlock implements RenderL
     @OnlyIn(Dist.CLIENT)
     public void provideBlockModels(Object modelGenerator) {
         WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        final var id = TextureMapping.getBlockTexture(this);
+        final var id = TextureMapping.getBlockTexture(this).sprite();
         final var mapping = new TextureMapping()
-                .put(TextureSlot.TEXTURE, id)
-                .put(TextureSlot.SIDE, Identifier.fromNamespaceAndPath(id.getNamespace(), id
+                .put(TextureSlot.TEXTURE, new Material(id))
+                .put(TextureSlot.SIDE, new Material(Identifier.fromNamespaceAndPath(id.getNamespace(), id
                         .getPath()
                         .replace("_trapdoor", "")).withSuffix("_door_side")
-                );
+                ));
 
         final var model = BCLModels.TRAPDOOR.create(this, mapping, generator.modelOutput());
 

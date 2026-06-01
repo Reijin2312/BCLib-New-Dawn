@@ -4,6 +4,7 @@ import org.betterx.bclib.items.boat.BoatTypeOverride;
 import org.betterx.bclib.items.boat.CustomBoatTypeOverride;
 import org.betterx.bclib.util.BCLAttachments;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.entity.vehicle.boat.AbstractChestBoat;
 import net.minecraft.world.item.Item;
@@ -77,6 +78,25 @@ public abstract class BoatMixin implements CustomBoatTypeOverride {
         if (customItem != null) {
             cir.setReturnValue(new ItemStack(customItem));
         }
+    }
+
+    protected Component getTypeName() {
+        Item customItem = bclib_getCustomItem();
+        if (customItem != null) {
+            return Component.translatable(customItem.getDescriptionId());
+        }
+
+        return ((AbstractBoat) (Object) this).getType().getDescription();
+    }
+
+    @Unique
+    private Item bclib_getCustomItem() {
+        BoatTypeOverride type = this.bcl_getCustomType();
+        if (type == null) {
+            return null;
+        }
+
+        return (Object) this instanceof AbstractChestBoat ? type.getChestBoatItem() : type.getBoatItem();
     }
 
     @Unique

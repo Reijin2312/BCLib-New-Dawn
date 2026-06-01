@@ -1,8 +1,11 @@
 package org.betterx.bclib.client.models;
 
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import com.mojang.blaze3d.platform.Transparency;
+
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.core.Direction;
 
 import net.neoforged.neoforge.client.model.pipeline.QuadBakingVertexConsumer;
@@ -44,16 +47,20 @@ public class UnbakedQuad {
         return result;
     }
 
-    public BakedQuad bake(TextureAtlasSprite[] sprites, ModelState modelState) {
+    public BakedQuad bake(Material.Baked[] materials, ModelState modelState) {
         Matrix4fc matrix = modelState.transformation().getMatrix();
-        TextureAtlasSprite sprite = sprites[spriteIndex];
+        Material.Baked material = materials[spriteIndex];
+        TextureAtlasSprite sprite = material.sprite();
+        Transparency transparency = material.forceTranslucent()
+                ? sprite.transparency().or(Transparency.TRANSLUCENT)
+                : sprite.transparency();
 
         QuadBakingVertexConsumer quadBaker = new QuadBakingVertexConsumer();
         quadBaker.setTintIndex(-1);
         quadBaker.setDirection(dir);
-        quadBaker.setSprite(sprite);
+        quadBaker.setSprite(material, transparency);
         quadBaker.setShade(useShading);
-        quadBaker.setHasAmbientOcclusion(true);
+        quadBaker.setAmbientOcclusion(true);
 
         for (int i = 0; i < 4; i++) {
             int dataIndex = i * 5;

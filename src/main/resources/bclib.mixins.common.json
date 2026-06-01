@@ -13,6 +13,7 @@
     "ComposterBlockAccessor",
     "CraftingMenuMixin",
     "EnchantingTableBlockMixin",
+    "FireBlockAccessor",
     "IdMapperAccessor",
     "IdMapperDebugMixin",
     "LayerLightSectionStorageMixin",

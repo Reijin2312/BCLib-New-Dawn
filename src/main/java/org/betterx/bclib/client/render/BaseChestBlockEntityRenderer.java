@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.renderer.blockentity.state.ChestRenderState;
-import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -21,15 +21,15 @@ public class BaseChestBlockEntityRenderer extends ChestRenderer<BaseChestBlockEn
     private static final int ID_NORMAL = 0;
     private static final int ID_LEFT = 1;
     private static final int ID_RIGHT = 2;
-    private static final Map<Block, Material[]> CUSTOM_MATERIALS = Maps.newHashMap();
+    private static final Map<Block, SpriteId[]> CUSTOM_MATERIALS = Maps.newHashMap();
 
     public BaseChestBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
         super(ctx);
     }
 
     @Override
-    protected @Nullable Material getCustomMaterial(BaseChestBlockEntity blockEntity, ChestRenderState renderState) {
-        Material[] materials = CUSTOM_MATERIALS.get(blockEntity.getBlockState().getBlock());
+    protected @Nullable SpriteId getCustomSprite(BaseChestBlockEntity blockEntity, ChestRenderState renderState) {
+        SpriteId[] materials = CUSTOM_MATERIALS.get(blockEntity.getBlockState().getBlock());
         if (materials == null) {
             return null;
         }
@@ -46,7 +46,7 @@ public class BaseChestBlockEntityRenderer extends ChestRenderer<BaseChestBlockEn
         String path = blockId.getPath();
         CUSTOM_MATERIALS.put(
                 block,
-                new Material[]{
+                new SpriteId[]{
                         chestMaterial(modId, path),
                         chestMaterial(modId, path + "_left"),
                         chestMaterial(modId, path + "_right")
@@ -54,7 +54,7 @@ public class BaseChestBlockEntityRenderer extends ChestRenderer<BaseChestBlockEn
         );
     }
 
-    private static Material chestMaterial(String modId, String path) {
-        return new Material(Sheets.CHEST_SHEET, Identifier.fromNamespaceAndPath(modId, "entity/chest/" + path));
+    private static SpriteId chestMaterial(String modId, String path) {
+        return Sheets.CHEST_MAPPER.apply(Identifier.fromNamespaceAndPath(modId, path));
     }
 }
