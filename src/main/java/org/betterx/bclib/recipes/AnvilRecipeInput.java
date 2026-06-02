@@ -1,5 +1,7 @@
 package org.betterx.bclib.recipes;
 
+import org.betterx.wover.tag.api.predefined.CommonItemTags;
+
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -12,16 +14,21 @@ public class AnvilRecipeInput implements RecipeInput {
     private final ItemStack ingredient;
 
     public AnvilRecipeInput(ItemStack first, ItemStack second, TagKey<Item> allowedTools) {
-        if (!first.isEmpty() && (allowedTools == null || first.is(allowedTools))) {
+        if (isHammer(first, allowedTools)) {
             this.hammer = first;
             this.ingredient = second;
-        } else if (!second.isEmpty() && (allowedTools == null || second.is(allowedTools))) {
+        } else if (isHammer(second, allowedTools)) {
             this.hammer = second;
             this.ingredient = first;
         } else {
             this.hammer = ItemStack.EMPTY;
             this.ingredient = first;
         }
+    }
+
+    private static boolean isHammer(ItemStack stack, TagKey<Item> allowedTools) {
+        if (stack.isEmpty()) return false;
+        return allowedTools == null ? stack.is(CommonItemTags.HAMMERS) : stack.is(allowedTools);
     }
 
     public boolean hasHammer() {

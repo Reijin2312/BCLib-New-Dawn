@@ -120,7 +120,12 @@ public class DataFixerAPI {
             boolean showUI,
             Consumer<Boolean> onResume
     ) {
-        return wrapCall(levelSource, levelID, (levelStorageAccess) -> fixData(levelStorageAccess, showUI, onResume));
+        return wrapCall(levelSource, levelID, (levelStorageAccess) -> {
+            File levelPath = levelStorageAccess.getLevelPath(LevelResource.ROOT).toFile();
+            // This access is scoped to wrapCall and gets closed before async UI flow finishes.
+            // Don't reuse it for backup creation.
+            return fixData(levelPath, levelStorageAccess.getLevelId(), showUI, onResume, null);
+        });
     }
 
     /**
@@ -139,7 +144,7 @@ public class DataFixerAPI {
             Consumer<Boolean> onResume
     ) {
         File levelPath = levelStorageAccess.getLevelPath(LevelResource.ROOT).toFile();
-        return fixData(levelPath, levelStorageAccess.getLevelId(), showUI, onResume);
+        return fixData(levelPath, levelStorageAccess.getLevelId(), showUI, onResume, levelStorageAccess);
     }
 
     /**
@@ -162,7 +167,24 @@ public class DataFixerAPI {
         return ps;
     }
 
-    private static boolean makeBackupAndShowToast(LevelStorageSource storageSource, String levelID) {
+    private static boolean makeBackupAndShowToast(
+            LevelStorageSource storageSource,
+            String levelID,
+            LevelStorageAccess currentAccess
+    ) {
+        if (currentAccess != null) {
+            try {
+                EditWorldScreen.makeBackupAndShowToast(currentAccess);
+                return true;
+            } catch (RuntimeException ex) {
+                LOGGER.warn(
+                        "Failed to create backup of level {} using existing access, retrying with reopened access",
+                        levelID,
+                        ex
+                );
+            }
+        }
+
         boolean didOpen = false;
         try (LevelStorageSource.LevelStorageAccess access = storageSource.createAccess(levelID);) {
             didOpen = true;
@@ -177,7 +199,13 @@ public class DataFixerAPI {
         }
     }
 
-    private static boolean fixData(File dir, String levelID, boolean showUI, Consumer<Boolean> onResume) {
+    private static boolean fixData(
+            File dir,
+            String levelID,
+            boolean showUI,
+            Consumer<Boolean> onResume,
+            LevelStorageAccess currentAccess
+    ) {
         MigrationProfile profile = loadProfileIfNeeded(dir);
 
         AtomicReference<BiConsumer<Boolean, Boolean>> runFixesRef = new AtomicReference<>();
@@ -224,7 +252,11 @@ public class DataFixerAPI {
                     if (progress != null) {
                         progress.progressStage(Component.translatable("message.bclib.datafixer.progress.waitbackup"));
                     }
-                    backupCreated = makeBackupAndShowToast(Minecraft.getInstance().getLevelSource(), levelID);
+                    backupCreated = makeBackupAndShowToast(
+                            Minecraft.getInstance().getLevelSource(),
+                            levelID,
+                            currentAccess
+                    );
                 }
 
                 if (applyFixes && !backupCreated) {

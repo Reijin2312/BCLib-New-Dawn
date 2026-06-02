@@ -94,7 +94,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         if (bcl_currentRecipe != null) {
             AnvilRecipeInput recipeInput = this.bcl_AnvilRecipeInput(bcl_currentRecipe.value().getAllowedTools());
             recipeInput.getIngredient().shrink(bcl_currentRecipe.value().getInputCount());
-            stack = bcl_currentRecipe.value().craft(recipeInput, player);
+            bcl_currentRecipe.value().craft(recipeInput, player);
             slotsChanged(inputSlots);
 
             access.execute((level, blockPos) -> {

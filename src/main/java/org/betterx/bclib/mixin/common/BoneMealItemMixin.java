@@ -6,6 +6,7 @@ import org.betterx.bclib.blocks.FeatureSaplingBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -38,6 +39,20 @@ public class BoneMealItemMixin {
                 bblock.performBonemeal(server, context.getLevel().getRandom(), blockPos, blockState);
                 info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));
             }
+        }
+    }
+
+    @Inject(remap = false, method = "applyBonemeal", at = @At("HEAD"), cancellable = true)
+    private static void bcl_applyBonemeal(
+            ItemStack itemStack,
+            Level level,
+            BlockPos blockPos,
+            Player player,
+            CallbackInfoReturnable<Boolean> cir
+    ) {
+        boolean forceBonemeal = player != null && player.isCreative();
+        if (BonemealAPI.INSTANCE.runSpreaders(itemStack, level, blockPos, forceBonemeal)) {
+            cir.setReturnValue(true);
         }
     }
 

@@ -13,7 +13,6 @@ import org.betterx.wover.tag.api.predefined.CommonItemTags;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -144,18 +143,16 @@ public class AnvilRecipe implements Recipe<AnvilRecipeInput>, UnknownReceipBookC
             ItemStack hammer = getHammer(craftingInventory);
             if (hammer != null) {
                 hammer.hurtAndBreak(this.damage, player, EquipmentSlot.OFFHAND);
-                return ItemStack.EMPTY;
             }
         }
-        return this.assemble(craftingInventory, Minecraft.getInstance().level.registryAccess());
+        return this.assemble(craftingInventory, player.level().registryAccess());
     }
 
     public boolean checkHammerDurability(AnvilRecipeInput craftingInventory, Player player) {
         if (player.isCreative()) return true;
         ItemStack hammer = getHammer(craftingInventory);
         if (hammer != null) {
-            int damage = hammer.getDamageValue() + this.damage;
-            return damage < hammer.getMaxDamage();
+            return !hammer.isDamageableItem() || hammer.getDamageValue() + this.damage <= hammer.getMaxDamage();
         }
         return true;
     }
@@ -171,7 +168,7 @@ public class AnvilRecipe implements Recipe<AnvilRecipeInput>, UnknownReceipBookC
         }
         int materialCount = material.getCount();
 
-        return this.input.test(getIngredient(craftingInventory)) && materialCount >= this.inputCount && hammer.is(allowedTools);
+        return this.input.test(getIngredient(craftingInventory)) && materialCount >= this.inputCount && hammer.is(getAllowedToolTag());
     }
 
     public int getDamage() {
@@ -196,9 +193,13 @@ public class AnvilRecipe implements Recipe<AnvilRecipeInput>, UnknownReceipBookC
 
     public boolean canUse(Item tool) {
         if (tool instanceof TieredItem ti) {
-            return ti.builtInRegistryHolder().is(allowedTools);
+            return ti.builtInRegistryHolder().is(getAllowedToolTag());
         }
         return false;
+    }
+
+    private TagKey<Item> getAllowedToolTag() {
+        return allowedTools == null ? CommonItemTags.HAMMERS : allowedTools;
     }
 
     public static boolean isHammer(Item tool) {
