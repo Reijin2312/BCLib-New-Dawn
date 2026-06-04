@@ -17,6 +17,8 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
+import net.neoforged.neoforge.common.Tags;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,21 +41,25 @@ public class StrippedLog extends SimpleMaterialSlot<WoodenComplexMaterial> {
                     .setBlockTags(
                             BlockTags.LOGS,
                             BlockTags.LOGS_THAT_BURN,
+                            Tags.Blocks.STRIPPED_LOGS,
                             parentMaterial.getBlockTag(WoodenComplexMaterial.TAG_LOGS)
                     )
                     .setItemTags(
                             ItemTags.LOGS,
                             ItemTags.LOGS_THAT_BURN,
+                            Tags.Items.STRIPPED_LOGS,
                             parentMaterial.getItemTag(WoodenComplexMaterial.TAG_LOGS)
                     );
         } else {
             entry
                     .setBlockTags(
                             BlockTags.LOGS,
+                            Tags.Blocks.STRIPPED_LOGS,
                             parentMaterial.getBlockTag(WoodenComplexMaterial.TAG_LOGS)
                     )
                     .setItemTags(
                             ItemTags.LOGS,
+                            Tags.Items.STRIPPED_LOGS,
                             parentMaterial.getItemTag(WoodenComplexMaterial.TAG_LOGS)
                     );
         }

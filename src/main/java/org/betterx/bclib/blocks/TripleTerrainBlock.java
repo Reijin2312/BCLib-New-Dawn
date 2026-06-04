@@ -84,6 +84,11 @@ public class TripleTerrainBlock extends BaseTerrainBlock implements RuntimeBlock
     }
 
     @Override
+    protected boolean canFlattenState(BlockState state) {
+        return state.getValue(SHAPE) == TripleShape.BOTTOM;
+    }
+
+    @Override
     public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         TripleShape shape = state.getValue(SHAPE);
         if (shape == TripleShape.BOTTOM) {

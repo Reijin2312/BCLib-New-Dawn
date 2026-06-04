@@ -39,6 +39,11 @@ public interface BonemealNyliumLike extends BonemealableBlock {
         return true;
     }
 
+    @Override
+    default BonemealableBlock.Type getType() {
+        return BonemealableBlock.Type.NEIGHBOR_SPREADER;
+    }
+
     default void performBonemeal(
             ServerLevel serverLevel,
             RandomSource randomSource,

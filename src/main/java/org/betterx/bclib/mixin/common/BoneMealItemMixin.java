@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.state.BlockState;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,6 +22,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BoneMealItem.class)
 public class BoneMealItemMixin {
+    private static void bclib_showBonemealEffect(Level level, BlockPos blockPos) {
+        level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, blockPos, 15);
+    }
+
     @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
     private void bclib_onUse(UseOnContext context, CallbackInfoReturnable<InteractionResult> info) {
         Level level = context.getLevel();
@@ -28,6 +33,7 @@ public class BoneMealItemMixin {
 
         if (context.getPlayer().isCreative()) {
             if (BonemealAPI.INSTANCE.runSpreaders(context.getItemInHand(), level, blockPos, true)) {
+                bclib_showBonemealEffect(level, blockPos);
                 info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));
             }
 
@@ -37,6 +43,7 @@ public class BoneMealItemMixin {
                     && blockState.getBlock() instanceof FeatureSaplingBlock<?, ?>
             ) {
                 bblock.performBonemeal(server, context.getLevel().getRandom(), blockPos, blockState);
+                bclib_showBonemealEffect(level, blockPos);
                 info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));
             }
         }

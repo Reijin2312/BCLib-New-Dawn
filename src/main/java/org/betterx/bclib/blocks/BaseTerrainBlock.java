@@ -19,6 +19,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -33,6 +34,8 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.ItemAbility;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,6 +60,28 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
 
     public Block getBaseBlock() {
         return baseBlock;
+    }
+
+    protected boolean canFlattenState(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public BlockState getToolModifiedState(
+            BlockState state,
+            UseOnContext context,
+            ItemAbility itemAbility,
+            boolean simulate
+    ) {
+        if (ItemAbilities.SHOVEL_FLATTEN == itemAbility
+                && pathBlock != null
+                && canFlattenState(state)
+                && context.getItemInHand().canPerformAction(itemAbility)
+                && context.getClickedFace() != Direction.DOWN
+                && context.getLevel().getBlockState(context.getClickedPos().above()).isAir()) {
+            return pathBlock.defaultBlockState();
+        }
+        return super.getToolModifiedState(state, context, itemAbility, simulate);
     }
 
     @Override
