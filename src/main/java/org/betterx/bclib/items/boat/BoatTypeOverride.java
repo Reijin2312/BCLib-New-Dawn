@@ -3,10 +3,6 @@ package org.betterx.bclib.items.boat;
 import org.betterx.bclib.BCLib;
 import org.betterx.wover.core.api.ModCore;
 
-import net.minecraft.client.model.object.boat.BoatModel;
-import net.minecraft.client.model.object.boat.RaftModel;
-import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.Item;
@@ -19,8 +15,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public final class BoatTypeOverride {
-    private static final String DEFAULT_LAYER = "main";
-
     private static final List<BoatTypeOverride> values = new ArrayList<>(8);
     private final String name;
     private final Block planks;
@@ -28,9 +22,8 @@ public final class BoatTypeOverride {
     public final Identifier id;
     public final Identifier boatTexture;
     public final Identifier chestBoatTexture;
-    public final ModelLayerLocation boatModelName;
-    public final ModelLayerLocation chestBoatModelName;
-    private Object boatModel, chestBoatModel;
+    public final Identifier boatModelName;
+    public final Identifier chestBoatModelName;
     private BoatItem boat, chestBoat;
     public final boolean isRaft;
 
@@ -51,37 +44,12 @@ public final class BoatTypeOverride {
         }
         this.ordinal = nr;
         this.isRaft = isRaft;
-        if (BCLib.isClient()) {
-            this.boatModelName = createBoatModelName(id.getNamespace(), id.getPath());
-            this.chestBoatModelName = createChestBoatModelName(id.getNamespace(), id.getPath());
-            this.boatTexture = getTextureLocation(modCore.namespace, name, false);
-            this.chestBoatTexture = getTextureLocation(modCore.namespace, name, true);
-        } else {
-            this.boatModelName = null;
-            this.chestBoatModelName = null;
-            this.boatTexture = null;
-            this.chestBoatTexture = null;
-        }
+        this.boatModelName = createBoatModelName(id.getNamespace(), id.getPath());
+        this.chestBoatModelName = createChestBoatModelName(id.getNamespace(), id.getPath());
+        this.boatTexture = getTextureLocation(modCore.namespace, name, false);
+        this.chestBoatTexture = getTextureLocation(modCore.namespace, name, true);
 
         values.add(this);
-    }
-
-    public Object getBoatModel(boolean chest) {
-        return chest ? chestBoatModel : boatModel;
-    }
-
-    public void createBoatModels(EntityRendererProvider.Context context) {
-        if (boatModel == null) {
-            boatModel = isRaft
-                    ? new RaftModel(context.bakeLayer(boatModelName))
-                    : new BoatModel(context.bakeLayer(boatModelName));
-        }
-        if (chestBoatModel == null) {
-            // Chest variants use the same model classes in 1.21.11, but with chest-specific layer definitions.
-            chestBoatModel = isRaft
-                    ? new RaftModel(context.bakeLayer(chestBoatModelName))
-                    : new BoatModel(context.bakeLayer(chestBoatModelName));
-        }
     }
 
     public Block getPlanks() {
@@ -108,12 +76,12 @@ public final class BoatTypeOverride {
         return values.stream();
     }
 
-    private static ModelLayerLocation createBoatModelName(String modID, String name) {
-        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(modID, "boat/" + name), DEFAULT_LAYER);
+    private static Identifier createBoatModelName(String modID, String name) {
+        return Identifier.fromNamespaceAndPath(modID, "boat/" + name);
     }
 
-    private static ModelLayerLocation createChestBoatModelName(String modID, String name) {
-        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(modID, "chest_boat/" + name), DEFAULT_LAYER);
+    private static Identifier createChestBoatModelName(String modID, String name) {
+        return Identifier.fromNamespaceAndPath(modID, "chest_boat/" + name);
     }
 
     private static Identifier getTextureLocation(String modID, String name, boolean chest) {
