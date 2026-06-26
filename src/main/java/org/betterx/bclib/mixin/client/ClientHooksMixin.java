@@ -15,6 +15,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FogType;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.client.ClientHooks;
 
 import org.joml.Vector4f;
@@ -27,6 +28,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(value = ClientHooks.class)
 public class ClientHooksMixin {
     private static final float LEGACY_END_FOG_COLOR_SCALE = 0.6F;
+
+    private static boolean hasDistantHorizons() {
+        return BCLib.RUNS_DISTANT_HORIZONS || ModList.get().isLoaded("distanthorizons");
+    }
 
     @Inject(remap = false, method = "getFogColor", at = @At("RETURN"), cancellable = true, require = 0)
     private static void bclib_captureFogColor(
@@ -45,7 +50,7 @@ public class ClientHooksMixin {
             return;
         }
 
-        if (BCLib.RUNS_DISTANT_HORIZONS) {
+        if (hasDistantHorizons()) {
             float fogRed = Mth.clamp(color.x, 0.0F, 1.0F);
             float fogGreen = Mth.clamp(color.y, 0.0F, 1.0F);
             float fogBlue = Mth.clamp(color.z, 0.0F, 1.0F);
@@ -94,7 +99,7 @@ public class ClientHooksMixin {
             FogData fogData,
             CallbackInfo ci
     ) {
-        if (BCLib.RUNS_DISTANT_HORIZONS) {
+        if (hasDistantHorizons()) {
             return;
         }
 

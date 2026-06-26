@@ -10,9 +10,14 @@ import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.ItemAbility;
+import org.jetbrains.annotations.Nullable;
 
 
 public abstract class BaseStripableBarkBlock extends BaseBarkBlock implements AxeCanStrip {
@@ -26,7 +31,20 @@ public abstract class BaseStripableBarkBlock extends BaseBarkBlock implements Ax
 
     @Override
     public BlockState strippedState(BlockState state) {
-        return strippedBlock.defaultBlockState();
+        return strippedBlock.withPropertiesOf(state);
+    }
+
+    @Override
+    public @Nullable BlockState getToolModifiedState(
+            BlockState state,
+            UseOnContext context,
+            ItemAbility itemAbility,
+            boolean simulate
+    ) {
+        if (itemAbility == ItemAbilities.AXE_STRIP) {
+            return strippedState(state);
+        }
+        return super.getToolModifiedState(state, context, itemAbility, simulate);
     }
 
     public static class Wood extends BaseStripableBarkBlock implements BehaviourWood, BlockTagProvider, ItemTagProvider {

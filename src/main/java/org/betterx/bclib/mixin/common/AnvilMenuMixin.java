@@ -108,8 +108,11 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         if (bcl_currentRecipe != null) {
             AnvilRecipeInput recipeInput = this.bcl_AnvilRecipeInput(bcl_currentRecipe.value().getAllowedTools());
             recipeInput.getIngredient().shrink(bcl_currentRecipe.value().getInputCount());
-            bcl_currentRecipe.value().craft(recipeInput, player);
+            if (!player.isCreative()) {
+                bcl_currentRecipe.value().damageHammer(bcl_getHammerStack(recipeInput), player);
+            }
             slotsChanged(inputSlots);
+            broadcastChanges();
 
             access.execute((level, blockPos) -> {
                 final BlockState anvilState = level.getBlockState(blockPos);
@@ -127,6 +130,18 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
             });
             info.cancel();
         }
+    }
+
+    @Unique
+    private ItemStack bcl_getHammerStack(AnvilRecipeInput recipeInput) {
+        ItemStack hammer = recipeInput.getHammer();
+        if (this.inputSlots.getItem(0) == hammer) {
+            return this.inputSlots.getItem(0);
+        }
+        if (this.inputSlots.getItem(1) == hammer) {
+            return this.inputSlots.getItem(1);
+        }
+        return hammer;
     }
 
     @Inject(remap = false, method = "onTake", at = @At("TAIL"), require = 0)

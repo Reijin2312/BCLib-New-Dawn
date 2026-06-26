@@ -13,7 +13,6 @@ import org.betterx.wover.tag.api.predefined.CommonItemTags;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -23,9 +22,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -141,21 +141,24 @@ public class AnvilRecipe implements Recipe<AnvilRecipeInput>, UnknownReceipBookC
     public ItemStack craft(AnvilRecipeInput craftingInventory, Player player) {
         if (!player.isCreative()) {
             if (!checkHammerDurability(craftingInventory, player)) return ItemStack.EMPTY;
-            ItemStack hammer = getHammer(craftingInventory);
-            if (hammer != null) {
-                hammer.hurtAndBreak(this.damage, player, EquipmentSlot.OFFHAND);
-                return ItemStack.EMPTY;
-            }
         }
-        return this.assemble(craftingInventory, Minecraft.getInstance().level.registryAccess());
+        return this.assemble(craftingInventory, player.level().registryAccess());
+    }
+
+    public void damageHammer(ItemStack hammer, Player player) {
+        if (!hammer.isDamageableItem()) return;
+        if (player instanceof ServerPlayer serverPlayer && player.level() instanceof ServerLevel serverLevel) {
+            hammer.hurtAndBreak(this.damage, serverLevel, serverPlayer, item -> {});
+        } else {
+            hammer.setDamageValue(hammer.getDamageValue() + this.damage);
+        }
     }
 
     public boolean checkHammerDurability(AnvilRecipeInput craftingInventory, Player player) {
         if (player.isCreative()) return true;
         ItemStack hammer = getHammer(craftingInventory);
         if (hammer != null) {
-            int damage = hammer.getDamageValue() + this.damage;
-            return damage < hammer.getMaxDamage();
+            return !hammer.isDamageableItem() || hammer.getDamageValue() + this.damage <= hammer.getMaxDamage();
         }
         return true;
     }
@@ -171,7 +174,7 @@ public class AnvilRecipe implements Recipe<AnvilRecipeInput>, UnknownReceipBookC
         }
         int materialCount = material.getCount();
 
-        return this.input.test(getIngredient(craftingInventory)) && materialCount >= this.inputCount && hammer.is(allowedTools);
+        return this.input.test(getIngredient(craftingInventory)) && materialCount >= this.inputCount && hammer.is(getAllowedToolTag());
     }
 
     public int getDamage() {
@@ -195,7 +198,11 @@ public class AnvilRecipe implements Recipe<AnvilRecipeInput>, UnknownReceipBookC
     }
 
     public boolean canUse(Item tool) {
-        return allowedTools != null && tool.builtInRegistryHolder().is(allowedTools);
+        return tool.builtInRegistryHolder().is(getAllowedToolTag());
+    }
+
+    private TagKey<Item> getAllowedToolTag() {
+        return allowedTools == null ? CommonItemTags.HAMMERS : allowedTools;
     }
 
     public static boolean isHammer(Item tool) {

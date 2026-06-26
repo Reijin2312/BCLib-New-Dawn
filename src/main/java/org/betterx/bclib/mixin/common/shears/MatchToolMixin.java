@@ -32,12 +32,12 @@ public class MatchToolMixin {
 
     @Inject(
             method = "test(Lnet/minecraft/world/level/storage/loot/LootContext;)Z",
-            at = @At(value = "HEAD"),
+            at = @At(value = "RETURN"),
             cancellable = true,
             remap = false
     )
     private void bcl_isShears(LootContext lootContext, CallbackInfoReturnable<Boolean> cir) {
-        if (bcl_isShears) {
+        if (!cir.getReturnValue() && bcl_isShears) {
             ItemStack itemStack = lootContext.getOptionalParameter(LootContextParams.TOOL);
             cir.setReturnValue(itemStack != null && itemStack.is(CommonItemTags.SHEARS));
         }
