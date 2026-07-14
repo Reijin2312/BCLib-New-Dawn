@@ -15,8 +15,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
-import net.neoforged.neoforge.common.Tags;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,11 +34,9 @@ public class StrippedBark extends SimpleMaterialSlot<WoodenComplexMaterial> {
     protected void modifyBlockEntry(WoodenComplexMaterial parentMaterial, @NotNull BlockEntry entry) {
         entry
                 .setBlockTags(
-                        Tags.Blocks.STRIPPED_WOODS,
                         parentMaterial.getBlockTag(WoodenComplexMaterial.TAG_LOGS)
                 )
                 .setItemTags(
-                        Tags.Items.STRIPPED_WOODS,
                         parentMaterial.getItemTag(WoodenComplexMaterial.TAG_LOGS)
                 );
     }

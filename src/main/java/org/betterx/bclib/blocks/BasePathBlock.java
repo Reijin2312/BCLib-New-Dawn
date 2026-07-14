@@ -20,8 +20,8 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -55,7 +55,7 @@ public abstract class BasePathBlock extends BaseBlockNotFull implements BlockLoo
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         var side = TextureMapping.getBlockTexture(this, "_side");
         side = ResourceLocation.fromNamespaceAndPath(side.getNamespace(), side
@@ -87,4 +87,3 @@ public abstract class BasePathBlock extends BaseBlockNotFull implements BlockLoo
         }
     }
 }
-

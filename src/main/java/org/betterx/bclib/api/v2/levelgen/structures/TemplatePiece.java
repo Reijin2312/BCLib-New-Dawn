@@ -8,8 +8,9 @@ import org.betterx.wover.tag.api.predefined.CommonBlockTags;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -29,22 +30,27 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockIgnorePr
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
-import net.neoforged.neoforge.registries.RegisterEvent;
 
 public class TemplatePiece extends TemplateStructurePiece {
     private final int erosion;
     private final boolean cover;
-    public static final ResourceLocation ID = BCLib.makeID("template_piece");
-    public static StructurePieceType INSTANCE;
+    public static final StructurePieceType INSTANCE = setTemplatePieceId(
+            TemplatePiece::new,
+            "template_piece"
+    );
 
-    public static void register(net.neoforged.neoforge.registries.RegisterEvent event) {
-        if (event.getRegistryKey().equals(Registries.STRUCTURE_PIECE)) {
-            event.register(Registries.STRUCTURE_PIECE, helper -> {
-                INSTANCE = (ctx, tag) -> new TemplatePiece(ctx.structureTemplateManager(), tag);
-                helper.register(ID, INSTANCE);
-            });
-        }
+
+    private static StructurePieceType setFullContextPieceId(StructurePieceType structurePieceType, String id) {
+        return Registry.register(BuiltInRegistries.STRUCTURE_PIECE, BCLib.makeID(id), structurePieceType);
     }
+
+    private static StructurePieceType setTemplatePieceId(
+            StructurePieceType.StructureTemplateType structureTemplateType,
+            String string
+    ) {
+        return setFullContextPieceId(structureTemplateType, string);
+    }
+
 
     public static void ensureStaticInitialization() {
     }

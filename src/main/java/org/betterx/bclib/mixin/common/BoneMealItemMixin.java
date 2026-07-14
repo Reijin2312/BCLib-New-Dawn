@@ -6,7 +6,6 @@ import org.betterx.bclib.blocks.FeatureSaplingBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -20,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = BoneMealItem.class)
+@Mixin(BoneMealItem.class)
 public class BoneMealItemMixin {
     private static void bclib_showBonemealEffect(Level level, BlockPos blockPos) {
         level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, blockPos, 15);
@@ -49,20 +48,6 @@ public class BoneMealItemMixin {
         }
     }
 
-    @Inject(remap = false, method = "applyBonemeal", at = @At("HEAD"), cancellable = true)
-    private static void bcl_applyBonemeal(
-            ItemStack itemStack,
-            Level level,
-            BlockPos blockPos,
-            Player player,
-            CallbackInfoReturnable<Boolean> cir
-    ) {
-        boolean forceBonemeal = player != null && player.isCreative();
-        if (BonemealAPI.INSTANCE.runSpreaders(itemStack, level, blockPos, forceBonemeal)) {
-            cir.setReturnValue(true);
-        }
-    }
-
     @Inject(method = "growCrop", at = @At("HEAD"), cancellable = true)
     private static void bcl_growCrop(
             ItemStack itemStack,
@@ -75,6 +60,3 @@ public class BoneMealItemMixin {
         }
     }
 }
-
-
-

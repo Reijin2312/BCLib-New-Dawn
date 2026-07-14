@@ -1,6 +1,5 @@
 package org.betterx.bclib;
 
-import org.betterx.bclib.api.v2.dataexchange.BCLibNetwork;
 import org.betterx.bclib.api.v2.levelgen.LevelGenEvents;
 import org.betterx.bclib.api.v2.levelgen.structures.TemplatePiece;
 import org.betterx.bclib.api.v3.tag.BCLBlockTags;
@@ -11,7 +10,6 @@ import org.betterx.bclib.recipes.AlloyingRecipe;
 import org.betterx.bclib.recipes.AnvilRecipe;
 import org.betterx.bclib.registry.BaseBlockEntities;
 import org.betterx.bclib.util.BCLDataComponents;
-import org.betterx.datagen.bclib.BCLibDatagen;
 import org.betterx.datagen.bclib.worldgen.BCLAutoBlockTagProvider;
 import org.betterx.datagen.bclib.worldgen.BCLAutoItemTagProvider;
 import org.betterx.wover.core.api.Logger;
@@ -22,40 +20,30 @@ import org.betterx.wover.ui.api.VersionChecker;
 
 import net.minecraft.resources.ResourceLocation;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.data.loading.DatagenModLoader;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 
-@Mod(BCLib.MOD_ID)
-public class BCLib {
-    public static final String MOD_ID = "bclib";
-    public static final ModCore C = ModCore.create(MOD_ID);
+public class BCLib implements ModInitializer {
+    public static final ModCore C = ModCore.create("bclib");
+    public static final String MOD_ID = C.namespace;
     public static final Logger LOGGER = C.LOG;
 
-    public static final boolean RUNS_NULLSCAPE = ModList.get().isLoaded("nullscape");
-    public static final boolean RUNS_DISTANT_HORIZONS = ModList.get().isLoaded("distanthorizons");
-
-    public BCLib(IEventBus modBus) {
-        initialize(modBus);
-    }
+    public static final boolean RUNS_NULLSCAPE = FabricLoader.getInstance()
+                                                             .getModContainer("nullscape")
+                                                             .isPresent();
+    public static final boolean RUNS_DISTANT_HORIZONS = FabricLoader.getInstance()
+                                                                   .getModContainer("distanthorizons")
+                                                                   .isPresent();
 
     private void onDatagen() {
 
     }
 
 
-    private void initialize(IEventBus modBus) {
-        modBus.addListener(BCLibNetwork::registerPayloadHandlers);
-        modBus.addListener(BCLibArguments::register);
-        modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, BCLDataComponents::register);
-        modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, org.betterx.bclib.registry.BaseBlockEntities::register);
-        modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, org.betterx.bclib.recipes.BCLRecipeManager::register);
-        modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, org.betterx.bclib.api.v2.levelgen.structures.TemplatePiece::register);
-        org.betterx.wover.block.api.BlockRegistry.hook(modBus);
-        org.betterx.wover.item.api.ItemRegistry.hook(modBus);
+    @Override
+    public void onInitialize() {
+        BCLibArguments.register();
         LevelGenEvents.register();
         BCLDataComponents.ensureStaticInitialization();
         BaseBlockEntities.register();
@@ -74,23 +62,21 @@ public class BCLib {
         if (isDatagen()) {
             WoverDataGenEntryPoint.registerAutoProvider(BCLAutoBlockTagProvider::new);
             WoverDataGenEntryPoint.registerAutoProvider(BCLAutoItemTagProvider::new);
-            BCLibDatagen datagen = new BCLibDatagen();
-            modBus.addListener(datagen::onGatherData);
             onDatagen();
 
         }
     }
 
     public static boolean isDevEnvironment() {
-        return !FMLEnvironment.production;
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     public static boolean isDatagen() {
-        return DatagenModLoader.isRunningDataGen();
+        return System.getProperty("fabric-api.datagen") != null;
     }
 
     public static boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
+        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
     }
 
     public static ResourceLocation makeID(String path) {
@@ -98,5 +84,3 @@ public class BCLib {
     }
 
 }
-
-

@@ -12,8 +12,8 @@ import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ public final class BoatTypeOverride {
     public final ResourceLocation chestBoatTexture;
     public final ModelLayerLocation boatModelName;
     public final ModelLayerLocation chestBoatModelName;
-    @OnlyIn(Dist.CLIENT)
+    @Environment(value = EnvType.CLIENT)
     private ListModel<Boat> boatModel, chestBoatModel;
     private BoatItem boat, chestBoat;
     public final boolean isRaft;
@@ -69,40 +69,20 @@ public final class BoatTypeOverride {
         values.add(this);
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(value = EnvType.CLIENT)
     public ListModel<Boat> getBoatModel(boolean chest) {
         return chest ? chestBoatModel : boatModel;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(value = EnvType.CLIENT)
     public void createBoatModels(EntityRendererProvider.Context context) {
         if (BCLib.isClient() && boatModel == null) {
             if (isRaft) {
-                try {
-                    boatModel = new RaftModel(context.bakeLayer(boatModelName));
-                } catch (IllegalArgumentException ex) {
-                    BCLib.LOGGER.warn("Missing model layer {}, using fallback raft model.", boatModelName, ex);
-                    boatModel = new RaftModel(RaftModel.createBodyModel().bakeRoot());
-                }
-                try {
-                    chestBoatModel = new ChestRaftModel(context.bakeLayer(chestBoatModelName));
-                } catch (IllegalArgumentException ex) {
-                    BCLib.LOGGER.warn("Missing model layer {}, using fallback chest raft model.", chestBoatModelName, ex);
-                    chestBoatModel = new ChestRaftModel(ChestRaftModel.createBodyModel().bakeRoot());
-                }
+                boatModel = new RaftModel(context.bakeLayer(boatModelName));
+                chestBoatModel = new ChestRaftModel(context.bakeLayer(chestBoatModelName));
             } else {
-                try {
-                    boatModel = new BoatModel(context.bakeLayer(boatModelName));
-                } catch (IllegalArgumentException ex) {
-                    BCLib.LOGGER.warn("Missing model layer {}, using fallback boat model.", boatModelName, ex);
-                    boatModel = new BoatModel(BoatModel.createBodyModel().bakeRoot());
-                }
-                try {
-                    chestBoatModel = new ChestBoatModel(context.bakeLayer(chestBoatModelName));
-                } catch (IllegalArgumentException ex) {
-                    BCLib.LOGGER.warn("Missing model layer {}, using fallback chest boat model.", chestBoatModelName, ex);
-                    chestBoatModel = new ChestBoatModel(ChestBoatModel.createBodyModel().bakeRoot());
-                }
+                boatModel = new BoatModel(context.bakeLayer(boatModelName));
+                chestBoatModel = new ChestBoatModel(context.bakeLayer(chestBoatModelName));
             }
         }
     }
@@ -214,5 +194,3 @@ public final class BoatTypeOverride {
     }
 
 }
-
-

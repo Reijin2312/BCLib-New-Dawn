@@ -13,15 +13,9 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(value = PortalShape.class)
+@Mixin(PortalShape.class)
 public class PortalShapeMixin {
-    @Redirect(
-            method = "getDistanceUntilEdgeAboveFrame",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;test(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z"
-            )
-    )
+    @Redirect(method = "getDistanceUntilEdgeAboveFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;test(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z"))
     private boolean be_getDistanceUntilEdgeAboveFrame(
             StatePredicate statePredicate,
             BlockState blockState,
@@ -31,13 +25,7 @@ public class PortalShapeMixin {
         return be_FRAME(statePredicate, blockState, blockGetter, blockPos);
     }
 
-    @Redirect(
-            method = "hasTopFrame",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;test(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z"
-            )
-    )
+    @Redirect(method = "hasTopFrame", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;test(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z"))
     private boolean be_hasTopFrame(
             StatePredicate statePredicate,
             BlockState blockState,
@@ -47,13 +35,7 @@ public class PortalShapeMixin {
         return be_FRAME(statePredicate, blockState, blockGetter, blockPos);
     }
 
-    @Redirect(
-            method = "getDistanceUntilTop",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;test(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z"
-            )
-    )
+    @Redirect(method = "getDistanceUntilTop", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;test(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z"))
     private boolean be_getDistanceUntilTop(
             StatePredicate statePredicate,
             BlockState blockState,
@@ -68,6 +50,3 @@ public class PortalShapeMixin {
         return state.is(CommonBlockTags.NETHER_PORTAL_FRAME) || FRAME.test(state, getter, pos);
     }
 }
-
-
-

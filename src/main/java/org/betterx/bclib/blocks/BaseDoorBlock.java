@@ -25,8 +25,8 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.storage.loot.LootParams;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,7 +54,7 @@ public abstract class BaseDoorBlock extends DoorBlock implements RenderLayerProv
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.vanillaGenerator.createDoor(this);
     }
@@ -70,7 +70,7 @@ public abstract class BaseDoorBlock extends DoorBlock implements RenderLayerProv
     }
 
     //    @Override
-//    @OnlyIn(Dist.CLIENT)
+//    @Environment(EnvType.CLIENT)
 //    public @Nullable BlockModel getBlockModel(ResourceLocation resourceLocation, BlockState blockState) {
 //        DoorType doorType = getDoorType(blockState);
 //        Optional<String> pattern = PatternsHelper.createJson(BasePatterns.BLOCK_DOOR_BOTTOM, resourceLocation);
@@ -91,7 +91,7 @@ public abstract class BaseDoorBlock extends DoorBlock implements RenderLayerProv
 //    }
 //
 //    @Override
-//    @OnlyIn(Dist.CLIENT)
+//    @Environment(EnvType.CLIENT)
 //    public UnbakedModel getModelVariant(
 //            ModelResourceLocation stateId,
 //            BlockState blockState,
@@ -233,4 +233,3 @@ public abstract class BaseDoorBlock extends DoorBlock implements RenderLayerProv
         return BehaviourHelper.from(source, type, Wood::new, Stone::new, Metal::new);
     }
 }
-

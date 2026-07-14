@@ -7,8 +7,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -55,7 +55,7 @@ public class JsonFactory {
      * @return {@link JsonObject}
      */
     @Nullable
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static JsonObject getJsonObject(ResourceLocation location) {
         ResourceManager manager = Minecraft.getInstance()
                                            .getResourceManager();
@@ -131,4 +131,3 @@ public class JsonFactory {
     }
 
 }
-

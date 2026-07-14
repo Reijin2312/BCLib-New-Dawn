@@ -2,7 +2,7 @@
 
 # BCLib
 
-BCLib is a library mod for BetterX team mods, developed for NeoForge, MC 1.21
+BCLib is a library mod for BetterX team mods, developed for Fabric, MC 1.21
 
 ## Importing:
 
@@ -18,23 +18,24 @@ repositories {
 ```
 dependencies {
     ...
-    implementation "org.betterx:bclib:${project.bclib_version}"
+    modImplementation "org.betterx:bclib:${project.bclib_version}"
 }
 ```
 
-You should also add a dependency to `META-INF/neoforge.mods.toml`. BCLib uses Semantic versioning, so adding the dependency as follows
+You should also add a dependency to `fabirc.mod.json`. BCLib uses Semantic versioning, so adding the dependcy as follows
 should respect that and ensure that your mod is not loaded with an incompatible version of BCLib:
 
 ```
-[[dependencies.bclib]]
-modId="bclib"
-mandatory=true
-versionRange="[2.0.0,)"
-ordering="NONE"
-side="BOTH"
+"depends": {
+  ...
+  "bclib": "2.0.x"
+},
+"breaks": {
+  "bclib": "<2.0.6"
+}
 ```
 
-In this example `2.0.0` is the BCLib version you are building against.
+In this example `2.0.6` is the BCLIb Version you are building against.
 
 ## Features:
 

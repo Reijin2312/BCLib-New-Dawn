@@ -84,19 +84,19 @@ public class LootUtil {
         if (state != null && tool.isCorrectToolForDrops(state)) return true;
 
         if (block instanceof AddMineableAxe) {
-            if (tool.is(ItemTags.AXES) || tool.is(ToolTags.COMMON_AXES)) return true;
+            if (tool.is(ItemTags.AXES) || tool.is(ToolTags.FABRIC_AXES)) return true;
         }
         if (block instanceof AddMineablePickaxe) {
-            if (tool.is(ItemTags.PICKAXES) || tool.is(ToolTags.COMMON_PICKAXES)) return true;
+            if (tool.is(ItemTags.PICKAXES) || tool.is(ToolTags.FABRIC_PICKAXES)) return true;
         }
         if (block instanceof AddMineableHoe) {
-            if (tool.is(ItemTags.HOES) || tool.is(ToolTags.COMMON_HOES)) return true;
+            if (tool.is(ItemTags.HOES) || tool.is(ToolTags.FABRIC_HOES)) return true;
         }
         if (block instanceof AddMineableShovel) {
-            if (tool.is(ItemTags.SHOVELS) || tool.is(ToolTags.COMMON_SHOVELS)) return true;
+            if (tool.is(ItemTags.SHOVELS) || tool.is(ToolTags.FABRIC_SHOVELS)) return true;
         }
         if (block instanceof AddMineableSword) {
-            if (tool.is(ItemTags.SWORDS) || tool.is(ToolTags.COMMON_SWORDS)) return true;
+            if (tool.is(ItemTags.SWORDS) || tool.is(ToolTags.FABRIC_SWORDS)) return true;
         }
         if (block instanceof AddMineableShears) {
             if (BaseShearsItem.isShear(tool)) return true;

@@ -22,8 +22,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public abstract class BaseSlabBlock extends SlabBlock implements CustomBlockItemProvider, BlockTagProvider, ItemTagProvider, DropSelfLootProvider<BaseSlabBlock>, BlockModelProvider {
     private final Block parent;
@@ -36,7 +36,7 @@ public abstract class BaseSlabBlock extends SlabBlock implements CustomBlockItem
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createSlab(this, parent);
     }
@@ -118,4 +118,3 @@ public abstract class BaseSlabBlock extends SlabBlock implements CustomBlockItem
         );
     }
 }
-

@@ -30,8 +30,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -85,7 +85,7 @@ public abstract class BaseBarrelBlock extends BarrelBlock implements BlockModelP
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createBarrel(this);
     }
@@ -124,4 +124,3 @@ public abstract class BaseBarrelBlock extends BarrelBlock implements BlockModelP
         return new Wood(source);
     }
 }
-

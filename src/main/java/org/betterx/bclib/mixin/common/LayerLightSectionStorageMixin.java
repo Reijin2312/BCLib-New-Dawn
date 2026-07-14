@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = LayerLightSectionStorage.class)
+@Mixin(LayerLightSectionStorage.class)
 public class LayerLightSectionStorageMixin {
     @Shadow
     protected DataLayer getDataLayer(long sectionPos, boolean cached) {
@@ -33,6 +33,3 @@ public class LayerLightSectionStorageMixin {
         }
     }
 }
-
-
-

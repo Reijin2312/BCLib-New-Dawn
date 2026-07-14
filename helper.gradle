@@ -97,9 +97,9 @@ modrinth {
     projectId = project.archives_base_name
     versionNumber = project.mod_version
     versionType = project.release_channel
-    uploadFile = jar
+    uploadFile = remapJar
     gameVersions = slurper.parseText(project.modrinth_versions)
-    loaders = ["neoforge"]
+    loaders = ["fabric"]
     changelog = changes
     dependencies {
         requiredDependencies.each { dep ->
@@ -141,7 +141,7 @@ curseforge {
             addGameVersion v
             latestVersion = "[$v]"
         }
-        addGameVersion 'NeoForge'
+        addGameVersion 'Fabric'
         addGameVersion 'Java 21'
         relations {
             requiredDependencies.each { dep ->
@@ -152,11 +152,11 @@ curseforge {
                 optionalDependency dep
             }
         }
-        mainArtifact(jar) {
+        mainArtifact(remapJar) {
             displayName = "$project.archives_base_name-$project.version $latestVersion"
         }
         afterEvaluate {
-            mainArtifact(jar.outputs)
+            mainArtifact(remapJar.outputs)
         }
     }
 
@@ -206,14 +206,32 @@ task nextVersion() {
         def newContents = propertiesFile.text.replaceFirst("mod_version=\\d+.\\d+.\\d+", "mod_version=${updatedVersion}")
         propertiesFile.text = newContents
 
-        // NeoForge uses token expansion for mods.toml, no direct JSON update required.
+        def rootFabricFile = rootProject.file("src/main/resources/fabric.mod.json")
+        def rootFabricFileJson = slurper.parseText(rootFabricFile.text)
+        allprojects.each { proj ->
+            if (proj.path != ':') {
+                println "Ignoring ${proj}"
+                return
+            }
+            println "Updating Version in ${proj}"
+
+            def fabricFile = proj.file("src/main/resources/fabric.mod.json")
+            def fabricJson = slurper.parseText(fabricFile.text)
+            fabricJson.version = updatedVersion
+            fabricJson.depends.minecraft = slurper.parseText(modrinth_versions)
+            fabricJson.depends.fabricloader = rootFabricFileJson.depends.fabricloader
+            fabricJson.depends['fabric-api'] = rootFabricFileJson.depends['fabric-api']
+            fabricJson.depends.java = rootFabricFileJson.depends.java
+
+            fabricFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(fabricJson))
+        }
     }
 }
 
 import org.kohsuke.github.GHReleaseBuilder
 import org.kohsuke.github.GitHub
 
-task github(dependsOn: [build, jar, sourcesJar, javadocJar]) {
+task github(dependsOn: [build, remapJar, sourcesJar, javadocJar]) {
     group = 'publishing'
     def slurper = new groovy.json.JsonSlurper()
     def apiKey = new File(projectDir, "../GITHUB_TOKEN")
@@ -257,11 +275,11 @@ publishing {
             def githubName = findProperty('github_base_name') ?: project.archives_base_name
             artifactId = project.archives_base_name
             // add all the jars that should be included when publishing to maven
-            artifact(jar) {
-                builtBy jar
+            artifact(remapJar) {
+                builtBy remapJar
             }
             artifact(sourcesJar) {
-                builtBy sourcesJar
+                builtBy remapSourcesJar
             }
 
             // Optional POM configuration
@@ -292,19 +310,6 @@ publishing {
                     woverNode.appendNode('version', project.wover_version)
                     woverNode.appendNode('scope', 'compile')
                 }
-            }
-        }
-    }
-    repositories {
-        maven {
-            def slurper = new groovy.json.JsonSlurper();
-            def apiKey = slurper.parseText(new File(projectDir, "../AMBER_TOKEN").text)
-            println "\nPublishing ${project.archives_base_name} to Maven..."
-            name = "Ambertation"
-            url = "https://maven.ambertation.de/releases/"
-            credentials {
-                username = apiKey.username
-                password = apiKey.token
             }
         }
     }

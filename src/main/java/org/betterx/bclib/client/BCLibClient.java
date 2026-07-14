@@ -3,24 +3,19 @@ package org.betterx.bclib.client;
 import org.betterx.bclib.api.v2.ModIntegrationAPI;
 import org.betterx.bclib.api.v2.PostInitAPI;
 import org.betterx.bclib.api.v2.dataexchange.DataExchangeAPI;
-import org.betterx.bclib.BCLib;
 import org.betterx.bclib.client.models.CustomModelBakery;
 import org.betterx.bclib.client.textures.AtlasSetManager;
 import org.betterx.bclib.client.textures.SpriteLister;
-import org.betterx.bclib.integration.modmenu.ModMenuEntryPoint;
-import org.betterx.bclib.interfaces.CustomColorProvider;
+import org.betterx.bclib.registry.BaseBlockEntityRenders;
 
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.client.resources.model.UnbakedModel;
 
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelResolver;
 
-@EventBusSubscriber(modid = BCLib.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public class BCLibClient {
+public class BCLibClient implements ClientModInitializer {
     private static CustomModelBakery modelBakery;
 
     public static CustomModelBakery lazyModelbakery() {
@@ -30,42 +25,69 @@ public class BCLibClient {
         return modelBakery;
     }
 
-    @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
+    @Override
+    public void onInitializeClient() {
         modelBakery = new CustomModelBakery();
 
         ModIntegrationAPI.registerAll();
+        BaseBlockEntityRenders.register();
         DataExchangeAPI.prepareClientside();
         PostInitAPI.postInit(true);
-        ModMenuEntryPoint.register();
+        ModelLoadingPlugin.register(BCLibClient::onInitializeModelLoader);
 
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, new SpriteLister("entity/chest"));
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, new SpriteLister("blocks"));
     }
 
-    @SubscribeEvent
-    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
-        for (Block block : BuiltInRegistries.BLOCK) {
-            if (block instanceof CustomColorProvider provider) {
-                event.register(
-                        (state, level, pos, tintIndex) -> provider.getProvider()
-                                                                  .getColor(state, level, pos, tintIndex),
-                        block
-                );
-            }
-        }
+
+    private static void onInitializeModelLoader(ModelLoadingPlugin.Context pluginContext) {
+        modelBakery.registerBlockStateResolvers(pluginContext);
+
+        pluginContext.resolveModel().register(BCLibClient::resolveModel);
+        pluginContext.modifyModelOnLoad().register(BCLibClient::modifyModelOnLoad);
     }
 
-    @SubscribeEvent
-    public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
-        for (Block block : BuiltInRegistries.BLOCK) {
-            if (block instanceof CustomColorProvider provider) {
-                event.register(
-                        (stack, tintIndex) -> provider.getItemProvider().getColor(stack, tintIndex),
-                        block
-                );
-            }
-        }
+    private static UnbakedModel resolveModel(ModelResolver.Context ctx) {
+        boolean isItem = ctx.id().getPath().startsWith("item/");
+//        if (ctx.id() instanceof ModelResourceLocation modelId && modelId.getVariant().equals("inventory")) {
+//            isItem = true;
+//        }
+
+        return isItem ? modelBakery.getItemModel(ctx.id()) : modelBakery.getBlockModel(ctx.id());
     }
+
+    private static UnbakedModel modifyModelOnLoad(UnbakedModel model, ModelModifier.OnLoad.Context ctx) {
+        UnbakedModel res = null;
+        if (ctx.topLevelId() != null) {
+            res = ctx.topLevelId().getVariant().equals("inventory")
+                    ? modelBakery.getItemModel(ctx.topLevelId().id())
+                    : modelBakery.getBlockModel(ctx.topLevelId().id());
+        } else if (ctx.resourceId() != null) {
+            res = modelBakery.getBlockModel(ctx.resourceId());
+        }
+
+
+        if (res == null)
+            return model;
+        return res;
+    }
+//    @Override
+//    public @Nullable UnbakedModel loadModelResource(
+//            ResourceLocation resourceId,
+//            ModelProviderContext context
+//    ) throws ModelProviderException {
+//        return modelBakery.getBlockModel(resourceId);
+//    }
+//
+//    @Override
+//    public @Nullable UnbakedModel loadModelVariant(
+//            ModelResourceLocation modelId,
+//            ModelProviderContext context
+//    ) throws ModelProviderException {
+//        return modelId.getVariant().equals("inventory")
+//                ? modelBakery.getItemModel(modelId)
+//                : modelBakery.getBlockModel(modelId);
+//    }
+
 
 }

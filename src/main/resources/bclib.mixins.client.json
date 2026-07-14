@@ -12,9 +12,9 @@
     "ClientRecipeBookMixin",
     "DebugRendererMixin",
     "FogRendererMixin",
-    "RenderSystemMixin",
     "LevelRendererAccessor",
     "LevelRendererMixin",
+    "MinecraftMixin",
     "ModelManagerMixin",
     "boat.BoatRendererMixin"
   ],

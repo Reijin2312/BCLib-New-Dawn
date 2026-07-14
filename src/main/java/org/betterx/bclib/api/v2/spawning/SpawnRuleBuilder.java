@@ -1,6 +1,5 @@
 package org.betterx.bclib.api.v2.spawning;
 
-import org.betterx.bclib.BCLib;
 import org.betterx.bclib.entity.BCLEntityWrapper;
 import org.betterx.bclib.interfaces.SpawnRule;
 import org.betterx.bclib.util.BlocksHelper;
@@ -13,21 +12,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.world.phys.AABB;
 
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.*;
 import java.util.function.Supplier;
 
-@EventBusSubscriber(modid = BCLib.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class SpawnRuleBuilder<M extends Mob> {
     private static final Map<String, SpawnRuleEntry> RULES_CACHE = Maps.newHashMap();
     private static final SpawnRuleBuilder INSTANCE = new SpawnRuleBuilder();
-    private static final List<SpawnPlacementEntry<?>> PENDING = new ArrayList<>();
     private final List<SpawnRuleEntry> rules = Lists.newArrayList();
     private SpawnRuleEntry entryInstance;
     private EntityType<M> entityType;
@@ -342,7 +335,7 @@ public class SpawnRuleBuilder<M extends Mob> {
             return true;
         };
 
-        PENDING.add(new SpawnPlacementEntry<>(entityType, spawnType, heightmapType, predicate));
+        SpawnPlacements.register(entityType, spawnType, heightmapType, predicate);
     }
 
     /**
@@ -396,34 +389,5 @@ public class SpawnRuleBuilder<M extends Mob> {
 //            RULES_CACHE.put(name, entry);
 //        }
 //        return entry;
-    }
-
-    @SubscribeEvent
-    public static void onRegisterSpawnPlacements(RegisterSpawnPlacementsEvent event) {
-        for (SpawnPlacementEntry<?> entry : PENDING) {
-            registerEntry(event, entry);
-        }
-        PENDING.clear();
-    }
-
-    private static <T extends Mob> void registerEntry(
-            RegisterSpawnPlacementsEvent event,
-            SpawnPlacementEntry<T> entry
-    ) {
-        event.register(
-                entry.entityType(),
-                entry.spawnType(),
-                entry.heightmapType(),
-                entry.predicate(),
-                RegisterSpawnPlacementsEvent.Operation.REPLACE
-        );
-    }
-
-    private record SpawnPlacementEntry<T extends Mob>(
-            EntityType<T> entityType,
-            SpawnPlacementType spawnType,
-            Types heightmapType,
-            SpawnPlacements.SpawnPredicate<T> predicate
-    ) {
     }
 }

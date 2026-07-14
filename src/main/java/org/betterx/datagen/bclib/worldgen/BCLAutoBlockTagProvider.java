@@ -17,7 +17,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 
-import org.betterx.bclib.registry.FuelRegistry;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
 
 public class BCLAutoBlockTagProvider extends WoverTagProvider.ForBlocks implements WoverAutoProvider {
     public BCLAutoBlockTagProvider(ModCore modCore) {
@@ -139,4 +139,3 @@ public class BCLAutoBlockTagProvider extends WoverTagProvider.ForBlocks implemen
         processCommonBlockTags(context, modCore);
     }
 }
-

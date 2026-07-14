@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = CraftingMenu.class)
+@Mixin(CraftingMenu.class)
 public abstract class CraftingMenuMixin {
     @Final
     @Shadow
@@ -31,6 +31,3 @@ public abstract class CraftingMenuMixin {
         }
     }
 }
-
-
-

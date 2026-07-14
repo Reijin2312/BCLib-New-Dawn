@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 
-@Mixin(value = AnvilMenu.class)
+@Mixin(AnvilMenu.class)
 public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilScreenHandlerExtended {
     @Unique
     private List<RecipeHolder<AnvilRecipe>> bcl_recipes = Collections.emptyList();
@@ -60,10 +60,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         return new AnvilRecipeInput(this.inputSlots.getItem(0), this.inputSlots.getItem(1), allowedTools);
     }
 
-    @Inject(
-            method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V",
-            at = @At("TAIL")
-    )
+    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("TAIL"))
     public void be_initAnvilLevel(int syncId, Inventory inventory, ContainerLevelAccess context, CallbackInfo info) {
         this.bcl_anvilLevel = addDataSlot(DataSlot.standalone());
         if (context != ContainerLevelAccess.NULL) {
@@ -85,6 +82,18 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         if (bcl_currentRecipe != null) {
             AnvilRecipeInput recipeInput = this.bcl_AnvilRecipeInput(bcl_currentRecipe.value().getAllowedTools());
             info.setReturnValue(bcl_currentRecipe.value().checkHammerDurability(recipeInput, player));
+        }
+    }
+
+    @Inject(method = "method_24922", at = @At(value = "HEAD"), cancellable = true)
+    private static void bcl_onDamageAnvil(Player player, Level level, BlockPos blockPos, CallbackInfo ci) {
+        BlockState blockState = level.getBlockState(blockPos);
+        if (!player.getAbilities().instabuild
+                && blockState.getBlock() instanceof BaseAnvilBlock anvil
+                && player.getRandom().nextDouble() < 0.12) {
+            BlockState damaged = anvil.damageAnvilUse(blockState, player.getRandom());
+            BaseAnvilBlock.destroyWhenNull(level, blockPos, damaged);
+            ci.cancel();
         }
     }
 
@@ -113,20 +122,6 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
             });
             info.cancel();
         }
-    }
-
-    @Inject(method = "onTake", at = @At("TAIL"))
-    private void bcl_afterOnTake(Player player, ItemStack stack, CallbackInfo info) {
-        // If vanilla onTake runs (we did not cancel in HEAD), ensure BaseAnvilBlocks use their custom damage logic
-        this.access.execute((level, blockPos) -> {
-            BlockState state = level.getBlockState(blockPos);
-            if (!player.getAbilities().instabuild && state.getBlock() instanceof BaseAnvilBlock anvil) {
-                if (player.getRandom().nextDouble() < 0.12) {
-                    BlockState damaged = anvil.damageAnvilUse(state, player.getRandom());
-                    BaseAnvilBlock.destroyWhenNull(level, blockPos, damaged);
-                }
-            }
-        });
     }
 
     @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
@@ -195,6 +190,3 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         return bcl_recipes;
     }
 }
-
-
-

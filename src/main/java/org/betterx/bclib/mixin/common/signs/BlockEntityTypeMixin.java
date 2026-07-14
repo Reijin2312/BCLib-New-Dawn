@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = BlockEntityType.class)
+@Mixin(BlockEntityType.class)
 public class BlockEntityTypeMixin {
     @Inject(method = "isValid", at = @At("HEAD"), cancellable = true)
     void bcl_isValid(BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
@@ -32,6 +32,3 @@ public class BlockEntityTypeMixin {
         }
     }
 }
-
-
-

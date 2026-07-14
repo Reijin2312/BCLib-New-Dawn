@@ -1,7 +1,6 @@
 package org.betterx.bclib.api.v2.dataexchange;
 
 import org.betterx.bclib.BCLib;
-import org.betterx.bclib.api.v2.dataexchange.BCLibNetwork;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -12,9 +11,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.betterx.bclib.api.v2.dataexchange.PacketSender;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import java.util.Collection;
 import java.util.List;
@@ -62,7 +64,7 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
 
     abstract protected void runOnGameThread(Minecraft client, MinecraftServer server, boolean isClient);
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     void receiveFromServer(
             Minecraft client,
@@ -98,7 +100,7 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
     void sendToClient(MinecraftServer server) {
         if (prepareData(false)) {
             T obj = serializeData(false);
-            _sendToClient(getIdentifier(), server, server.getPlayerList().getPlayers(), obj);
+            _sendToClient(getIdentifier(), server, PlayerLookup.all(server), obj);
         }
     }
 
@@ -119,17 +121,17 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
     ) {
         if (payload == null) return;
         for (ServerPlayer player : players) {
-            BCLibNetwork.sendToPlayer(player, payload);
+            ServerPlayNetworking.send(player, payload);
         }
 
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     void sendToServer(Minecraft client) {
         if (prepareData(true)) {
             T obj = serializeData(true);
-            BCLibNetwork.sendToServer(obj);
+            ClientPlayNetworking.send(obj);
         }
     }
 
@@ -162,12 +164,12 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
             super(identifier, false);
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         protected boolean prepareDataOnClient() {
             return true;
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         abstract protected T serializeDataOnClient();
 
         protected abstract void deserializeIncomingDataOnServer(
@@ -215,12 +217,12 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
             BCLib.LOGGER.error("[Internal Error] The message '" + getIdentifier() + "' must originate from the client!");
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         @Override
         void sendToServer(Minecraft client) {
             if (prepareDataOnClient()) {
                 T obj = serializeDataOnClient();
-                if (obj != null) BCLibNetwork.sendToServer(obj);
+                if (obj != null) ClientPlayNetworking.send(obj);
             }
         }
     }
@@ -259,10 +261,10 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
 
         abstract protected T serializeDataOnServer();
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         abstract protected void deserializeIncomingDataOnClient(T payload, PacketSender responseSender);
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         abstract protected void runOnClientGameThread(Minecraft client);
 
 
@@ -301,7 +303,7 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
             if (prepareDataOnServer()) {
                 T obj = serializeDataOnServer();
 
-                _sendToClient(getIdentifier(), server, server.getPlayerList().getPlayers(), obj);
+                _sendToClient(getIdentifier(), server, PlayerLookup.all(server), obj);
             }
         }
 
@@ -313,11 +315,10 @@ public abstract class DataHandler<T extends CustomPacketPayload> extends BaseDat
             }
         }
 
-        @OnlyIn(Dist.CLIENT)
+        @Environment(EnvType.CLIENT)
         @Override
         final void sendToServer(Minecraft client) {
             BCLib.LOGGER.error("[Internal Error] The message '" + getIdentifier() + "' must originate from the server!");
         }
     }
 }
-

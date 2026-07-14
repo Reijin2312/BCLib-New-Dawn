@@ -16,12 +16,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import org.joml.Quaternionf;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(value = EnvType.CLIENT)
 public class BoatRenderer {
 
     public static boolean render(
@@ -79,6 +79,3 @@ public class BoatRenderer {
         return false;
     }
 }
-
-
-

@@ -19,8 +19,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelProvider, BlockTagProvider, ItemTagProvider, DropSelfLootProvider<BaseButtonBlock> {
     private final Block parent;
@@ -42,7 +42,7 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createButton(parent, this);
     }
@@ -100,4 +100,3 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
         return BehaviourHelper.from(source, type, Wood::new, Stone::new, Metal::new);
     }
 }
-

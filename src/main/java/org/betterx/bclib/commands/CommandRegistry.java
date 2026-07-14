@@ -24,19 +24,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class CommandRegistry {
     public static void register() {
-        NeoForge.EVENT_BUS.addListener(CommandRegistry::onRegisterCommands);
-    }
-
-    private static void onRegisterCommands(RegisterCommandsEvent event) {
-        register(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+        CommandRegistrationCallback.EVENT.register(CommandRegistry::register);
     }
 
     private static void register(
@@ -50,8 +45,6 @@ public class CommandRegistry {
         bnContext = PlaceCommand.register(bnContext, commandBuildContext);
         bnContext = PrintInfo.register(bnContext);
         bnContext = DumpMap.register(bnContext);
-        bnContext = BlockStateIdCommand.register(bnContext);
-        bnContext = BlockStateDumpCommand.register(bnContext);
 
         dispatcher.register(
                 bnContext

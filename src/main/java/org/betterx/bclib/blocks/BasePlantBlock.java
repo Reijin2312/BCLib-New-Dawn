@@ -9,6 +9,7 @@ import org.betterx.wover.loot.api.LootLookupProvider;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -27,8 +28,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -102,9 +103,9 @@ public abstract class BasePlantBlock extends BaseBlockNotFull implements RenderL
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
-        generator.createCrossBlock(this, false);
+        generator.vanillaGenerator.createCrossBlock(this, BlockModelGenerators.TintState.NOT_TINTED);
         generator.createFlatItem(this);
     }
 
@@ -118,4 +119,3 @@ public abstract class BasePlantBlock extends BaseBlockNotFull implements RenderL
         return provider.dropWithSilkTouchOrShears(this);
     }
 }
-

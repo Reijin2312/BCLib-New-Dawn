@@ -8,8 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tier;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public class BaseSwordItem extends SwordItem implements ItemModelProvider {
     public BaseSwordItem(Tier material, Properties settings) {
@@ -21,9 +21,8 @@ public class BaseSwordItem extends SwordItem implements ItemModelProvider {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public BlockModel getItemModel(ResourceLocation resourceLocation) {
         return ModelsHelper.createHandheldItem(resourceLocation);
     }
 }
-

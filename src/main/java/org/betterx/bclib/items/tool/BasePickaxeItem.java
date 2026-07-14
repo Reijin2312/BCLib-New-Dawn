@@ -8,8 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.Tier;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public class BasePickaxeItem extends PickaxeItem implements ItemModelProvider {
     public BasePickaxeItem(Tier material, int attackDamage, float attackSpeed, Properties settings) {
@@ -21,9 +21,8 @@ public class BasePickaxeItem extends PickaxeItem implements ItemModelProvider {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public BlockModel getItemModel(ResourceLocation resourceLocation) {
         return ModelsHelper.createHandheldItem(resourceLocation);
     }
 }
-

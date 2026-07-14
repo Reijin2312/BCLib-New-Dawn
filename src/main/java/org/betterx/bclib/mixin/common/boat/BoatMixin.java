@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = Boat.class)
+@Mixin(Boat.class)
 public abstract class BoatMixin extends Entity implements CustomBoatTypeOverride {
     @Unique
     private BoatTypeOverride bcl_type = null;
@@ -119,6 +119,3 @@ public abstract class BoatMixin extends Entity implements CustomBoatTypeOverride
     }
 
 }
-
-
-

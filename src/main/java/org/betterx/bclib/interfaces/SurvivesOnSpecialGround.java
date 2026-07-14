@@ -8,8 +8,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import com.google.common.collect.Lists;
 
@@ -22,7 +22,7 @@ public interface SurvivesOnSpecialGround extends SurvivesOn {
         return "tooltip.bclib.place_on";
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     static List<String> splitLines(String input) {
         final int MAX_LEN = 45;
         List<String> lines = Lists.newArrayList();
@@ -41,7 +41,7 @@ public interface SurvivesOnSpecialGround extends SurvivesOn {
         return lines;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     static void appendHoverText(SurvivesOnSpecialGround surv, List<Component> list) {
         if (!Configs.CLIENT_CONFIG.survivesOnHint()) return;
         final int MAX_LINES = 7;
@@ -59,13 +59,13 @@ public interface SurvivesOnSpecialGround extends SurvivesOn {
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void appendHoverTextUnderwater(List<Component> list) {
         list.add(Component.translatable("tooltip.bclib.place_underwater")
                           .withStyle(ChatFormatting.GREEN));
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public static void appendHoverTextUnderwaterInDepth(List<Component> list, int depth) {
         list.add(Component.translatable("tooltip.bclib.place_underwater_depth", depth)
                           .withStyle(ChatFormatting.GREEN));

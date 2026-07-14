@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = WorldGenRegion.class)
+@Mixin(WorldGenRegion.class)
 public class WorldGenRegionMixin {
     @Final
     @Shadow
@@ -25,6 +25,3 @@ public class WorldGenRegionMixin {
         info.setReturnValue(Math.abs(x - center.getPos().x) < 2 && Math.abs(z - center.getPos().z) < 2);
     }
 }
-
-
-

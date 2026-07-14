@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import org.jetbrains.annotations.Nullable;
 
-@Mixin(value = Minecraft.class)
+@Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
     @Final
     @Shadow
@@ -37,19 +37,9 @@ public abstract class MinecraftMixin {
     private void bclib_onMCInit(GameConfig args, CallbackInfo info) {
         BuiltInRegistries.BLOCK.forEach(block -> {
             if (block instanceof CustomColorProvider provider) {
-                blockColors.register(
-                        (state, level, pos, tintIndex) -> provider.getProvider()
-                                                                  .getColor(state, level, pos, tintIndex),
-                        block
-                );
-                itemColors.register(
-                        (stack, tintIndex) -> provider.getItemProvider().getColor(stack, tintIndex),
-                        block.asItem()
-                );
+                blockColors.register(provider.getProvider(), block);
+                itemColors.register(provider.getItemProvider(), block.asItem());
             }
         });
     }
 }
-
-
-

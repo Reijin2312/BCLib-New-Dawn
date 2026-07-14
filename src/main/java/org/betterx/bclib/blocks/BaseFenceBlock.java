@@ -26,8 +26,8 @@ import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +43,7 @@ public abstract class BaseFenceBlock extends FenceBlock implements RuntimeBlockM
 
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public BlockModel getItemModel(ResourceLocation blockId) {
         ResourceLocation parentId = BuiltInRegistries.BLOCK.getKey(parent);
         Optional<String> pattern = PatternsHelper.createJson(BasePatterns.ITEM_FENCE, parentId);
@@ -51,7 +51,7 @@ public abstract class BaseFenceBlock extends FenceBlock implements RuntimeBlockM
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public @Nullable BlockModel getBlockModel(ResourceLocation blockId, BlockState blockState) {
         ResourceLocation parentId = BuiltInRegistries.BLOCK.getKey(parent);
         String path = blockId.getPath();
@@ -66,7 +66,7 @@ public abstract class BaseFenceBlock extends FenceBlock implements RuntimeBlockM
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public UnbakedModel getModelVariant(
             ModelResourceLocation stateId,
             BlockState blockState,
@@ -100,7 +100,7 @@ public abstract class BaseFenceBlock extends FenceBlock implements RuntimeBlockM
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createFence(parent, this);
     }
@@ -135,4 +135,3 @@ public abstract class BaseFenceBlock extends FenceBlock implements RuntimeBlockM
         return new BaseFenceBlock.Wood(source, type);
     }
 }
-

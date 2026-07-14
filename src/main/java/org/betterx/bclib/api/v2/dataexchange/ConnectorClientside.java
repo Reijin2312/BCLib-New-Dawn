@@ -6,14 +6,16 @@ import org.betterx.bclib.api.v2.dataexchange.handler.DataExchange;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 
 
 /**
  * This is an internal class that handles a Clienetside players Connection to a Server
  */
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ConnectorClientside extends Connector {
     private Minecraft client;
 
@@ -33,9 +35,13 @@ public class ConnectorClientside extends Connector {
             BCLib.LOGGER.warn("Client changed!");
         }
         this.client = client;
+        for (DataHandlerDescriptor<?> desc : getDescriptors()) {
+            if (desc.DIRECTION == DataHandlerDescriptor.Direction.SERVER_TO_CLIENT)
+                ClientPlayNetworking.registerReceiver(desc.IDENTIFIER, desc::receiveFromServer);
+        }
     }
 
-    public void onPlayReady(ClientPacketListener handler, Minecraft client) {
+    public void onPlayReady(ClientPacketListener handler, PacketSender sender, Minecraft client) {
         for (DataHandlerDescriptor<?> desc : getDescriptors()) {
             if (desc.sendOnJoin) {
                 BaseDataHandler h = desc.JOIN_INSTANCE.get();
@@ -47,15 +53,15 @@ public class ConnectorClientside extends Connector {
     }
 
     public void onPlayDisconnect(ClientPacketListener handler, Minecraft client) {
-        this.client = null;
+        for (DataHandlerDescriptor<?> desc : getDescriptors()) {
+            ClientPlayNetworking.unregisterReceiver(desc.IDENTIFIER.id());
+        }
     }
 
-    @Override
-    public void sendToServer(BaseDataHandler<?> h) {
+    public void sendToServer(BaseDataHandler h) {
         if (client == null) {
             throw new RuntimeException("[internal error] Client not initialized yet!");
         }
         h.sendToServer(this.client);
     }
 }
-

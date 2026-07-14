@@ -22,8 +22,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,13 +59,13 @@ public abstract class BaseBarsBlock extends IronBarsBlock implements RuntimeBloc
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public BlockModel getItemModel(ResourceLocation resourceLocation) {
         return ModelsHelper.createBlockItem(resourceLocation);
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public @Nullable BlockModel getBlockModel(ResourceLocation blockId, BlockState blockState) {
         ResourceLocation thisId = BuiltInRegistries.BLOCK.getKey(this);
         String path = blockId.getPath();
@@ -80,7 +80,7 @@ public abstract class BaseBarsBlock extends IronBarsBlock implements RuntimeBloc
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public UnbakedModel getModelVariant(
             ModelResourceLocation stateId,
             BlockState blockState,
@@ -116,7 +116,7 @@ public abstract class BaseBarsBlock extends IronBarsBlock implements RuntimeBloc
         return builder.build();
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public boolean skipRendering(BlockState state, BlockState stateFrom, Direction direction) {
         if (direction.getAxis().isVertical() && stateFrom.getBlock() == this && !stateFrom.equals(state)) {
             return false;
@@ -140,4 +140,3 @@ public abstract class BaseBarsBlock extends IronBarsBlock implements RuntimeBloc
         }
     }
 }
-

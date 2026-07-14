@@ -21,9 +21,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
 
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 
 import com.google.common.collect.Lists;
 
@@ -70,15 +70,13 @@ public class PostInitAPI {
         itemTags = null;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     private static void processBlockClient(Block block) {
         if (block instanceof RenderLayerProvider) {
             BCLRenderLayer layer = ((RenderLayerProvider) block).getRenderLayer();
-            if (layer == BCLRenderLayer.CUTOUT) {
-                ItemBlockRenderTypes.setRenderLayer(block, RenderType.cutout());
-            } else if (layer == BCLRenderLayer.TRANSLUCENT) {
-                ItemBlockRenderTypes.setRenderLayer(block, RenderType.translucent());
-            }
+            if (layer == BCLRenderLayer.CUTOUT) BlockRenderLayerMap.INSTANCE.putBlock(block, RenderType.cutout());
+            else if (layer == BCLRenderLayer.TRANSLUCENT)
+                BlockRenderLayerMap.INSTANCE.putBlock(block, RenderType.translucent());
         }
         if (block instanceof BaseChestBlock) {
             BaseChestBlockEntityRenderer.registerRenderLayer(block);
@@ -106,12 +104,11 @@ public class PostInitAPI {
         }
 
         if (block instanceof BaseChestBlock) {
-            BaseBlockEntities.registerChestBlock(block);
+            BaseBlockEntities.CHEST.registerBlock(block);
         } else if (block instanceof BaseBarrelBlock) {
-            BaseBlockEntities.registerBarrelBlock(block);
+            BaseBlockEntities.BARREL.registerBlock(block);
         } else if (block instanceof BaseFurnaceBlock) {
-            BaseBlockEntities.registerFurnaceBlock(block);
+            BaseBlockEntities.FURNACE.registerBlock(block);
         }
     }
 }
-

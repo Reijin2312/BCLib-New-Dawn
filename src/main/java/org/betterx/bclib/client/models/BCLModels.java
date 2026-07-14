@@ -136,7 +136,7 @@ public class BCLModels {
                 CLOTH,
                 TextureMapping.getBlockTexture(clothType)
         );
-        ResourceLocation modelLocation = BAR_STOOL.create(block, mapping, generators.vanillaGenerator.modelOutput());
+        ResourceLocation modelLocation = BAR_STOOL.create(block, mapping, generators.vanillaGenerator.modelOutput);
 
         var blockStateGenerator = MultiVariantGenerator
                 .multiVariant(block)
@@ -153,7 +153,7 @@ public class BCLModels {
                 TextureSlot.TEXTURE,
                 TextureMapping.getBlockTexture(woodType)
         );
-        ResourceLocation modelLocation = TABURET.create(block, mapping, generators.vanillaGenerator.modelOutput());
+        ResourceLocation modelLocation = TABURET.create(block, mapping, generators.vanillaGenerator.modelOutput);
 
         var blockStateGenerator = MultiVariantGenerator
                 .multiVariant(block)
@@ -173,7 +173,7 @@ public class BCLModels {
                 TextureSlot.PARTICLE,
                 TextureMapping.getBlockTexture(woodType)
         );
-        ResourceLocation modelLocation = CHAIR.create(block, mapping, generators.vanillaGenerator.modelOutput());
+        ResourceLocation modelLocation = CHAIR.create(block, mapping, generators.vanillaGenerator.modelOutput);
         ResourceLocation topLocation = generators.particleOnlyModel(woodType);//CHAIR_TOP.create(block, mapping, generators.vanillaGenerator.modelOutput);
 
 

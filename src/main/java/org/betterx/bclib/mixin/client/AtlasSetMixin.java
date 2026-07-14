@@ -13,12 +13,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import java.util.List;
 
-@Mixin(value = SpriteSourceList.class)
+@Mixin(SpriteSourceList.class)
 public class AtlasSetMixin {
-    @ModifyVariable(
-            method = "load",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/atlas/SpriteSourceList;<init>(Ljava/util/List;)V")
-    )
+    @ModifyVariable(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/texture/atlas/SpriteSourceList;<init>(Ljava/util/List;)V"))
     private static List<SpriteSource> bcl_load(
             List<SpriteSource> list,
             ResourceManager resourceManager,
@@ -28,6 +25,3 @@ public class AtlasSetMixin {
         return list;
     }
 }
-
-
-

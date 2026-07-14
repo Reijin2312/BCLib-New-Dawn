@@ -2,15 +2,15 @@ package org.betterx.bclib.client.models;
 
 import net.minecraft.resources.ResourceLocation;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import com.google.common.collect.Lists;
 import org.joml.Vector3f;
 
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class OBJModelBuilder {
     private static final OBJModelBuilder INSTANCE = new OBJModelBuilder();
     private final List<ResourceLocation> textures = Lists.newArrayList();
@@ -110,4 +110,3 @@ public class OBJModelBuilder {
         return new OBJBlockModel(modelLocation, offset, useCulling, useShading, particleIndex, sprites);
     }
 }
-

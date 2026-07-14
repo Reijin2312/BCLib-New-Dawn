@@ -38,8 +38,8 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import com.google.common.collect.Lists;
 
@@ -71,13 +71,13 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
     }
 
     //    @Override
-//    @OnlyIn(Dist.CLIENT)
+//    @Environment(EnvType.CLIENT)
 //    public BlockModel getItemModel(ResourceLocation blockId) {
 //        return getBlockModel(blockId, defaultBlockState());
 //    }
 //
 //    @Override
-//    @OnlyIn(Dist.CLIENT)
+//    @Environment(EnvType.CLIENT)
 //    public @Nullable BlockModel getBlockModel(ResourceLocation blockId, BlockState blockState) {
 //        int destruction = blockState.getValue(DESTRUCTION);
 //        String name = blockId.getPath();
@@ -90,7 +90,7 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
 //    }
 //
 //    @Override
-//    @OnlyIn(Dist.CLIENT)
+//    @Environment(EnvType.CLIENT)
 //    public UnbakedModel getModelVariant(
 //            ModelResourceLocation stateId,
 //            BlockState blockState,
@@ -102,7 +102,7 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
 //        return ModelsHelper.createFacingModel(modelLocation.id(), blockState.getValue(FACING), false, false);
 //    }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     @Override
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         final ResourceLocation id = TextureMapping.getBlockTexture(this);
@@ -200,4 +200,3 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
         }
     }
 }
-

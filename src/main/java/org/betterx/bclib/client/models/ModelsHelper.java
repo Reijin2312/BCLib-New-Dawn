@@ -15,8 +15,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import com.google.common.collect.Lists;
 
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class ModelsHelper {
     public static BlockModel fromPattern(Optional<String> pattern) {
         return pattern.map(BlockModel::fromString).orElse(null);
@@ -170,4 +170,3 @@ public class ModelsHelper {
         }
     }
 }
-

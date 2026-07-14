@@ -9,14 +9,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class LevelFixErrorScreen extends BCLibLayoutScreen {
     private final String[] errors;
     final Listener onContinue;
-    private boolean resolved;
 
     public LevelFixErrorScreen(Screen parent, String[] errors, Listener onContinue) {
         super(parent, Component.translatable("title.bclib.datafixer.error"), 10, 10, 10);
@@ -24,10 +23,6 @@ public class LevelFixErrorScreen extends BCLibLayoutScreen {
         this.onContinue = onContinue;
     }
 
-    @Override
-    public void onClose() {
-        resolve(false);
-    }
 
     @Override
     protected LayoutComponent<?, ?> initContent() {
@@ -57,27 +52,23 @@ public class LevelFixErrorScreen extends BCLibLayoutScreen {
                 fit(), fit(),
                 Component.translatable("title.bclib.datafixer.error.continue")
         ).setAlpha(0.5f).onPress((n) -> {
-            resolve(true);
+            onClose();
+            onContinue.doContinue(true);
         });
         row.addSpacer(4);
         row.addButton(
                 fit(), fit(),
                 CommonComponents.GUI_CANCEL
-        ).onPress((n) -> resolve(false));
+        ).onPress((n) -> {
+            this.minecraft.setScreen(null);
+        });
 
 
         return grid;
     }
 
-    private void resolve(boolean markFixed) {
-        if (resolved) return;
-        resolved = true;
-        onContinue.doContinue(markFixed);
-    }
-
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public interface Listener {
         void doContinue(boolean markFixed);
     }
 }
-

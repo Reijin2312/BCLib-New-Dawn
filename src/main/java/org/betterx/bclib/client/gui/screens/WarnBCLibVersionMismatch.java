@@ -7,10 +7,10 @@ import de.ambertation.wunderlib.ui.layout.components.VerticalStack;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class WarnBCLibVersionMismatch extends BCLibLayoutScreen {
     private final Component description;
     private final Listener listener;
@@ -42,9 +42,8 @@ public class WarnBCLibVersionMismatch extends BCLibLayoutScreen {
         return grid;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public interface Listener {
         void proceed(boolean download);
     }
 }
-

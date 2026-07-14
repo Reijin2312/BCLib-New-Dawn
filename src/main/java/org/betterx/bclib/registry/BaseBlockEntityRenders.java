@@ -1,6 +1,5 @@
 package org.betterx.bclib.registry;
 
-import org.betterx.bclib.BCLib;
 import org.betterx.bclib.client.render.BaseChestBlockEntityRenderer;
 import org.betterx.bclib.furniture.renderer.RenderChair;
 import org.betterx.bclib.items.boat.BoatTypeOverride;
@@ -13,35 +12,43 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.world.entity.EntityType;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
-@OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = BCLib.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class BaseBlockEntityRenders {
-    @SubscribeEvent
-    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(BaseBlockEntities.CHEST, BaseChestBlockEntityRenderer::new);
-        event.registerEntityRenderer(BaseBlockEntities.CHAIR, RenderChair::new);
-    }
+    public static void register() {
+        BlockEntityRendererRegistry.register(BaseBlockEntities.CHEST, BaseChestBlockEntityRenderer::new);
 
-    @SubscribeEvent
-    public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
         LayerDefinition boatModel = BoatModel.createBodyModel();
         LayerDefinition chestBoatModel = ChestBoatModel.createBodyModel();
         LayerDefinition raftModel = RaftModel.createBodyModel();
         LayerDefinition chestRaftModel = ChestRaftModel.createBodyModel();
 
         BoatTypeOverride.values().forEach(type -> {
-            event.registerLayerDefinition(type.boatModelName, () -> type.isRaft ? raftModel : boatModel);
-            event.registerLayerDefinition(
+            EntityModelLayerRegistry.registerModelLayer(type.boatModelName, () -> type.isRaft ? raftModel : boatModel);
+            EntityModelLayerRegistry.registerModelLayer(
                     type.chestBoatModelName,
                     () -> type.isRaft ? chestRaftModel : chestBoatModel
             );
         });
+
+        registerRender(BaseBlockEntities.CHAIR, RenderChair.class);
+    }
+
+    public static void registerRender(EntityType<?> entity, Class<? extends EntityRenderer<?>> renderer) {
+        EntityRendererRegistry.register(entity, (context) -> {
+            EntityRenderer render = null;
+            try {
+                render = renderer.getConstructor(context.getClass())
+                                 .newInstance(context);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return render;
+        });
     }
 }
-

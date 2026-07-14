@@ -7,11 +7,11 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 
-import java.lang.reflect.Constructor;
+import net.fabricmc.fabric.api.object.builder.v1.block.type.BlockSetTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.block.type.WoodTypeBuilder;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.RecordComponent;
 import java.util.Map;
 import java.util.Objects;
 
@@ -108,94 +108,17 @@ public final class BCLWoodTypeWrapper {
             if (existing != null) {
                 return new BCLWoodTypeWrapper(id, existing, color, flammable);
             }
-            if (setType == null) {
-                setType = registerBlockSetType(createBlockSetType(id));
-            }
+            if (setType == null) setType = new BlockSetTypeBuilder().register(id);
 
-            final WoodType type = registerWoodType(createWoodType(id, setType));
+            final WoodType type = new WoodTypeBuilder().register(id, setType);
             return new BCLWoodTypeWrapper(id, type, color, flammable);
         }
-    }
-
-    private static BlockSetType registerBlockSetType(BlockSetType type) {
-        try {
-            for (Method method : BlockSetType.class.getDeclaredMethods()) {
-                if (method.getName().equals("register") && method.getParameterCount() == 1) {
-                    method.setAccessible(true);
-                    return (BlockSetType) method.invoke(null, type);
-                }
-            }
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Failed to register BlockSetType " + type, e);
-        }
-        return type;
-    }
-
-    private static BlockSetType createBlockSetType(ResourceLocation id) {
-        try {
-            if (BlockSetType.class.isRecord()) {
-                RecordComponent[] components = BlockSetType.class.getRecordComponents();
-                Object[] args = new Object[components.length];
-                Class<?>[] types = new Class<?>[components.length];
-                for (int i = 0; i < components.length; i++) {
-                    RecordComponent component = components[i];
-                    types[i] = component.getType();
-                    if ("name".equals(component.getName())) {
-                        args[i] = id.getPath();
-                    } else {
-                        args[i] = component.getAccessor().invoke(BlockSetType.OAK);
-                    }
-                }
-                Constructor<BlockSetType> ctor = BlockSetType.class.getDeclaredConstructor(types);
-                ctor.setAccessible(true);
-                return ctor.newInstance(args);
-            }
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Failed to create BlockSetType " + id, e);
-        }
-        throw new IllegalStateException("Unsupported BlockSetType layout for " + id);
-    }
-
-    private static WoodType registerWoodType(WoodType type) {
-        return WoodType.register(type);
-    }
-
-    private static WoodType createWoodType(ResourceLocation id, BlockSetType setType) {
-        try {
-            for (Constructor<?> ctor : WoodType.class.getDeclaredConstructors()) {
-                Class<?>[] params = ctor.getParameterTypes();
-                Object[] args = new Object[params.length];
-                boolean matched = true;
-                for (int i = 0; i < params.length; i++) {
-                    if (params[i] == String.class) {
-                        // Keep namespace in WoodType name so sign and hanging sign textures resolve
-                        // to the mod namespace instead of falling back to minecraft.
-                        args[i] = id.toString();
-                    } else if (params[i] == ResourceLocation.class) {
-                        args[i] = id;
-                    } else if (params[i] == BlockSetType.class) {
-                        args[i] = setType;
-                    } else {
-                        matched = false;
-                        break;
-                    }
-                }
-                if (matched) {
-                    ctor.setAccessible(true);
-                    return (WoodType) ctor.newInstance(args);
-                }
-            }
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException("Failed to create WoodType " + id, e);
-        }
-        throw new IllegalStateException("Unsupported WoodType layout for " + id);
     }
 
     private static WoodType findExistingWoodType(ResourceLocation id) {
         try {
             for (Field field : WoodType.class.getDeclaredFields()) {
-                if (!Modifier.isStatic(field.getModifiers())) continue;
-                if (!Map.class.isAssignableFrom(field.getType())) continue;
+                if (!Modifier.isStatic(field.getModifiers()) || !Map.class.isAssignableFrom(field.getType())) continue;
                 field.setAccessible(true);
                 Object raw = field.get(null);
                 if (!(raw instanceof Map<?, ?> map) || map.isEmpty()) continue;
@@ -222,7 +145,7 @@ public final class BCLWoodTypeWrapper {
             Object entryValue = entry.getValue();
             if (!(entryValue instanceof WoodType type)) continue;
             if (key instanceof ResourceLocation rl && rl.getPath().equals(id.getPath())) return type;
-            if (key instanceof String name && (name.equals(id.getPath()) || name.equals(id.toString()))) return type;
+            if (key instanceof String name && name.equals(id.getPath())) return type;
         }
         return null;
     }

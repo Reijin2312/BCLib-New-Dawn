@@ -61,9 +61,8 @@ public class WaterGrassSpreader extends TaggedBonemealBlockSpreader {
                         && !BlocksHelper.isFluid(level.getBlockState(down))) {
                     Holder<Block> grass = sourceSet.get(randomSource);
                     if (grass.isBound()) {
-                        BlockState grassState = grass.value().defaultBlockState();
-                        if (grassState.canSurvive(level, currentPos)) {
-                            level.setBlock(currentPos, grassState, BlocksHelper.SET_SILENT);
+                        if (grass.value().canSurvive(grass.value().defaultBlockState(), level, currentPos)) {
+                            level.setBlock(currentPos, grass.value().defaultBlockState(), BlocksHelper.SET_SILENT);
                             result = true;
                         }
                     }

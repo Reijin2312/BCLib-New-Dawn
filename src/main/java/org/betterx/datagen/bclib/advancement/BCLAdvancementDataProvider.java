@@ -5,14 +5,14 @@ import org.betterx.bclib.api.v3.datagen.AdvancementDataProvider;
 
 import net.minecraft.core.HolderLookup;
 
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class BCLAdvancementDataProvider extends AdvancementDataProvider {
     public BCLAdvancementDataProvider(
-            PackOutput output,
+            FabricDataOutput output,
             CompletableFuture<HolderLookup.Provider> registryLookup
     ) {
         super(List.of(BCLib.MOD_ID), output, registryLookup);

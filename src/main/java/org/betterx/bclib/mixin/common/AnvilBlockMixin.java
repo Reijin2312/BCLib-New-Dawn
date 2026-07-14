@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = AnvilBlock.class)
+@Mixin(AnvilBlock.class)
 public class AnvilBlockMixin {
     @Inject(method = "damage", at = @At("HEAD"), cancellable = true)
     private static void bclib_anvilDamage(BlockState state, CallbackInfoReturnable<BlockState> info) {
@@ -19,6 +19,3 @@ public class AnvilBlockMixin {
         }
     }
 }
-
-
-

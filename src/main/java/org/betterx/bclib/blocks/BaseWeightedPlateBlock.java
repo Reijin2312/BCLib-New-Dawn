@@ -16,8 +16,8 @@ import net.minecraft.world.level.block.WeightedPressurePlateBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,13 +40,13 @@ public class BaseWeightedPlateBlock extends WeightedPressurePlateBlock implement
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public BlockModel getItemModel(ResourceLocation resourceLocation) {
         return getBlockModel(resourceLocation, defaultBlockState());
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public @Nullable BlockModel getBlockModel(ResourceLocation resourceLocation, BlockState blockState) {
         ResourceLocation parentId = BuiltInRegistries.BLOCK.getKey(parent);
         Optional<String> pattern;
@@ -59,7 +59,7 @@ public class BaseWeightedPlateBlock extends WeightedPressurePlateBlock implement
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public UnbakedModel getModelVariant(
             ModelResourceLocation stateId,
             BlockState blockState,
@@ -71,4 +71,3 @@ public class BaseWeightedPlateBlock extends WeightedPressurePlateBlock implement
         return ModelsHelper.createBlockSimple(modelId.id());
     }
 }
-

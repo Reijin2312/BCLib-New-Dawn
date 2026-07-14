@@ -8,8 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.Tier;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public class BaseShovelItem extends ShovelItem implements ItemModelProvider {
     public BaseShovelItem(Tier material, float attackDamage, float attackSpeed, Properties settings) {
@@ -21,9 +21,8 @@ public class BaseShovelItem extends ShovelItem implements ItemModelProvider {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public BlockModel getItemModel(ResourceLocation resourceLocation) {
         return ModelsHelper.createHandheldItem(resourceLocation);
     }
 }
-

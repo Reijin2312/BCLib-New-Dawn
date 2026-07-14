@@ -36,8 +36,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
@@ -176,7 +176,7 @@ public abstract class BaseChair extends AbstractChair {
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         BCLModels.createChairBlockModel(generator, this, this.baseMaterial, this.clothMaterial);
     }
@@ -202,4 +202,3 @@ public abstract class BaseChair extends AbstractChair {
                 );
     }
 }
-

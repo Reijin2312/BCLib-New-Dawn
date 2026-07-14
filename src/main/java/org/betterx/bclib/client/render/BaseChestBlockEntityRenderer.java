@@ -22,15 +22,15 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.Int2IntFunction;
 
 import java.util.HashMap;
 
-@OnlyIn(Dist.CLIENT)
+@Environment(EnvType.CLIENT)
 public class BaseChestBlockEntityRenderer implements BlockEntityRenderer<BaseChestBlockEntity> {
     private static final HashMap<Block, RenderType[]> LAYERS = Maps.newHashMap();
     private static final RenderType[] RENDER_TYPES;
@@ -192,4 +192,3 @@ public class BaseChestBlockEntityRenderer implements BlockEntityRenderer<BaseChe
         };
     }
 }
-

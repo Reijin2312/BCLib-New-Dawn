@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 
-@Mixin(value = MultiPackResourceManager.class)
+@Mixin(MultiPackResourceManager.class)
 public class MultiPackResourceManagerMixin {
     @Unique
     private static final String[] BCLIB_MISSING_RESOURCES = new String[]{
@@ -35,6 +35,3 @@ public class MultiPackResourceManagerMixin {
         }
     }
 }
-
-
-

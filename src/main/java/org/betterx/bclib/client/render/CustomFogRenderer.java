@@ -30,7 +30,6 @@ public class CustomFogRenderer {
 
     public static boolean applyFogDensity(Camera camera, float viewDistance, boolean thickFog) {
         if (BCLib.RUNS_DISTANT_HORIZONS) {
-            // DH handles fog blending for LOD/world transitions.
             return false;
         }
 

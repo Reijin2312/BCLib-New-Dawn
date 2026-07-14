@@ -118,46 +118,14 @@ public class StructureNBT {
     }
 
     private static StructureTemplate _readStructureFromJar(ResourceLocation resource) {
-        try (InputStream inputstream = openStructureStream(resource)) {
-            if (inputstream == null) {
-                BCLib.LOGGER.error("Structure not found: " + getStructurePath(resource) + ".nbt");
-                return new StructureTemplate();
-            }
+        try {
+            InputStream inputstream = MinecraftServer.class.getResourceAsStream("/" + getStructurePath(resource) + ".nbt");
             return readStructureFromStream(inputstream);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
-    }
-
-    private static InputStream openStructureStream(ResourceLocation resource) {
-        String path = getStructurePath(resource) + ".nbt";
-        ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-        if (contextLoader != null) {
-            InputStream stream = contextLoader.getResourceAsStream(path);
-            if (stream != null) {
-                return stream;
-            }
-        }
-
-        ClassLoader bclibLoader = StructureNBT.class.getClassLoader();
-        if (bclibLoader != null) {
-            InputStream stream = bclibLoader.getResourceAsStream(path);
-            if (stream != null) {
-                return stream;
-            }
-        }
-
-        ClassLoader minecraftLoader = MinecraftServer.class.getClassLoader();
-        if (minecraftLoader != null) {
-            InputStream stream = minecraftLoader.getResourceAsStream(path);
-            if (stream != null) {
-                return stream;
-            }
-        }
-
-        return MinecraftServer.class.getResourceAsStream("/" + path);
     }
 
     /**

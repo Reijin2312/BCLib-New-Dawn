@@ -11,15 +11,12 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(value = MobSpawnSettings.class)
+@Mixin(MobSpawnSettings.class)
 public interface MobSpawnSettingsAccessor {
-    @Accessor(value = "spawners")
+    @Accessor("spawners")
     Map<MobCategory, WeightedRandomList<SpawnerData>> bcl_getSpawners();
 
-    @Accessor(value = "spawners")
+    @Accessor("spawners")
     @Mutable
     void bcl_setSpawners(Map<MobCategory, WeightedRandomList<SpawnerData>> spawners);
 }
-
-
-

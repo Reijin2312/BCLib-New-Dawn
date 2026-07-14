@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = PistonBaseBlock.class)
+@Mixin(PistonBaseBlock.class)
 public class PistonBaseBlockMixin {
     @Inject(method = "isPushable", at = @At("HEAD"), cancellable = true)
     private static void bclib_isPushable(
@@ -31,6 +31,3 @@ public class PistonBaseBlockMixin {
         }
     }
 }
-
-
-

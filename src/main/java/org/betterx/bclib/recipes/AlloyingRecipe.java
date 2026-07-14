@@ -27,8 +27,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.List;
 import java.util.Optional;
@@ -135,12 +135,12 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public String getGroup() {
         return this.group;
     }
 
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public ItemStack getToastSymbol() {
         return AlloyingRecipeWorkstation.getWorkstationIcon();
     }
@@ -273,4 +273,3 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
         //we call this to make sure that TYPE is initialized
     }
 }
-

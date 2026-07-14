@@ -26,8 +26,8 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.function.Supplier;
 
@@ -81,7 +81,7 @@ public abstract class BaseSignBlock extends StandingSignBlock implements BlockMo
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         final BaseWallSignBlock wallSignBlock = this.getWallSignBlock();
         generator.createSign(this.parent, this, wallSignBlock);

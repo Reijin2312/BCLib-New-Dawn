@@ -1,9 +1,8 @@
 plugins {
 	id 'idea'
 	id 'eclipse'
+	id 'fabric-loom'
 	id 'maven-publish'
-	id 'java-library'
-	id 'net.neoforged.moddev' version "${moddev_version}"
 }
 
 apply from: "bclib.gradle"

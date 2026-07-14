@@ -30,8 +30,8 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -84,11 +84,6 @@ public class TripleTerrainBlock extends BaseTerrainBlock implements RuntimeBlock
     }
 
     @Override
-    protected boolean canFlattenState(BlockState state) {
-        return state.getValue(SHAPE) == TripleShape.BOTTOM;
-    }
-
-    @Override
     public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         TripleShape shape = state.getValue(SHAPE);
         if (shape == TripleShape.BOTTOM) {
@@ -125,13 +120,13 @@ public class TripleTerrainBlock extends BaseTerrainBlock implements RuntimeBlock
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public BlockModel getItemModel(ResourceLocation blockId) {
         return getBlockModel(blockId, defaultBlockState());
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public @Nullable BlockModel getBlockModel(ResourceLocation blockId, BlockState blockState) {
         String path = blockId.getPath();
         Optional<String> pattern;
@@ -149,7 +144,7 @@ public class TripleTerrainBlock extends BaseTerrainBlock implements RuntimeBlock
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public UnbakedModel getModelVariant(
             ModelResourceLocation stateId,
             BlockState blockState,
@@ -185,4 +180,3 @@ public class TripleTerrainBlock extends BaseTerrainBlock implements RuntimeBlock
         return blockState.is(this) && blockState.getValue(SHAPE) == TripleShape.MIDDLE;
     }
 }
-

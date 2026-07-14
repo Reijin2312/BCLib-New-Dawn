@@ -16,7 +16,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
-import org.betterx.bclib.registry.FlammableBlockRegistry;
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -115,7 +115,7 @@ public abstract class ComplexMaterial {
     }
 
     /**
-     * Allows adding blocks into the {@link FlammableBlockRegistry} for this {@link ComplexMaterial}, not required.
+     * Allows to add blocks into Fabric {@link FlammableBlockRegistry} for this {@link ComplexMaterial}, not required.
      */
     protected void initFlammable(FlammableBlockRegistry registry) {
     }
@@ -354,9 +354,10 @@ public abstract class ComplexMaterial {
     /**
      * Get a unique {@link ResourceLocation} for each material class.
      * For example WoodenComplexMaterial will have a "bclib:Wooden_Complex_Material" {@link ResourceLocation}.
-     * This is used to add custom entries before mods init during early mod bootstrap.
+     * This is used to add custom entries before mods init using Fabric "preLaunch" entry point.
      *
      * @return {@link ResourceLocation} for this material
+     * @see <a href="https://fabricmc.net/wiki/documentation:entrypoint">Fabric Documentation: Entrypoint</a>
      */
     public abstract ResourceLocation getMaterialID();
 
@@ -423,10 +424,11 @@ public abstract class ComplexMaterial {
     /**
      * Adds a custom {@link BlockEntry} for specified {@link ComplexMaterial} using its {@link ResourceLocation}.
      * Used to add custom entry for all instances of {@link ComplexMaterial}.
-     * Should be called only during early mod bootstrap.
+     * Should be called only using Fabric "preLaunch" entry point.
      *
      * @param materialName {@link ResourceLocation} id of {@link ComplexMaterial};
      * @param entry        {@link BlockEntry}.
+     * @see <a href="https://fabricmc.net/wiki/documentation:entrypoint">Fabric Documentation: Entrypoint</a>
      */
     public static void addBlockEntry(ResourceLocation materialName, BlockEntry entry) {
         List<BlockEntry> entries = BLOCK_ENTRIES.get(materialName);
@@ -440,10 +442,11 @@ public abstract class ComplexMaterial {
     /**
      * Adds a custom {@link ItemEntry} for specified {@link ComplexMaterial} using its {@link ResourceLocation}.
      * Used to add custom entry for all instances of {@link ComplexMaterial}.
-     * Should be called only during early mod bootstrap.
+     * Should be called only using Fabric "preLaunch" entry point.
      *
      * @param materialName {@link ResourceLocation} id of {@link ComplexMaterial};
      * @param entry        {@link ItemEntry}.
+     * @see <a href="https://fabricmc.net/wiki/documentation:entrypoint">Fabric Documentation: Entrypoint</a>
      */
     public static void addItemEntry(ResourceLocation materialName, ItemEntry entry) {
         List<ItemEntry> entries = ITEM_ENTRIES.get(materialName);
@@ -457,10 +460,11 @@ public abstract class ComplexMaterial {
     /**
      * Adds a custom {@link RecipeEntry} for specified {@link ComplexMaterial} using its {@link ResourceLocation}.
      * Used to add custom entry for all instances of {@link ComplexMaterial}.
-     * Should be called only during early mod bootstrap.
+     * Should be called only using Fabric "preLaunch" entry point.
      *
      * @param materialName {@link ResourceLocation} id of {@link ComplexMaterial};
      * @param entry        {@link RecipeEntry}.
+     * @see <a href="https://fabricmc.net/wiki/documentation:entrypoint">Fabric Documentation: Entrypoint</a>
      */
     public static void addRecipeEntry(ResourceLocation materialName, RecipeEntry entry) {
         List<RecipeEntry> entries = RECIPE_ENTRIES.get(materialName);
@@ -480,4 +484,3 @@ public abstract class ComplexMaterial {
         return MATERIALS;
     }
 }
-

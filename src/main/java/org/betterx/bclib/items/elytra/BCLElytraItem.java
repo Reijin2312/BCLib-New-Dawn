@@ -2,27 +2,15 @@ package org.betterx.bclib.items.elytra;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-import net.neoforged.neoforge.common.extensions.IItemExtension;
+import net.fabricmc.fabric.api.entity.event.v1.FabricElytraItem;
 
-public interface BCLElytraItem extends IItemExtension {
+public interface BCLElytraItem extends FabricElytraItem {
     ResourceLocation getModelTexture();
 
     double getMovementFactor();
-
-    @Override
-    default boolean canElytraFly(ItemStack stack, LivingEntity entity) {
-        return ElytraItem.isFlyEnabled(stack);
-    }
-
-    @Override
-    default boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
-        doVanillaElytraTick(entity, stack);
-        return ElytraItem.isFlyEnabled(stack);
-    }
 
 
     default void doVanillaElytraTick(LivingEntity entity, ItemStack chestStack) {

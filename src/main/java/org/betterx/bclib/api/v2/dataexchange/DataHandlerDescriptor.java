@@ -6,10 +6,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 
-import net.minecraft.server.level.ServerPlayer;
-
-import org.betterx.bclib.api.v2.dataexchange.PacketSender;
-import org.betterx.bclib.api.v2.dataexchange.handler.DataExchange;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -83,7 +82,10 @@ public class DataHandlerDescriptor<T extends DataHandlerDescriptor.PacketPayload
                 factory::create
         );
 
-        DataExchange.registerDescriptor(this);
+        if (direction == Direction.SERVER_TO_CLIENT)
+            PayloadTypeRegistry.playS2C().register(this.IDENTIFIER, STREAM_CODEC);
+        else if (direction == Direction.CLIENT_TO_SERVER)
+            PayloadTypeRegistry.playC2S().register(this.IDENTIFIER, STREAM_CODEC);
     }
 
     public final Direction DIRECTION;
@@ -117,32 +119,32 @@ public class DataHandlerDescriptor<T extends DataHandlerDescriptor.PacketPayload
 
     void receiveFromServer(
             Object payload,
-            PacketSender responseSender,
-            Minecraft client
+            ClientPlayNetworking.Context context
     ) {
         BaseDataHandler<T> h = this.INSTANCE.get();
-        //noinspection unchecked
-        h.receiveFromServer(
-                client,
-                client.getConnection(),
-                (T) payload,
-                responseSender
-        );
+        try (Minecraft client = context.client()) {
+            //noinspection unchecked
+            h.receiveFromServer(
+                    client,
+                    client.getConnection(),
+                    (T) payload,
+                    context.responseSender()
+            );
+        }
     }
 
     void receiveFromClient(
             Object payload,
-            PacketSender responseSender,
-            ServerPlayer player
+            ServerPlayNetworking.Context context
     ) {
         BaseDataHandler<T> h = this.INSTANCE.get();
         //noinspection unchecked
         h.receiveFromClient(
-                player.server,
-                player,
-                player.connection,
+                context.player().server,
+                context.player(),
+                context.player().connection,
                 (T) payload,
-                responseSender
+                context.responseSender()
         );
     }
 }

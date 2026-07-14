@@ -2,7 +2,7 @@ package org.betterx.bclib.config;
 
 import org.betterx.bclib.util.JsonFactory;
 
-import net.neoforged.fml.loading.FMLPaths;
+import net.fabricmc.loader.api.FabricLoader;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,7 +11,7 @@ import java.io.File;
 import java.nio.file.Path;
 
 public class ConfigWriter {
-    private final static Path GAME_CONFIG_DIR = FMLPaths.CONFIGDIR.get();
+    private final static Path GAME_CONFIG_DIR = FabricLoader.getInstance().getConfigDir();
 
     private final File configFile;
     private JsonObject configObject;

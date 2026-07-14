@@ -1,6 +1,5 @@
 package org.betterx.bclib.client.models;
 
-import org.betterx.bclib.BCLib;
 import org.betterx.bclib.interfaces.ItemModelProvider;
 import org.betterx.bclib.interfaces.RuntimeBlockModelProvider;
 import org.betterx.bclib.models.RecordItemModelProvider;
@@ -15,6 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -38,61 +39,54 @@ public class CustomModelBakery {
         return models.get(location);
     }
 
+    public void registerBlockStateResolvers(ModelLoadingPlugin.Context pluginContext) {
+        for (Map.Entry<Block, List<StateModelPair>> e : this.blockModels.entrySet()) {
+            pluginContext.registerBlockStateResolver(
+                    e.getKey(),
+                    context -> {
+                        e.getValue().forEach(p -> context.setModel(p.state, p.model));
+                    }
+            );
+        }
+    }
+
     public void loadCustomModels(ResourceManager resourceManager) {
         BuiltInRegistries.BLOCK.stream()
+                               .parallel()
                                .filter(block -> block instanceof RuntimeBlockModelProvider)
                                .forEach(block -> {
                                    ResourceLocation blockID = BuiltInRegistries.BLOCK.getKey(block);
-                                   if (blockID == null) {
-                                       BCLib.LOGGER.warn("Skip runtime block model: missing registry key for {}", block);
-                                       return;
+                                   ResourceLocation storageID = ResourceLocation.fromNamespaceAndPath(
+                                           blockID.getNamespace(),
+                                           "blockstates/" + blockID.getPath() + ".json"
+                                   );
+                                   if (resourceManager.getResource(storageID).isEmpty()) {
+                                       addBlockModel(blockID, block);
                                    }
-                                   try {
-                                       ResourceLocation storageID = ResourceLocation.fromNamespaceAndPath(
-                                               blockID.getNamespace(),
-                                               "blockstates/" + blockID.getPath() + ".json"
-                                       );
-                                       if (resourceManager.getResource(storageID).isEmpty()) {
-                                           addBlockModel(blockID, block);
-                                       }
-                                       storageID = ResourceLocation.fromNamespaceAndPath(
-                                               blockID.getNamespace(),
-                                               "models/item/" + blockID.getPath() + ".json"
-                                       );
-                                       if (resourceManager.getResource(storageID).isEmpty()) {
-                                           addItemModel(blockID, (ItemModelProvider) block);
-                                       }
-                                   } catch (RuntimeException ex) {
-                                       BCLib.LOGGER.error("Failed to build runtime block model for {}", blockID, ex);
+                                   storageID = ResourceLocation.fromNamespaceAndPath(
+                                           blockID.getNamespace(),
+                                           "models/item/" + blockID.getPath() + ".json"
+                                   );
+                                   if (resourceManager.getResource(storageID).isEmpty()) {
+                                       addItemModel(blockID, (ItemModelProvider) block);
                                    }
                                });
 
         BuiltInRegistries.ITEM.stream()
+                              .parallel()
                               .filter(item -> item instanceof ItemModelProvider || RecordItemModelProvider.has(item))
                               .forEach(item -> {
                                   ResourceLocation registryID = BuiltInRegistries.ITEM.getKey(item);
-                                  if (registryID == null) {
-                                      BCLib.LOGGER.warn("Skip runtime item model: missing registry key for {}", item);
-                                      return;
-                                  }
-                                  try {
-                                      ResourceLocation storageID = ResourceLocation.fromNamespaceAndPath(
-                                              registryID.getNamespace(),
-                                              "models/item/" + registryID.getPath() + ".json"
-                                      );
-                                      final ItemModelProvider provider = (item instanceof ItemModelProvider)
-                                              ? (ItemModelProvider) item
-                                              : RecordItemModelProvider.get(item);
-                                      if (provider == null) {
-                                          BCLib.LOGGER.warn("Skip runtime item model: missing provider for {}", registryID);
-                                          return;
-                                      }
+                                  ResourceLocation storageID = ResourceLocation.fromNamespaceAndPath(
+                                          registryID.getNamespace(),
+                                          "models/item/" + registryID.getPath() + ".json"
+                                  );
+                                  final ItemModelProvider provider = (item instanceof ItemModelProvider)
+                                          ? (ItemModelProvider) item
+                                          : RecordItemModelProvider.get(item);
 
-                                      if (resourceManager.getResource(storageID).isEmpty()) {
-                                          addItemModel(registryID, provider);
-                                      }
-                                  } catch (RuntimeException ex) {
-                                      BCLib.LOGGER.error("Failed to build runtime item model for {}", registryID, ex);
+                                  if (resourceManager.getResource(storageID).isEmpty()) {
+                                      addItemModel(registryID, provider);
                                   }
                               });
     }
@@ -104,10 +98,6 @@ public class CustomModelBakery {
 
         ModelResourceLocation defaultStateID = BlockModelShaper.stateToModelLocation(blockID, defaultState);
         UnbakedModel defaultModel = provider.getModelVariant(defaultStateID, defaultState, models);
-        if (defaultModel == null) {
-            BCLib.LOGGER.warn("Skip runtime block model: missing default model for {}", blockID);
-            return;
-        }
 
         List<StateModelPair> stateModels = new ArrayList<>(states.size());
         if (defaultModel instanceof MultiPart) {
@@ -122,10 +112,6 @@ public class CustomModelBakery {
                 UnbakedModel model = stateID.equals(defaultStateID)
                         ? defaultModel
                         : provider.getModelVariant(stateID, blockState, models);
-                if (model == null) {
-                    BCLib.LOGGER.warn("Skip runtime block model: missing model for {}", stateID);
-                    model = defaultModel;
-                }
                 models.put(stateID.id(), model);
                 stateModels.add(new StateModelPair(blockState, model));
             });
@@ -139,15 +125,10 @@ public class CustomModelBakery {
                 "inventory"
         );
 
-        ResourceLocation modelKey = modelLocation.id();
-        if (!models.containsKey(modelKey)) {
+        if (!models.containsKey(modelLocation)) {
             ResourceLocation itemModelLocation = itemID.withPrefix("item/");
-            BlockModel model = provider.getItemModel(modelKey);
-            if (model == null) {
-                BCLib.LOGGER.warn("Skip runtime item model: missing model for {}", itemID);
-                return;
-            }
-            models.put(modelKey, model);
+            BlockModel model = provider.getItemModel(modelLocation.id());
+            models.put(modelLocation.id(), model);
             models.put(itemModelLocation, model);
         }
     }

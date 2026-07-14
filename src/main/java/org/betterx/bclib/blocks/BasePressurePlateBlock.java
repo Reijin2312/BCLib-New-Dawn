@@ -19,8 +19,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PressurePlateBlock;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public abstract class BasePressurePlateBlock extends PressurePlateBlock implements BlockModelProvider, BlockTagProvider, DropSelfLootProvider<BasePressurePlateBlock> {
     private final Block parent;
@@ -34,7 +34,7 @@ public abstract class BasePressurePlateBlock extends PressurePlateBlock implemen
 
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createPressurePlate(parent, this);
     }
@@ -78,4 +78,3 @@ public abstract class BasePressurePlateBlock extends PressurePlateBlock implemen
         );
     }
 }
-

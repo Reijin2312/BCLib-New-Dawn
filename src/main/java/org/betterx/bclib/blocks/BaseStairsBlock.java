@@ -22,8 +22,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StairBlock;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 public abstract class BaseStairsBlock extends StairBlock implements BlockModelProvider, CustomBlockItemProvider, BlockTagProvider, ItemTagProvider, DropSelfLootProvider<BaseStairsBlock> {
     private final Block parent;
@@ -36,7 +36,7 @@ public abstract class BaseStairsBlock extends StairBlock implements BlockModelPr
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createStairs(parent, this);
     }
@@ -121,4 +121,3 @@ public abstract class BaseStairsBlock extends StairBlock implements BlockModelPr
 
     }
 }
-

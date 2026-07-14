@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 
-@Mixin(value = Recipe.class)
+@Mixin(Recipe.class)
 public interface RecipeMixin<C extends RecipeInput> {
     //Water Bottles are potions and they do not return an empty bottle in crafting Recipes
     //This mixin will fix that behaviour
@@ -40,6 +40,3 @@ public interface RecipeMixin<C extends RecipeInput> {
         }
     }
 }
-
-
-

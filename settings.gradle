@@ -1,8 +1,8 @@
 pluginManagement {
     repositories {
         maven {
-            name = 'NeoForge'
-            url = 'https://maven.neoforged.net/releases'
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
         }
         gradlePluginPortal()
     }
@@ -17,8 +17,8 @@ def allowLocalLibUse = true
 def allowLocalLibInConsoleMode = true
 
 //The path were to look for the local BCLib
-def WunderLibPath = '../WunderLib'
-def WoverPath = '../WorldWeaver'
+def WunderLibPath = '../WunderLib-Fabric-1.21.1'
+def WoverPath = '../WorldWeaver-Fabric-1.21.1'
 
 
 // #### Logic ####

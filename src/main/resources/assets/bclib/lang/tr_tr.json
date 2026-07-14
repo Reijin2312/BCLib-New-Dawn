@@ -1,8 +1,4 @@
 {
-  "message.bclib.datafixer.backup_failed": "BCLib otomatik bir yedek oluşturamadı. Düzeltmeleri uygulamadan önce geri dönüp bu dünyanın manuel bir yedeğini oluşturmanız daha güvenlidir.",
-  "title.bclib.datafixer.backup_failed": "Yedekleme başarısız",
-  "title.bclib.datafixer.backup_failed.back": "Geri dön (manuel yedek)",
-  "title.bclib.datafixer.backup_failed.continue": "Sorumluluğu kabul et ve devam et",
   "__comment__": "@alpeerkaraca - BCLib Turkish Language File",
   "message.bclib.anvil_damage": "§cHasar",
   "bclib.datafixer.backupWarning.title": "Dünyayla Uyumsuz Bir Gardiyan Bulundu",
@@ -97,7 +93,7 @@
   "title.config.bclib.client.rendering.FogDensity": "Sis Yoğunluğu",
   "description.config.bclib.client.ui.suppressExperimentalDialogOnLoad": "Bu seçenek etkinleştirildiğinde, mevcut bir dünya yüklediğinizde uyarı ekranı görüntülenmez. Bu uyarı ekranı, dünyanızın vanilla sürüm ayarlarını kullanmadığı durumlarda ortaya çıkar. Bu durum, önizleme sürümünde bir dünya başlattığınızda veya dünya oluşturmak için modları kullandığınızda gerçekleşebilir. Yeni bir dünya oluşturulduğunda hatırlatma olarak yine gösterilir.",  "title.config.bclib.client.ui.forceBetterXPreset": "Use BetterX as Default World-Type",
   "warning.config.bclib.client.ui.forceBetterXPreset": "HER ZAMANKİ GİBİ BU AYARI AÇIK BIRAKMAYACAKSIN.\n",
-  "description.config.bclib.client.ui.forceBetterXPreset": "Dünya türü, bir dünyanın nasıl oluşturulduğunu belirler. Çoğu durumda, BetterX varsayılan olarak kalması gereken bir seçenektir (dünya oluşturma ekranında her zaman türü değiştirebilirsiniz). Bu tür, DataPack'ler, kendi modumuz ve diğer NeoForge modları arasında maksimum uyumluluk için optimize edilmiştir. Ayrıca BetterNether ve BetterEnd için bazı benzersiz özellikler sunar. Bu seçeneği yalnızca bir nedeniniz varsa devre dışı bırakmalısınız!",
+  "description.config.bclib.client.ui.forceBetterXPreset": "Dünya türü, bir dünyanın nasıl oluşturulduğunu belirler. Çoğu durumda, BetterX varsayılan olarak kalması gereken bir seçenektir (dünya oluşturma ekranında her zaman türü değiştirebilirsiniz). Bu tür, DataPack'ler, kendi modumuz ve diğer Fabric modları arasında maksimum uyumluluk için optimize edilmiştir. Ayrıca BetterNether ve BetterEnd için bazı benzersiz özellikler sunar. Bu seçeneği yalnızca bir nedeniniz varsa devre dışı bırakmalısınız!",
   "emi.category.bclib.alloying": "Alaşım Hazırlama",
   "emi.category.bclib.anvil_0": "Örs (Seviye 0)",
   "emi.category.bclib.anvil_1": "Örs (Seviye I)",

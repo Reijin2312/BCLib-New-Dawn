@@ -10,13 +10,9 @@ import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.neoforge.common.ItemAbility;
 
 
 public abstract class BaseStripableLogBlock extends BaseRotatedPillarBlock implements AxeCanStrip {
@@ -30,19 +26,6 @@ public abstract class BaseStripableLogBlock extends BaseRotatedPillarBlock imple
     @Override
     public BlockState strippedState(BlockState state) {
         return stripped.defaultBlockState().setValue(AXIS, state.getValue(AXIS));
-    }
-
-    @Override
-    public BlockState getToolModifiedState(
-            BlockState state,
-            UseOnContext context,
-            ItemAbility itemAbility,
-            boolean simulate
-    ) {
-        if (ItemAbilities.AXE_STRIP == itemAbility && context.getItemInHand().canPerformAction(itemAbility)) {
-            return strippedState(state);
-        }
-        return super.getToolModifiedState(state, context, itemAbility, simulate);
     }
 
     public static class Wood extends BaseStripableLogBlock implements BehaviourWood, BlockTagProvider, ItemTagProvider {
@@ -65,7 +48,7 @@ public abstract class BaseStripableLogBlock extends BaseRotatedPillarBlock imple
                 context.add(BlockTags.LOGS_THAT_BURN, this);
             }
         }
-        
+
         @Override
         public void registerItemTags(ResourceLocation location, ItemTagBootstrapContext context) {
             context.add(ItemTags.LOGS, this);

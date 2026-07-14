@@ -15,10 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(value = Block.class)
+@Mixin(Block.class)
 public class BlockMixin {
-    // require=0 makes this injection optional so it won't crash if the signature drifts between mappings
-    @Inject(method = "appendHoverText", at = @At("HEAD"), require = 0)
+    @Inject(method = "appendHoverText", at = @At("HEAD"))
     void bclib_appendSurvivalBlock(
             ItemStack itemStack,
             Item.TooltipContext tooltipContext,
@@ -31,6 +30,3 @@ public class BlockMixin {
         }
     }
 }
-
-
-

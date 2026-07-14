@@ -32,8 +32,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -171,7 +171,7 @@ public abstract class AbstractVineBlock extends BaseBlockNotFull implements Rend
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createCubeModel(this);
         generator.createFlatItem(this);
@@ -188,4 +188,3 @@ public abstract class AbstractVineBlock extends BaseBlockNotFull implements Rend
         }
     }
 }
-

@@ -3,7 +3,7 @@ package org.betterx.bclib.api.v2;
 import org.betterx.bclib.integration.ModIntegration;
 import org.betterx.wover.core.api.ModCore;
 
-import net.neoforged.fml.ModList;
+import net.fabricmc.loader.api.FabricLoader;
 
 import com.google.common.collect.Lists;
 
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ModIntegrationAPI {
     private static final List<ModIntegration> INTEGRATIONS = Lists.newArrayList();
-    private static final boolean HAS_CANVAS = ModList.get().isLoaded("canvas");
+    private static final boolean HAS_CANVAS = FabricLoader.getInstance().isModLoaded("canvas");
 
     /**
      * Registers mod integration

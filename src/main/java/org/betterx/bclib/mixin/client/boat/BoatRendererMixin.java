@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(value = BoatRenderer.class)
+@Mixin(BoatRenderer.class)
 public abstract class BoatRendererMixin extends EntityRenderer<Boat> {
     protected BoatRendererMixin(EntityRendererProvider.Context context) {
         super(context);
@@ -26,11 +26,7 @@ public abstract class BoatRendererMixin extends EntityRenderer<Boat> {
         BoatTypeOverride.values().forEach(type -> type.createBoatModels(context));
     }
 
-    @Inject(
-            method = "render(Lnet/minecraft/world/entity/vehicle/Boat;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
-            at = @At("HEAD"),
-            cancellable = true
-    )
+    @Inject(method = "render(Lnet/minecraft/world/entity/vehicle/Boat;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", at = @At("HEAD"), cancellable = true)
     void bcl_render(
             Boat boat,
             float f, float g,
@@ -44,6 +40,3 @@ public abstract class BoatRendererMixin extends EntityRenderer<Boat> {
         }
     }
 }
-
-
-

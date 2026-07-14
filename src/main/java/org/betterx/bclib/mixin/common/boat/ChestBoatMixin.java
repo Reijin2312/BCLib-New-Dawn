@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = ChestBoat.class)
+@Mixin(ChestBoat.class)
 public abstract class ChestBoatMixin {
 
     @Inject(method = "getDropItem", at = @At("HEAD"), cancellable = true)
@@ -28,6 +28,3 @@ public abstract class ChestBoatMixin {
         }
     }
 }
-
-
-

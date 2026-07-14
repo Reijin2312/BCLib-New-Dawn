@@ -19,7 +19,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -32,10 +31,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.phys.BlockHitResult;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.common.ItemAbilities;
-import net.neoforged.neoforge.common.ItemAbility;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -62,28 +59,6 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
         return baseBlock;
     }
 
-    protected boolean canFlattenState(BlockState state) {
-        return true;
-    }
-
-    @Override
-    public BlockState getToolModifiedState(
-            BlockState state,
-            UseOnContext context,
-            ItemAbility itemAbility,
-            boolean simulate
-    ) {
-        if (ItemAbilities.SHOVEL_FLATTEN == itemAbility
-                && pathBlock != null
-                && canFlattenState(state)
-                && context.getItemInHand().canPerformAction(itemAbility)
-                && context.getClickedFace() != Direction.DOWN
-                && context.getLevel().getBlockState(context.getClickedPos().above()).isAir()) {
-            return pathBlock.defaultBlockState();
-        }
-        return super.getToolModifiedState(state, context, itemAbility, simulate);
-    }
-
     @Override
     public InteractionResult useWithoutItem(
             BlockState state,
@@ -92,7 +67,10 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
             Player player,
             BlockHitResult hit
     ) {
-        if (pathBlock != null && TagManager.isToolWithMineableTag(player.getMainHandItem(), MineableTags.SHOVEL)) {
+        if (pathBlock != null
+                && TagManager.isToolWithMineableTag(player.getMainHandItem(), MineableTags.SHOVEL)
+                && hit.getDirection() != Direction.DOWN
+                && level.getBlockState(pos.above()).isAir()) {
             level.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0F, 1.0F);
             if (!level.isClientSide) {
                 level.setBlockAndUpdate(pos, pathBlock.defaultBlockState());
@@ -135,7 +113,7 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createBlockTopSideBottom(getBaseBlock(), this, true);
     }
@@ -149,4 +127,3 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
         return provider.dropWithSilkTouch(this, getBaseBlock(), ConstantValue.exactly(1));
     }
 }
-

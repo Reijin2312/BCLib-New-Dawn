@@ -1,7 +1,10 @@
 package org.betterx.bclib.interfaces;
 
-public interface CustomColorProvider {
-    BlockColorProvider getProvider();
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.item.ItemColor;
 
-    ItemColorProvider getItemProvider();
+public interface CustomColorProvider {
+    BlockColor getProvider();
+
+    ItemColor getItemProvider();
 }

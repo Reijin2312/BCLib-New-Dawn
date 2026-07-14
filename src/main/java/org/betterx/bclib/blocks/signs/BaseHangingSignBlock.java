@@ -27,8 +27,8 @@ import net.minecraft.world.level.block.state.properties.RotationSegment;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.function.Supplier;
 
@@ -86,7 +86,7 @@ public abstract class BaseHangingSignBlock extends CeilingHangingSignBlock imple
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
+    @Environment(EnvType.CLIENT)
     public void provideBlockModels(WoverBlockModelGenerators generator) {
         generator.createHangingSign(parent, this, getWallSignBlock());
     }
@@ -137,4 +137,3 @@ public abstract class BaseHangingSignBlock extends CeilingHangingSignBlock imple
         return new BaseHangingSignBlock.Wood(parent, type);
     }
 }
-

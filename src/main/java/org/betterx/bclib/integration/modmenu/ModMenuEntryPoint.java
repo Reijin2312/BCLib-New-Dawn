@@ -1,34 +1,33 @@
 package org.betterx.bclib.integration.modmenu;
 
-import org.betterx.bclib.BCLib;
 import org.betterx.bclib.client.gui.modmenu.MainScreen;
 
-import net.minecraft.client.gui.screens.Screen;
+import com.terraformersmc.modmenu.api.ConfigScreenFactory;
+import com.terraformersmc.modmenu.api.ModMenuApi;
 
-import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
+
 /**
- * NeoForge mod list config screen integration.
+ * Internal class to hook into ModMenu, you should not need to use this class. If you want to register a
+ * ModMenu Screen for a Mod using BCLib, use {@link ModMenu#addModMenuScreen(String, Function)}
  */
-public final class ModMenuEntryPoint {
-    private ModMenuEntryPoint() {
+public class ModMenuEntryPoint implements ModMenuApi {
+    @Override
+    public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
+        Map<String, ConfigScreenFactory<?>> copy = new HashMap<>();
+        for (var entry : ModMenu.screen.entrySet()) {
+            copy.put(entry.getKey(), (parent) -> entry.getValue().apply(parent));
+        }
+        return copy;
     }
 
-    public static void register() {
-        registerFactory(BCLib.MOD_ID, parent -> new MainScreen(parent));
-        ModMenu.screen.forEach(ModMenuEntryPoint::registerFactory);
+    @Override
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        return (parent) -> new MainScreen(parent);
     }
 
-    private static void registerFactory(String modId, Function<Screen, Screen> factory) {
-        IConfigScreenFactory screenFactory = (modContainer, parent) -> factory.apply(parent);
-        ModList.get()
-               .getModContainerById(modId)
-               .ifPresent(container -> container.registerExtensionPoint(
-                       IConfigScreenFactory.class,
-                       screenFactory
-               ));
-    }
+
 }

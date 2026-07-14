@@ -58,7 +58,7 @@ public abstract class BaseChestBlock extends ChestBlock implements BlockModelPro
                 this,
                 BCLModels.CHEST_ITEM,
                 new TextureMapping()
-                        .put(TextureSlot.TEXTURE, BuiltInRegistries.BLOCK.getKey(this).withPrefix("block/chest/"))
+                        .put(TextureSlot.TEXTURE, BuiltInRegistries.BLOCK.getKey(this).withPrefix("entity/chest/"))
         );
     }
 

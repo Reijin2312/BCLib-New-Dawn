@@ -1,8 +1,4 @@
 {
-  "message.bclib.datafixer.backup_failed": "BCLib 无法创建自动备份。更安全的做法是返回并在应用修复前手动备份此世界。",
-  "title.bclib.datafixer.backup_failed": "备份失败",
-  "title.bclib.datafixer.backup_failed.back": "返回（手动备份）",
-  "title.bclib.datafixer.backup_failed.continue": "自行承担风险并继续",
   "message.bclib.anvil_damage": "§c损坏",
   "bclib.datafixer.backupWarning.title": "发现了一个不兼容的世界",
   "bclib.datafixer.backupWarning.message": "自从上次加载这个世界以来，一些安装的MOD的内部结构确实发生了变化。\n\n我们可以自动为您更改世界。如果继续而不应用更改，则世界可能无法正确加载，在着之前，您应该创建一个备份.",
@@ -86,7 +82,7 @@
   "description.config.bclib.client.ui.suppressExperimentalDialogOnLoad": "只要您的世界不使用原版设置，就会出现此警告屏幕。这也可能在当您在预览版中启动世界或使用模组更改世界创建的方式时发生。如果启用此选项，则在加载现有世界时将跳过此警告。创建新世界时，它仍会（作为提醒）显示。",
   "title.config.bclib.client.ui.forceBetterXPreset": "使用BetterX作为默认世界类型",
   "warning.config.bclib.client.ui.forceBetterXPreset": "您很可能希望启用此选项。\n",
-  "description.config.bclib.client.ui.forceBetterXPreset": "世界类型决定了世界的生成方式。在大多数情况下，BetterX应该保持为默认值（您可以在世界创建屏幕中随时更改类型）。此类型针对数据包、我们的模组和其他NeoForge模组之间进行了兼容性方面的最大优化。它还为更好的下界和更好的末地提供了一些独特的功能。如果您有理由这样做，您应该只禁用此选项！",
+  "description.config.bclib.client.ui.forceBetterXPreset": "世界类型决定了世界的生成方式。在大多数情况下，BetterX应该保持为默认值（您可以在世界创建屏幕中随时更改类型）。此类型针对数据包、我们的模组和其他Fabric模组之间进行了兼容性方面的最大优化。它还为更好的下界和更好的末地提供了一些独特的功能。如果您有理由这样做，您应该只禁用此选项！",
   "emi.category.bclib.alloying": "合金化",
   "emi.category.bclib.anvil_0": "铁砧（等级 0 ）",
   "emi.category.bclib.anvil_1": "铁砧（等级 I ）",

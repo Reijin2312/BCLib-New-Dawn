@@ -5,16 +5,16 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(value = LevelRenderer.class)
-@OnlyIn(Dist.CLIENT)
+@Mixin(LevelRenderer.class)
+@Environment(EnvType.CLIENT)
 public interface LevelRendererAccessor {
-    @Invoker(value = "renderShape")
+    @Invoker("renderShape")
     public static void bclib_renderShape(
             PoseStack poseStack,
             VertexConsumer vertexConsumer,
@@ -30,7 +30,3 @@ public interface LevelRendererAccessor {
         throw new AssertionError();
     }
 }
-
-
-
-

@@ -13,17 +13,19 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 
 import org.jetbrains.annotations.NotNull;
 
-@OnlyIn(Dist.CLIENT)
-public abstract class HumanoidArmorRenderer {
+@Environment(EnvType.CLIENT)
+public abstract class HumanoidArmorRenderer implements ArmorRenderer {
     public interface CopyExtraState {
         void copyPropertiesFrom(HumanoidModel<LivingEntity> parentModel);
     }
 
+    @Override
     public void render(
             PoseStack pose, MultiBufferSource buffer,
             ItemStack stack, LivingEntity entity, EquipmentSlot slot,
@@ -112,4 +114,3 @@ public abstract class HumanoidArmorRenderer {
         }
     }
 }
-

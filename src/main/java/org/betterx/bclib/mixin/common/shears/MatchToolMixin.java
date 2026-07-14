@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 
-@Mixin(value = MatchTool.class)
+@Mixin(MatchTool.class)
 public class MatchToolMixin {
     @Unique
     private boolean bcl_isShears;
@@ -28,7 +28,7 @@ public class MatchToolMixin {
             .of(CommonItemTags.SHEARS)
             .build();
 
-    @Inject(method = "<init>", at = @At(value = "TAIL"))
+    @Inject(method = "<init>", at = @At("TAIL"))
     private void bcl_initShears(Optional<ItemPredicate> optional, CallbackInfo ci) {
         if (optional.isPresent()) {
             if (optional.get().items().isPresent()) {
@@ -40,11 +40,7 @@ public class MatchToolMixin {
         }
     }
 
-    @Inject(
-            method = "test(Lnet/minecraft/world/level/storage/loot/LootContext;)Z",
-            at = @At(value = "RETURN"),
-            cancellable = true
-    )
+    @Inject(method = "test(Lnet/minecraft/world/level/storage/loot/LootContext;)Z", at = @At("RETURN"), cancellable = true)
     private void bcl_isShears(LootContext lootContext, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue() && bcl_isShears) {
             ItemStack itemStack = lootContext.getParamOrNull(LootContextParams.TOOL);
@@ -52,6 +48,3 @@ public class MatchToolMixin {
         }
     }
 }
-
-
-
