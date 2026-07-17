@@ -85,10 +85,10 @@ dependencies {
 
     println "Using local WorldWeaver: ${local_wover}"
     if (local_wover) {
-        implementation project(path: ":WorldWeaver", configuration: 'dev')
+        implementation project(path: ":WorldWeaver", configuration: 'localDev')
 
         gradle.knownWoverModules.each {
-            implementation project(path: ":WorldWeaver:$it", configuration: 'dev')
+            implementation project(path: ":WorldWeaver:$it", configuration: 'localDev')
         }
     } else {
         modImplementation "org.betterx:worldweaver:${project.wover_version}"

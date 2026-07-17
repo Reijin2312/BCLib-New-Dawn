@@ -1,13 +1,14 @@
 {
     "schemaVersion": 1,
     "id": "bclib",
-    "version": "21.0.14",
+    "version": "21.0.15",
     "name": "BCLib",
     "description": "A library for BetterX team mods",
     "authors": [
         "Quiqueck",
         "paulevs",
-        "Bulldog83"
+        "Bulldog83",
+        "Raijin"
     ],
     "contact": {
         "homepage": "https://modrinth.com/mod/bclib",
