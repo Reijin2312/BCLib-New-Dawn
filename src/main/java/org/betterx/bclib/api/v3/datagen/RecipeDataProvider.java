@@ -4,17 +4,14 @@ import org.betterx.bclib.BCLib;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeOutput;
-
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.minecraft.data.recipes.RecipeProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-public class RecipeDataProvider extends FabricRecipeProvider {
+public class RecipeDataProvider extends RecipeProvider {
     private static List<DatapackRecipeBuilder> RECIPES;
 
     @Nullable
@@ -22,27 +19,27 @@ public class RecipeDataProvider extends FabricRecipeProvider {
 
     public RecipeDataProvider(
             @Nullable List<String> modIDs,
-            FabricDataOutput output,
-            CompletableFuture<HolderLookup.Provider> registriesFuture
+            HolderLookup.Provider registries,
+            RecipeOutput output
     ) {
-        super(output, registriesFuture);
+        super(registries, output);
         this.modIDs = modIDs;
     }
 
     @Override
-    public void buildRecipes(RecipeOutput exporter) {
+    public void buildRecipes() {
         if (RECIPES == null) return;
 
         for (var r : RECIPES) {
-            if (modIDs.size() == 0 || modIDs.indexOf(r.getNamespace()) >= 0) {
-                r.build(exporter);
+            if (modIDs == null || modIDs.isEmpty() || modIDs.contains(r.getNamespace())) {
+                r.build(this.output);
             }
         }
     }
 
     @ApiStatus.Internal
     public static void register(DatapackRecipeBuilder builder) {
-        //thi is only used withe the Data Generator, so we do not keep this list on a regular run
+        // This is only used with the data generator, so we do not keep this list on a regular run.
         if (!BCLib.isDatagen()) {
             return;
         }

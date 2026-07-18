@@ -1,16 +1,23 @@
 package org.betterx.bclib.items.elytra;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gameevent.GameEvent;
 
-import net.fabricmc.fabric.api.entity.event.v1.FabricElytraItem;
-
-public interface BCLElytraItem extends FabricElytraItem {
-    ResourceLocation getModelTexture();
+public interface BCLElytraItem {
+    Identifier getModelTexture();
 
     double getMovementFactor();
+
+    default boolean canElytraFly(ItemStack stack, LivingEntity entity) {
+        return !stack.isDamaged() || stack.getDamageValue() < stack.getMaxDamage() - 1;
+    }
+
+    default boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
+        doVanillaElytraTick(entity, stack);
+        return canElytraFly(stack, entity);
+    }
 
 
     default void doVanillaElytraTick(LivingEntity entity, ItemStack chestStack) {
@@ -20,7 +27,7 @@ public interface BCLElytraItem extends FabricElytraItem {
     static void vanillaElytraTick(LivingEntity entity, ItemStack chestStack) {
         int nextRoll = entity.getFallFlyingTicks() + 1;
 
-        if (!entity.level().isClientSide && nextRoll % 10 == 0) {
+        if (!entity.level().isClientSide() && nextRoll % 10 == 0) {
             if ((nextRoll / 10) % 2 == 0) {
                 BCLElytraUtils.onBreak.accept(entity, chestStack);
                 return;

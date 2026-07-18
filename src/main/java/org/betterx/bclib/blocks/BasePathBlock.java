@@ -1,17 +1,13 @@
 package org.betterx.bclib.blocks;
 
 import org.betterx.bclib.behaviours.interfaces.BehaviourStone;
-import org.betterx.bclib.client.models.BCLModels;
 import org.betterx.wover.block.api.model.BlockModelProvider;
-import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
 import org.betterx.wover.loot.api.BlockLootProvider;
 import org.betterx.wover.loot.api.LootLookupProvider;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,8 +16,6 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -55,26 +49,19 @@ public abstract class BasePathBlock extends BaseBlockNotFull implements BlockLoo
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
-        var side = TextureMapping.getBlockTexture(this, "_side");
-        side = ResourceLocation.fromNamespaceAndPath(side.getNamespace(), side
-                .getPath()
-                .replace("_path", ""));
-
-        var mapping = new TextureMapping()
-                .put(TextureSlot.SIDE, side)
-                .put(TextureSlot.TOP, TextureMapping.getBlockTexture(this, "_top"))
-                .put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(baseBlock));
-        var location = BCLModels.PATH.create(this, mapping, generator.modelOutput());
-
-        generator.acceptBlockState(generator.randomTopModelVariant(this, location));
-
+    public void provideBlockModels(Object modelGenerator) {
+        try {
+            Class<?> bridge = Class.forName("org.betterx.bclib.client.models.BlockDatagenBridge");
+            bridge.getMethod("provideBasePathBlockModels", Object.class, BasePathBlock.class, Block.class)
+                  .invoke(null, modelGenerator, this, this.baseBlock);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException("Failed to provide models for BasePathBlock", ex);
+        }
     }
 
     @Override
     public LootTable.Builder registerBlockLoot(
-            @NotNull ResourceLocation location,
+            @NotNull Identifier location,
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {

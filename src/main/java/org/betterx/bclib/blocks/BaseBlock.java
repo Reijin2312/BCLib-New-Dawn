@@ -9,13 +9,11 @@ import org.betterx.wover.loot.api.BlockLootProvider;
 import org.betterx.wover.loot.api.LootLookupProvider;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootTable;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
@@ -49,7 +47,7 @@ public class BaseBlock extends Block implements BlockLootProvider, BlockModelPro
 //     * This implementation will load the Block-Model and return it as the Item-Model
 //     */
 //    @Override
-//    public BlockModel getItemModel(ResourceLocation blockId) {
+//    public BlockModel getItemModel(Identifier blockId) {
 //        return getBlockModel(blockId, defaultBlockState());
 //    }
 
@@ -74,14 +72,14 @@ public class BaseBlock extends Block implements BlockLootProvider, BlockModelPro
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         generator.createCubeModel(this);
     }
 
     @Override
     public LootTable.Builder registerBlockLoot(
-            @NotNull ResourceLocation location,
+            @NotNull Identifier location,
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {

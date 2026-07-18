@@ -7,11 +7,8 @@ import de.ambertation.wunderlib.ui.layout.values.Value;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 
-@Environment(EnvType.CLIENT)
 public class ConfirmRestartScreen extends BCLibLayoutScreen {
     private final Component description;
     private final ConfirmRestartScreen.Listener listener;
@@ -45,7 +42,6 @@ public class ConfirmRestartScreen extends BCLibLayoutScreen {
         return grid;
     }
 
-    @Environment(EnvType.CLIENT)
     public interface Listener {
         void proceed();
     }

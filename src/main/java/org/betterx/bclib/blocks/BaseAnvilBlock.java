@@ -9,17 +9,17 @@ import org.betterx.bclib.util.LootUtil;
 import org.betterx.wover.block.api.BlockProperties;
 import org.betterx.wover.block.api.CustomBlockItemProvider;
 import org.betterx.wover.block.api.model.BlockModelProvider;
+import org.betterx.wover.block.api.model.DatagenModelDispatch;
 import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
 
+import com.mojang.math.Quadrant;
+import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.data.models.blockstates.MultiVariantGenerator;
-import net.minecraft.data.models.blockstates.PropertyDispatch;
-import net.minecraft.data.models.blockstates.Variant;
-import net.minecraft.data.models.blockstates.VariantProperties;
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TextureSlot;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
+import net.minecraft.client.renderer.block.model.VariantMutator;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -37,9 +37,6 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import com.google.common.collect.Lists;
 
@@ -70,15 +67,13 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
         builder.add(DESTRUCTION, durability);
     }
 
-    //    @Override
-//    @Environment(EnvType.CLIENT)
-//    public BlockModel getItemModel(ResourceLocation blockId) {
+//    @Override
+//    public BlockModel getItemModel(Identifier blockId) {
 //        return getBlockModel(blockId, defaultBlockState());
 //    }
 //
 //    @Override
-//    @Environment(EnvType.CLIENT)
-//    public @Nullable BlockModel getBlockModel(ResourceLocation blockId, BlockState blockState) {
+//    public @Nullable BlockModel getBlockModel(Identifier blockId, BlockState blockState) {
 //        int destruction = blockState.getValue(DESTRUCTION);
 //        String name = blockId.getPath();
 //        Map<String, String> textures = Maps.newHashMap();
@@ -90,11 +85,10 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
 //    }
 //
 //    @Override
-//    @Environment(EnvType.CLIENT)
 //    public UnbakedModel getModelVariant(
 //            ModelResourceLocation stateId,
 //            BlockState blockState,
-//            Map<ResourceLocation, UnbakedModel> modelCache
+//            Map<Identifier, UnbakedModel> modelCache
 //    ) {
 //        int destruction = blockState.getValue(DESTRUCTION);
 //        ModelResourceLocation modelLocation = RuntimeBlockModelProvider.remapModelResourceLocation(stateId, blockState, "_top_" + destruction);
@@ -102,48 +96,39 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
 //        return ModelsHelper.createFacingModel(modelLocation.id(), blockState.getValue(FACING), false, false);
 //    }
 
-    @Environment(EnvType.CLIENT)
     @Override
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
-        final ResourceLocation id = TextureMapping.getBlockTexture(this);
+    public void provideBlockModels(Object modelGenerator) {
+        WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
+        final Identifier id = TextureMapping.getBlockTexture(this);
         final TextureMapping mapping = new TextureMapping()
                 .put(TextureSlot.FRONT, id.withSuffix("_front"))
                 .put(TextureSlot.BACK, id.withSuffix("_back"))
                 .put(TextureSlot.BOTTOM, id.withSuffix("_bottom"))
                 .put(BCLModels.PANEL, id.withSuffix("_panel"));
 
-        final var prop = PropertyDispatch.properties(DESTRUCTION, FACING);
+        final Object prop = DatagenModelDispatch.propertyDispatchInitial(DESTRUCTION, FACING);
 
         for (int d = 0; d < 3; d++) {
             mapping.put(TextureSlot.TOP, id.withSuffix("_top_" + d));
-            final ResourceLocation model = BCLModels.ANVIL.createWithSuffix(this, "_" + d, mapping, generator.modelOutput());
+            final Identifier model = BCLModels.ANVIL.createWithSuffix(this, "_" + d, mapping, generator.modelOutput());
 
-            prop.select(d, Direction.NORTH, Variant
-                    .variant()
-                    .with(VariantProperties.MODEL, model)
-            );
-            prop.select(d, Direction.EAST, Variant
-                    .variant()
-                    .with(VariantProperties.MODEL, model)
-                    .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
-            );
-            prop.select(d, Direction.SOUTH, Variant
-                    .variant()
-                    .with(VariantProperties.MODEL, model)
-                    .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
-            );
-            prop.select(d, Direction.WEST, Variant
-                    .variant()
-                    .with(VariantProperties.MODEL, model)
-                    .with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
-            );
+            DatagenModelDispatch.propertyDispatchSelect(prop, d, Direction.NORTH, BlockModelGenerators.plainVariant(model));
+            DatagenModelDispatch.propertyDispatchSelect(prop, d, Direction.EAST, BlockModelGenerators
+                    .plainVariant(model)
+                    .with(VariantMutator.Y_ROT.withValue(Quadrant.R90)));
+            DatagenModelDispatch.propertyDispatchSelect(prop, d, Direction.SOUTH, BlockModelGenerators
+                    .plainVariant(model)
+                    .with(VariantMutator.Y_ROT.withValue(Quadrant.R180)));
+            DatagenModelDispatch.propertyDispatchSelect(prop, d, Direction.WEST, BlockModelGenerators
+                    .plainVariant(model)
+                    .with(VariantMutator.Y_ROT.withValue(Quadrant.R270)));
         }
-        generator.acceptBlockState(MultiVariantGenerator.multiVariant(this).with(prop));
+        generator.acceptBlockState(DatagenModelDispatch.dispatchWith(this, prop));
         generator.delegateItemModel(this, id.withSuffix("_0"));
     }
 
     @Override
-    public BlockItem getCustomBlockItem(ResourceLocation blockID, Item.Properties settings) {
+    public BlockItem getCustomBlockItem(Identifier blockID, Item.Properties settings) {
         return new BaseAnvilItem(this, settings);
     }
 

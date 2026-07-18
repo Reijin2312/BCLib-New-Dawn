@@ -9,15 +9,12 @@ import org.betterx.wover.item.api.ItemTagProvider;
 import org.betterx.wover.tag.api.event.context.ItemTagBootstrapContext;
 import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TextureSlot;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CraftingTableBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public abstract class BaseCraftingTableBlock extends CraftingTableBlock implements DropSelfLootProvider<BaseCraftingTableBlock>, BlockModelProvider, BlockTagProvider, ItemTagProvider {
     protected BaseCraftingTableBlock(Block source) {
@@ -39,31 +36,29 @@ public abstract class BaseCraftingTableBlock extends CraftingTableBlock implemen
                 .put(TextureSlot.WEST, TextureMapping.getBlockTexture(block, "_front"));
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         generator.vanillaGenerator.createCraftingTableLike(this, this, BaseCraftingTableBlock::craftingTableTextureMapping);
     }
 
     @Override
-    public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+    public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
         context.add(org.betterx.wover.tag.api.predefined.CommonBlockTags.WORKBENCHES, this);
     }
 
     @Override
-    public void registerItemTags(ResourceLocation location, ItemTagBootstrapContext context) {
+    public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
         context.add(this, org.betterx.wover.tag.api.predefined.CommonItemTags.WORKBENCHES);
     }
 
 //    @Override
-//    @Environment(EnvType.CLIENT)
-//    public BlockModel getItemModel(ResourceLocation resourceLocation) {
+//    public BlockModel getItemModel(Identifier resourceLocation) {
 //        return getBlockModel(resourceLocation, defaultBlockState());
 //    }
 //
 //    @Override
-//    @Environment(EnvType.CLIENT)
-//    public @Nullable BlockModel getBlockModel(ResourceLocation blockId, BlockState blockState) {
+//    public @Nullable BlockModel getBlockModel(Identifier blockId, BlockState blockState) {
 //        String blockName = blockId.getPath();
 //        Optional<String> pattern = PatternsHelper.createJson(BasePatterns.BLOCK_SIDED, new HashMap<String, String>() {
 //            private static final long serialVersionUID = 1L;

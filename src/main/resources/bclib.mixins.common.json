@@ -19,6 +19,7 @@
     "PistonBaseBlockMixin",
     "PortalShapeMixin",
     "RecipeManagerMixin",
+    "RecipeManagerAccessor",
     "RecipeMixin",
     "RegistryDataLoaderMixin",
     "ServerLevelMixin",

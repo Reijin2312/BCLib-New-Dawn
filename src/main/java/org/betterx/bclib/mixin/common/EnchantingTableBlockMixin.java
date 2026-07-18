@@ -10,13 +10,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(EnchantingTableBlock.class)
+@Mixin(value = EnchantingTableBlock.class)
 public abstract class EnchantingTableBlockMixin extends Block {
     public EnchantingTableBlockMixin(Properties settings) {
         super(settings);
     }
 
-    @Inject(method = "isValidBookShelf(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Z", at = @At("HEAD"), cancellable = true)
+    @Inject(remap = false,
+            method = "isValidBookShelf(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Z",
+            at = @At("HEAD"),
+            cancellable = true
+    )
     private static void bclib_isBookshelf(
             Level level,
             BlockPos tablePos,

@@ -11,7 +11,7 @@ import org.betterx.wover.tag.api.predefined.MineableTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -31,8 +31,6 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.phys.BlockHitResult;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -67,12 +65,9 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
             Player player,
             BlockHitResult hit
     ) {
-        if (pathBlock != null
-                && TagManager.isToolWithMineableTag(player.getMainHandItem(), MineableTags.SHOVEL)
-                && hit.getDirection() != Direction.DOWN
-                && level.getBlockState(pos.above()).isAir()) {
+        if (pathBlock != null && TagManager.isToolWithMineableTag(player.getMainHandItem(), MineableTags.SHOVEL)) {
             level.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0F, 1.0F);
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 level.setBlockAndUpdate(pos, pathBlock.defaultBlockState());
                 if (!player.isCreative()) {
                     player.getMainHandItem().hurtAndBreak(1, (ServerLevel) level, (ServerPlayer) player, i -> {
@@ -100,27 +95,24 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
             return false;
         } else {
             int i = LightEngine.getLightBlockInto(
-                    worldView,
                     state,
-                    pos,
                     blockState,
-                    blockPos,
                     Direction.UP,
-                    blockState.getLightBlock(worldView, blockPos)
+                    blockState.getLightBlock()
             );
             return i < 5;
         }
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         generator.createBlockTopSideBottom(getBaseBlock(), this, true);
     }
 
     @Override
     public LootTable.Builder registerBlockLoot(
-            @NotNull ResourceLocation location,
+            @NotNull Identifier location,
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {

@@ -1,16 +1,16 @@
 package org.betterx.bclib.interfaces;
 
-import org.betterx.bclib.client.models.ModelsHelper;
-
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.resources.ResourceLocation;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.resources.Identifier;
 
 public interface ItemModelProvider {
-    @Environment(EnvType.CLIENT)
-    default BlockModel getItemModel(ResourceLocation resourceLocation) {
-        return ModelsHelper.createItemModel(resourceLocation);
+    default Object getItemModel(Identifier resourceLocation) {
+        try {
+            Class<?> modelsHelper = Class.forName("org.betterx.bclib.client.models.ModelsHelper");
+            return modelsHelper
+                    .getMethod("createItemModel", Identifier.class)
+                    .invoke(null, resourceLocation);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException("Failed to create item model for " + resourceLocation, ex);
+        }
     }
 }

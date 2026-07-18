@@ -12,41 +12,41 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.function.Supplier;
 
-@Mixin(SurfaceRules.Context.class)
+@Mixin(value = SurfaceRules.Context.class)
 public interface SurfaceRulesContextAccessor {
-    @Accessor("blockX")
+    @Accessor(value = "blockX")
     int getBlockX();
 
-    @Accessor("blockY")
+    @Accessor(value = "blockY")
     int getBlockY();
 
-    @Accessor("blockZ")
+    @Accessor(value = "blockZ")
     int getBlockZ();
 
-    @Accessor("surfaceDepth")
+    @Accessor(value = "surfaceDepth")
     int getSurfaceDepth();
 
-    @Accessor("biome")
+    @Accessor(value = "biome")
     Supplier<Holder<Biome>> getBiome();
 
-    @Accessor("chunk")
+    @Accessor(value = "chunk")
     ChunkAccess getChunk();
 
-    @Accessor("noiseChunk")
+    @Accessor(value = "noiseChunk")
     NoiseChunk getNoiseChunk();
 
-    @Accessor("stoneDepthAbove")
+    @Accessor(value = "stoneDepthAbove")
     int getStoneDepthAbove();
 
-    @Accessor("stoneDepthBelow")
+    @Accessor(value = "stoneDepthBelow")
     int getStoneDepthBelow();
 
-    @Accessor("lastUpdateY")
+    @Accessor(value = "lastUpdateY")
     long getLastUpdateY();
 
-    @Accessor("lastUpdateXZ")
+    @Accessor(value = "lastUpdateXZ")
     long getLastUpdateXZ();
 
-    @Accessor("randomState")
+    @Accessor(value = "randomState")
     RandomState getRandomState();
 }

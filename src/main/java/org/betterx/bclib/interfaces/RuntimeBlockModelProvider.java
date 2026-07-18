@@ -1,72 +1,74 @@
 package org.betterx.bclib.interfaces;
 
 import org.betterx.bclib.BCLib;
-import org.betterx.bclib.client.models.ModelsHelper;
-import org.betterx.bclib.client.models.PatternsHelper;
 
-import net.minecraft.client.renderer.block.BlockModelShaper;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.client.resources.model.UnbakedModel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.Map;
-import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 public interface RuntimeBlockModelProvider extends ItemModelProvider {
-    @Environment(EnvType.CLIENT)
-    default @Nullable BlockModel getBlockModel(ResourceLocation resourceLocation, BlockState blockState) {
-        Optional<String> pattern = PatternsHelper.createBlockSimple(resourceLocation);
-        return ModelsHelper.fromPattern(pattern);
+    default @Nullable Object getBlockModel(Identifier resourceLocation, BlockState blockState) {
+        try {
+            Class<?> patternsHelper = Class.forName("org.betterx.bclib.client.models.PatternsHelper");
+            Class<?> modelsHelper = Class.forName("org.betterx.bclib.client.models.ModelsHelper");
+            Object pattern = patternsHelper
+                    .getMethod("createBlockSimple", Identifier.class)
+                    .invoke(null, resourceLocation);
+            return modelsHelper
+                    .getMethod("fromPattern", java.util.Optional.class)
+                    .invoke(null, pattern);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException("Failed to create block model for " + resourceLocation, ex);
+        }
     }
-    static ModelResourceLocation remapModelResourceLocation(
-            ModelResourceLocation stateId,
+    static Identifier remapModelIdentifier(
+            Identifier stateId,
             BlockState blockState
     ) {
-        return remapModelResourceLocation(stateId, blockState, "");
+        return remapModelIdentifier(stateId, blockState, "");
     }
 
-    static ModelResourceLocation remapModelResourceLocation(
-            ModelResourceLocation stateId,
+    static Identifier remapModelIdentifier(
+            Identifier stateId,
             BlockState blockState,
             String pathAddOn
     ) {
-        return BlockModelShaper.stateToModelLocation(
-                ResourceLocation.fromNamespaceAndPath(stateId.id().getNamespace(), "block/" + stateId
-                        .id()
-                        .getPath() + pathAddOn),
-                blockState
+        return Identifier.fromNamespaceAndPath(
+                stateId.getNamespace(),
+                "block/" + stateId.getPath() + pathAddOn
         );
     }
-
-    @Environment(EnvType.CLIENT)
-    default UnbakedModel getModelVariant(
-            ModelResourceLocation stateId,
+    @SuppressWarnings("rawtypes")
+    default Object getModelVariant(
+            Identifier stateId,
             BlockState blockState,
-            Map<ResourceLocation, UnbakedModel> modelCache
+            Map modelCache
     ) {
-        ModelResourceLocation modelId = remapModelResourceLocation(stateId, blockState);
+        Identifier modelId = remapModelIdentifier(stateId, blockState);
         registerBlockModel(stateId, modelId, blockState, modelCache);
-        return ModelsHelper.createBlockSimple(modelId.id());
+        try {
+            Class<?> modelsHelper = Class.forName("org.betterx.bclib.client.models.ModelsHelper");
+            return modelsHelper
+                    .getMethod("createBlockSimple", Identifier.class)
+                    .invoke(null, modelId);
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException("Failed to create block variant for " + modelId, ex);
+        }
     }
-
-    @Environment(EnvType.CLIENT)
+    @SuppressWarnings({"rawtypes", "unchecked"})
     default void registerBlockModel(
-            ModelResourceLocation stateId,
-            ModelResourceLocation modelId,
+            Identifier stateId,
+            Identifier modelId,
             BlockState blockState,
-            Map<ResourceLocation, UnbakedModel> modelCache
+            Map modelCache
     ) {
-        if (!modelCache.containsKey(modelId.id())) {
-            BlockModel model = getBlockModel(stateId.id(), blockState);
+        if (!modelCache.containsKey(modelId)) {
+            Object model = getBlockModel(stateId, blockState);
             if (model != null) {
-                model.name = modelId.toString();
-                modelCache.put(modelId.id(), model);
+                modelCache.put(modelId, model);
             } else {
                 BCLib.LOGGER.warn("Error loading model: {}", modelId);
             }

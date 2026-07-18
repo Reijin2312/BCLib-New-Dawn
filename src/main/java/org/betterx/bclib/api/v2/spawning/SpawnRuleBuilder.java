@@ -93,7 +93,7 @@ public class SpawnRuleBuilder<M extends Mob> {
     public SpawnRuleBuilder aboveGround(int minHeight) {
         entryInstance = getFromCache("above_ground", () -> {
             return new SpawnRuleEntry(0, (type, world, spawnReason, pos, random) -> {
-                if (pos.getY() < world.getMinBuildHeight() + 2) {
+                if (pos.getY() < world.getMinY() + 2) {
                     return false;
                 }
                 return BlocksHelper.findSurfaceBelow(

@@ -10,10 +10,7 @@
     "ClientLevelMixin",
     "ClientPacketListenerMixin",
     "ClientRecipeBookMixin",
-    "DebugRendererMixin",
     "FogRendererMixin",
-    "LevelRendererAccessor",
-    "LevelRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",
     "boat.BoatRendererMixin"

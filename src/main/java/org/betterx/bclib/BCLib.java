@@ -18,7 +18,7 @@ import org.betterx.wover.datagen.api.WoverDataGenEntryPoint;
 import org.betterx.wover.state.api.WorldConfig;
 import org.betterx.wover.ui.api.VersionChecker;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
@@ -79,8 +79,8 @@ public class BCLib implements ModInitializer {
         return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
     }
 
-    public static ResourceLocation makeID(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier makeID(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
 }

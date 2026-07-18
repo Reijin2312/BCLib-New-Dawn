@@ -14,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -33,15 +32,15 @@ public class LootUtil {
             BlockState state,
             LootParams.Builder builder
     ) {
-        ResourceKey<LootTable> tableID = block.getLootTable();
-        if (tableID == BuiltInLootTables.EMPTY) {
+        Optional<ResourceKey<LootTable>> tableID = block.getLootTable();
+        if (tableID.isEmpty()) {
             return Optional.empty();
         }
 
         final LootParams ctx = builder.withParameter(LootContextParams.BLOCK_STATE, state)
                                       .create(LootContextParamSets.BLOCK);
         final ServerLevel level = ctx.getLevel();
-        final LootTable table = level.getServer().reloadableRegistries().getLootTable(tableID);
+        final LootTable table = level.getServer().reloadableRegistries().getLootTable(tableID.get());
 
         if (table == LootTable.EMPTY) return Optional.empty();
         return Optional.of(table.getRandomItems(ctx));
@@ -84,19 +83,19 @@ public class LootUtil {
         if (state != null && tool.isCorrectToolForDrops(state)) return true;
 
         if (block instanceof AddMineableAxe) {
-            if (tool.is(ItemTags.AXES) || tool.is(ToolTags.FABRIC_AXES)) return true;
+            if (tool.is(ItemTags.AXES) || tool.is(ToolTags.COMMON_AXES)) return true;
         }
         if (block instanceof AddMineablePickaxe) {
-            if (tool.is(ItemTags.PICKAXES) || tool.is(ToolTags.FABRIC_PICKAXES)) return true;
+            if (tool.is(ItemTags.PICKAXES) || tool.is(ToolTags.COMMON_PICKAXES)) return true;
         }
         if (block instanceof AddMineableHoe) {
-            if (tool.is(ItemTags.HOES) || tool.is(ToolTags.FABRIC_HOES)) return true;
+            if (tool.is(ItemTags.HOES) || tool.is(ToolTags.COMMON_HOES)) return true;
         }
         if (block instanceof AddMineableShovel) {
-            if (tool.is(ItemTags.SHOVELS) || tool.is(ToolTags.FABRIC_SHOVELS)) return true;
+            if (tool.is(ItemTags.SHOVELS) || tool.is(ToolTags.COMMON_SHOVELS)) return true;
         }
         if (block instanceof AddMineableSword) {
-            if (tool.is(ItemTags.SWORDS) || tool.is(ToolTags.FABRIC_SWORDS)) return true;
+            if (tool.is(ItemTags.SWORDS) || tool.is(ToolTags.COMMON_SWORDS)) return true;
         }
         if (block instanceof AddMineableShears) {
             if (BaseShearsItem.isShear(tool)) return true;

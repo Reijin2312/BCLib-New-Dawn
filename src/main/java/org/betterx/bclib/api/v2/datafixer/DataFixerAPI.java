@@ -2,6 +2,7 @@ package org.betterx.bclib.api.v2.datafixer;
 
 import org.betterx.bclib.BCLib;
 import org.betterx.bclib.client.gui.screens.AtomicProgressListener;
+import org.betterx.bclib.client.gui.screens.BackupFailedScreen;
 import org.betterx.bclib.client.gui.screens.ConfirmFixScreen;
 import org.betterx.bclib.client.gui.screens.LevelFixErrorScreen;
 import org.betterx.bclib.client.gui.screens.LevelFixErrorScreen.Listener;
@@ -10,7 +11,6 @@ import org.betterx.bclib.config.Configs;
 import org.betterx.wover.core.api.Logger;
 import org.betterx.wover.state.api.WorldConfig;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
@@ -18,6 +18,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
@@ -25,14 +26,13 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelStorageSource.LevelStorageAccess;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -48,6 +48,7 @@ public class DataFixerAPI {
 
     static class State {
         public boolean didFail = false;
+        public boolean backupFailed = false;
         protected ArrayList<String> errors = new ArrayList<>();
 
         public void addError(String s) {
@@ -119,6 +120,8 @@ public class DataFixerAPI {
     ) {
         return wrapCall(levelSource, levelID, (levelStorageAccess) -> {
             File levelPath = levelStorageAccess.getLevelPath(LevelResource.ROOT).toFile();
+            // This access is scoped to wrapCall and gets closed before async UI flow finishes.
+            // Don't reuse it for backup creation.
             return fixData(levelPath, levelStorageAccess.getLevelId(), showUI, onResume, null);
         });
     }
@@ -151,7 +154,6 @@ public class DataFixerAPI {
     }
 
 
-    @Environment(EnvType.CLIENT)
     private static AtomicProgressListener showProgressScreen() {
         ProgressScreen ps = new ProgressScreen(
                 Minecraft.getInstance().screen,
@@ -165,14 +167,18 @@ public class DataFixerAPI {
     private static boolean makeBackupAndShowToast(
             LevelStorageSource storageSource,
             String levelID,
-            LevelStorageSource.LevelStorageAccess currentAccess
+            LevelStorageAccess currentAccess
     ) {
         if (currentAccess != null) {
             try {
                 EditWorldScreen.makeBackupAndShowToast(currentAccess);
                 return true;
             } catch (RuntimeException ex) {
-                LOGGER.warn("Failed to create backup of level {} using existing access, retrying with reopened access", levelID, ex);
+                LOGGER.warn(
+                        "Failed to create backup of level {} using existing access, retrying with reopened access",
+                        levelID,
+                        ex
+                );
             }
         }
 
@@ -195,10 +201,11 @@ public class DataFixerAPI {
             String levelID,
             boolean showUI,
             Consumer<Boolean> onResume,
-            LevelStorageSource.LevelStorageAccess currentAccess
+            LevelStorageAccess currentAccess
     ) {
         MigrationProfile profile = loadProfileIfNeeded(dir);
 
+        AtomicReference<BiConsumer<Boolean, Boolean>> runFixesRef = new AtomicReference<>();
         BiConsumer<Boolean, Boolean> runFixes = (createBackup, applyFixes) -> {
             final AtomicProgressListener progress;
             if (applyFixes) {
@@ -236,9 +243,23 @@ public class DataFixerAPI {
             }
 
             Supplier<State> runner = () -> {
+                boolean backupCreated = true;
                 if (createBackup) {
-                    progress.progressStage(Component.translatable("message.bclib.datafixer.progress.waitbackup"));
-                    makeBackupAndShowToast(Minecraft.getInstance().getLevelSource(), levelID, currentAccess);
+                    if (progress != null) {
+                        progress.progressStage(Component.translatable("message.bclib.datafixer.progress.waitbackup"));
+                    }
+                    backupCreated = makeBackupAndShowToast(
+                            Minecraft.getInstance().getLevelSource(),
+                            levelID,
+                            currentAccess
+                    );
+                }
+
+                if (applyFixes && !backupCreated) {
+                    State state = new State();
+                    state.backupFailed = true;
+                    state.addError("Failed creating backup");
+                    return state;
                 }
 
                 if (applyFixes) {
@@ -250,18 +271,40 @@ public class DataFixerAPI {
 
             if (showUI) {
                 Thread fixerThread = new Thread(() -> {
-                    final State state = runner.get();
+                    State computedState;
+                    try {
+                        computedState = runner.get();
+                    } catch (Throwable ex) {
+                        LOGGER.error("Unexpected exception while fixing level '" + levelID + "': " + ex.getMessage());
+                        ex.printStackTrace();
+                        State failedState = new State();
+                        failedState.didFail = true;
+                        failedState.addError(ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
+                        failedState.errors.add(0, "Unexpected exception in DataFixer");
+                        computedState = failedState;
+                    }
+                    final State resultState = computedState;
 
                     Minecraft.getInstance()
                              .execute(() -> {
                                  if (profile != null && showUI) {
-                                     //something went wrong, show the user our error
-                                     if (state.didFail || state.hasError()) {
-                                         showLevelFixErrorScreen(state, (markFixed) -> {
+                                     if (resultState.backupFailed) {
+                                         showBackupFailedScreen(
+                                                 () -> onResume.accept(false),
+                                                 () -> runFixesRef.get().accept(false, applyFixes)
+                                         );
+                                         return;
+                                     }
+
+                                      //something went wrong, show the user our error
+                                      if (resultState.didFail || resultState.hasError()) {
+                                          showLevelFixErrorScreen(resultState, (markFixed) -> {
                                              if (markFixed) {
                                                  profile.markApplied();
+                                                 onResume.accept(applyFixes);
+                                             } else {
+                                                 onResume.accept(false);
                                              }
-                                             onResume.accept(applyFixes);
                                          });
                                      } else {
                                          onResume.accept(applyFixes);
@@ -269,16 +312,17 @@ public class DataFixerAPI {
                                  }
                              });
 
-                });
+                }, "BCLib-DataFixer");
                 fixerThread.start();
             } else {
-                State state = runner.get();
-                if (state.hasError()) {
+                State resultState = runner.get();
+                if (resultState.hasError()) {
                     LOGGER.error("There were Errors while fixing the Level:");
-                    LOGGER.error(state.getErrorMessage());
+                    LOGGER.error(resultState.getErrorMessage());
                 }
             }
         };
+        runFixesRef.set(runFixes);
 
         //we have some migrations
         if (profile != null) {
@@ -294,7 +338,6 @@ public class DataFixerAPI {
         return false;
     }
 
-    @Environment(EnvType.CLIENT)
     private static void showLevelFixErrorScreen(State state, Listener onContinue) {
         Minecraft.getInstance()
                  .setScreen(new LevelFixErrorScreen(
@@ -302,6 +345,10 @@ public class DataFixerAPI {
                          state.getErrorMessages(),
                          onContinue
                  ));
+    }
+
+    private static void showBackupFailedScreen(Runnable onBack, Runnable onContinue) {
+        Minecraft.getInstance().setScreen(new BackupFailedScreen(null, onBack, onContinue));
     }
 
     private static MigrationProfile loadProfileIfNeeded(File levelBaseDir) {
@@ -328,7 +375,6 @@ public class DataFixerAPI {
         return profile;
     }
 
-    @Environment(EnvType.CLIENT)
     static void showBackupWarning(String levelID, BiConsumer<Boolean, Boolean> whenFinished) {
         Minecraft.getInstance().setScreen(new ConfirmFixScreen(null, whenFinished::accept));
     }
@@ -446,16 +492,16 @@ public class DataFixerAPI {
 
     private static void fixPlayerNbt(CompoundTag player, boolean[] changed, MigrationProfile data) {
         //Checking Inventory
-        ListTag inventory = player.getList("Inventory", Tag.TAG_COMPOUND);
+        ListTag inventory = player.getListOrEmpty("Inventory");
         fixItemArrayWithID(inventory, changed, data, true);
 
         //Checking EnderChest
-        ListTag enderitems = player.getList("EnderItems", Tag.TAG_COMPOUND);
+        ListTag enderitems = player.getListOrEmpty("EnderItems");
         fixItemArrayWithID(enderitems, changed, data, true);
 
         //Checking ReceipBook
         if (player.contains("recipeBook")) {
-            CompoundTag recipeBook = player.getCompound("recipeBook");
+            CompoundTag recipeBook = player.getCompound("recipeBook").orElse(new CompoundTag());
             changed[0] |= fixStringIDList(recipeBook, "recipes", data);
             changed[0] |= fixStringIDList(recipeBook, "toBeDisplayed", data);
         }
@@ -464,12 +510,12 @@ public class DataFixerAPI {
     static boolean fixStringIDList(CompoundTag root, String name, MigrationProfile data) {
         boolean _changed = false;
         if (root.contains(name)) {
-            ListTag items = root.getList(name, Tag.TAG_STRING);
+            ListTag items = root.getListOrEmpty(name);
             ListTag newItems = new ListTag();
 
             for (Tag tag : items) {
                 final StringTag str = (StringTag) tag;
-                final String replace = data.replaceStringFromIDs(str.getAsString());
+                final String replace = data.replaceStringFromIDs(str.value());
                 if (replace != null) {
                     _changed = true;
                     newItems.add(StringTag.valueOf(replace));
@@ -505,18 +551,20 @@ public class DataFixerAPI {
 
                         //Checking TileEntities
                         ListTag tileEntities = root.getCompound("Level")
-                                                   .getList("TileEntities", Tag.TAG_COMPOUND);
+                                                   .orElse(new CompoundTag())
+                                                   .getListOrEmpty("TileEntities");
                         fixItemArrayWithID(tileEntities, changed, data, true);
 
                         //Checking Entities
-                        ListTag entities = root.getList("Entities", Tag.TAG_COMPOUND);
+                        ListTag entities = root.getListOrEmpty("Entities");
                         fixItemArrayWithID(entities, changed, data, true);
 
                         //Checking Block Palette
                         ListTag sections = root.getCompound("Level")
-                                               .getList("Sections", Tag.TAG_COMPOUND);
+                                               .orElse(new CompoundTag())
+                                               .getListOrEmpty("Sections");
                         sections.forEach((tag) -> {
-                            ListTag palette = ((CompoundTag) tag).getList("Palette", Tag.TAG_COMPOUND);
+                            ListTag palette = ((CompoundTag) tag).getListOrEmpty("Palette");
                             palette.forEach((blockTag) -> {
                                 CompoundTag blockTagCompound = ((CompoundTag) blockTag);
                                 changed[0] |= data.replaceStringFromIDs(blockTagCompound, "Name");
@@ -525,10 +573,7 @@ public class DataFixerAPI {
                             try {
                                 changed[0] |= data.patchBlockState(
                                         palette,
-                                        ((CompoundTag) tag).getList(
-                                                "BlockStates",
-                                                Tag.TAG_LONG
-                                        )
+                                        ((CompoundTag) tag).getListOrEmpty("BlockStates")
                                 );
                             } catch (PatchDidiFailException e) {
                                 BCLib.LOGGER.error("Failed fixing BlockState in " + pos);
@@ -584,10 +629,10 @@ public class DataFixerAPI {
         }
 
         if (recursive && tag.contains("Items")) {
-            fixItemArrayWithID(tag.getList("Items", Tag.TAG_COMPOUND), changed, data, true);
+            fixItemArrayWithID(tag.getListOrEmpty("Items"), changed, data, true);
         }
         if (recursive && tag.contains("Inventory")) {
-            ListTag inventory = tag.getList("Inventory", Tag.TAG_COMPOUND);
+            ListTag inventory = tag.getListOrEmpty("Inventory");
             fixItemArrayWithID(inventory, changed, data, true);
         }
         if (tag.contains("tag")) {
@@ -595,8 +640,8 @@ public class DataFixerAPI {
             if (entityTag.contains("BlockEntityTag")) {
                 CompoundTag blockEntityTag = (CompoundTag) entityTag.get("BlockEntityTag");
                 fixID(blockEntityTag, changed, data, recursive);
-				/*ListTag items = blockEntityTag.getList("Items", Tag.TAG_COMPOUND);
-				fixItemArrayWithID(items, changed, data, recursive);*/
+                /*ListTag items = blockEntityTag.getList("Items", Tag.TAG_COMPOUND);
+                fixItemArrayWithID(items, changed, data, recursive);*/
             }
         }
     }

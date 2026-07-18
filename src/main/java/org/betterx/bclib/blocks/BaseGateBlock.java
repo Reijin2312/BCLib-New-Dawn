@@ -7,14 +7,12 @@ import org.betterx.wover.block.api.model.BlockModelProvider;
 import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
 import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.state.properties.WoodType;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public abstract class BaseGateBlock extends FenceGateBlock implements BlockModelProvider, BlockTagProvider, DropSelfLootProvider<BaseGateBlock> {
     private final Block parent;
@@ -25,13 +23,13 @@ public abstract class BaseGateBlock extends FenceGateBlock implements BlockModel
     }
 
     @Override
-    public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+    public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
         context.add(BlockTags.FENCE_GATES, this);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         generator.createFenceGate(parent, this);
     }
 

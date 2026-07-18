@@ -7,7 +7,7 @@ import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(PlacementContext.class)
+@Mixin(value = PlacementContext.class)
 public class PlacementContextMixin implements org.betterx.bclib.interfaces.BCLPlacementContext {
     @Unique
     private Rotation bcl_rotation = Rotation.NONE;

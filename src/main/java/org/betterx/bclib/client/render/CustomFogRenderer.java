@@ -7,8 +7,8 @@ import org.betterx.bclib.util.MHelper;
 import org.betterx.wover.biome.api.BiomeManager;
 import org.betterx.wover.biome.api.data.BiomeData;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
@@ -19,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.FogType;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class CustomFogRenderer {
     private static final MutableBlockPos LAST_POS = new MutableBlockPos(0, -100, 0);
@@ -28,8 +29,49 @@ public class CustomFogRenderer {
     private static float fogStart = 0;
     private static float fogEnd = 192;
 
+    private static boolean hasDistantHorizons() {
+        return BCLib.RUNS_DISTANT_HORIZONS || FabricLoader.getInstance().isModLoaded("distanthorizons");
+    }
+
+    public static void applyFogDensity(Camera camera, float viewDistance, FogData fogData) {
+        boolean thickFog = isThickFog(fogData, viewDistance);
+        if (applyFogDensity(camera, viewDistance, thickFog) && fogData != null) {
+            fogData.environmentalStart = fogStart;
+            fogData.renderDistanceStart = fogStart;
+            fogData.environmentalEnd = fogEnd;
+            fogData.renderDistanceEnd = fogEnd;
+            fogData.skyEnd = fogEnd;
+            fogData.cloudEnd = fogEnd;
+        }
+    }
+
+    private static boolean isThickFog(FogData fogData, float viewDistance) {
+        if (fogData == null || viewDistance <= 0.0F) {
+            return false;
+        }
+
+        float endInBlocks = normalizeFogDistance(fogData.environmentalEnd, viewDistance);
+        if (endInBlocks <= 0.0F) {
+            return false;
+        }
+
+        return endInBlocks < viewDistance * 0.95F;
+    }
+
+    private static float normalizeFogDistance(float distance, float viewDistance) {
+        if (distance <= 0.0F || viewDistance <= 0.0F) {
+            return distance;
+        }
+
+        // 1.21.11 can provide fog distances either in blocks or in chunks depending on the path.
+        float blocks = distance;
+        float fromChunks = distance * 16.0F;
+        return Math.abs(viewDistance - fromChunks) < Math.abs(viewDistance - blocks) ? fromChunks : blocks;
+    }
+
     public static boolean applyFogDensity(Camera camera, float viewDistance, boolean thickFog) {
-        if (BCLib.RUNS_DISTANT_HORIZONS) {
+        if (hasDistantHorizons()) {
+            // DH handles fog blending for LOD/world transitions.
             return false;
         }
 
@@ -42,7 +84,7 @@ public class CustomFogRenderer {
             BackgroundInfo.fogDensity = 1;
             return false;
         }
-        Entity entity = camera.getEntity();
+        Entity entity = camera.entity();
 
         if (!isForcedDimension(entity.level()) && shouldIgnoreArea(
                 entity.level(),
@@ -89,9 +131,6 @@ public class CustomFogRenderer {
                 BackgroundInfo.blindness = 0;
             }
         }
-        RenderSystem.setShaderFogStart(fogStart);
-        RenderSystem.setShaderFogEnd(fogEnd);
-
         return true;
     }
 

@@ -18,7 +18,7 @@ public class DynamicBlockEntityType<T extends BlockEntity> extends BlockEntityTy
     private final BlockEntitySupplier<? extends T> factory;
 
     public DynamicBlockEntityType(BlockEntitySupplier<? extends T> supplier) {
-        super(null, Collections.emptySet(), null);
+        super(supplier::create, Collections.emptySet());
         this.factory = supplier;
     }
 

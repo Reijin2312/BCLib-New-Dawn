@@ -4,6 +4,6 @@ import net.minecraft.world.level.biome.Biome;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(Biome.class)
+@Mixin(value = Biome.class)
 public class BiomeMixin {
 }

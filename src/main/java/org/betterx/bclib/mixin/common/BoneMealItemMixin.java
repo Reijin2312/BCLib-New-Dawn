@@ -19,21 +19,25 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(BoneMealItem.class)
+@Mixin(value = BoneMealItem.class)
 public class BoneMealItemMixin {
-    private static void bclib_showBonemealEffect(Level level, BlockPos blockPos) {
+    private static InteractionResult bclibSidedSuccess(Level level) {
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.SUCCESS_SERVER;
+    }
+
+    private static void bclibShowBonemealEffect(Level level, BlockPos blockPos) {
         level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, blockPos, 15);
     }
 
-    @Inject(method = "useOn", at = @At("HEAD"), cancellable = true)
+    @Inject(remap = false, method = "useOn", at = @At("HEAD"), cancellable = true)
     private void bclib_onUse(UseOnContext context, CallbackInfoReturnable<InteractionResult> info) {
         Level level = context.getLevel();
         final BlockPos blockPos = context.getClickedPos();
 
         if (context.getPlayer().isCreative()) {
             if (BonemealAPI.INSTANCE.runSpreaders(context.getItemInHand(), level, blockPos, true)) {
-                bclib_showBonemealEffect(level, blockPos);
-                info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));
+                bclibShowBonemealEffect(level, blockPos);
+                info.setReturnValue(bclibSidedSuccess(level));
             }
 
             final BlockState blockState = level.getBlockState(blockPos);
@@ -42,13 +46,13 @@ public class BoneMealItemMixin {
                     && blockState.getBlock() instanceof FeatureSaplingBlock<?, ?>
             ) {
                 bblock.performBonemeal(server, context.getLevel().getRandom(), blockPos, blockState);
-                bclib_showBonemealEffect(level, blockPos);
-                info.setReturnValue(InteractionResult.sidedSuccess(level.isClientSide));
+                bclibShowBonemealEffect(level, blockPos);
+                info.setReturnValue(bclibSidedSuccess(level));
             }
         }
     }
 
-    @Inject(method = "growCrop", at = @At("HEAD"), cancellable = true)
+    @Inject(remap = false, method = "growCrop", at = @At("HEAD"), cancellable = true)
     private static void bcl_growCrop(
             ItemStack itemStack,
             Level level,

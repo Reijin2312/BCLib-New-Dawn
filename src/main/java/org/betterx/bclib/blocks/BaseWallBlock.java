@@ -9,13 +9,11 @@ import org.betterx.wover.block.api.model.BlockModelProvider;
 import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
 import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WallBlock;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public abstract class BaseWallBlock extends WallBlock implements DropSelfLootProvider<BaseWallBlock>, BlockModelProvider, BlockTagProvider {
     private final Block parent;
@@ -26,13 +24,13 @@ public abstract class BaseWallBlock extends WallBlock implements DropSelfLootPro
     }
 
     @Override
-    public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+    public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
         context.add(this, BlockTags.WALLS);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         generator.createWall(parent, this);
     }
 

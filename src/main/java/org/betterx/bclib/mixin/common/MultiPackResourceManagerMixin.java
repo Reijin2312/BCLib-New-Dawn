@@ -1,6 +1,6 @@
 package org.betterx.bclib.mixin.common;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.server.packs.resources.Resource;
 
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
 
-@Mixin(MultiPackResourceManager.class)
+@Mixin(value = MultiPackResourceManager.class)
 public class MultiPackResourceManagerMixin {
     @Unique
     private static final String[] BCLIB_MISSING_RESOURCES = new String[]{
@@ -22,8 +22,8 @@ public class MultiPackResourceManagerMixin {
             "dimension_type/the_nether.json"
     };
 
-    @Inject(method = "getResource", at = @At("HEAD"), cancellable = false)
-    private void bclib_hasResource(ResourceLocation resourceLocation, CallbackInfoReturnable<Optional<Resource>> info) {
+    @Inject(remap = false, method = "getResource", at = @At("HEAD"), cancellable = false)
+    private void bclib_hasResource(Identifier resourceLocation, CallbackInfoReturnable<Optional<Resource>> info) {
         if (resourceLocation.getNamespace().equals("minecraft")) {
             for (String key : BCLIB_MISSING_RESOURCES) {
                 if (resourceLocation.getPath().equals(key)) {

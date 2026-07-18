@@ -14,7 +14,7 @@ import org.betterx.wover.tag.api.predefined.CommonBlockTags;
 import org.betterx.wover.tag.api.predefined.CommonItemTags;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
@@ -30,8 +30,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,14 +55,14 @@ public abstract class BaseBarrelBlock extends BarrelBlock implements BlockModelP
             Player player,
             BlockHitResult hit
     ) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         } else {
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof BaseBarrelBlockEntity) {
                 player.openMenu((BaseBarrelBlockEntity) blockEntity);
                 player.awardStat(Stats.OPEN_BARREL);
-                PiglinAi.angerNearbyPiglins(player, true);
+                PiglinAi.angerNearbyPiglins((ServerLevel) level, player, true);
             }
 
             return InteractionResult.CONSUME;
@@ -85,18 +83,18 @@ public abstract class BaseBarrelBlock extends BarrelBlock implements BlockModelP
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         generator.createBarrel(this);
     }
 
     @Override
-    public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+    public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
         context.add(CommonBlockTags.BARREL, this);
     }
 
     @Override
-    public void registerItemTags(ResourceLocation location, ItemTagBootstrapContext context) {
+    public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
         context.add(CommonItemTags.BARREL, this);
     }
 
@@ -110,12 +108,12 @@ public abstract class BaseBarrelBlock extends BarrelBlock implements BlockModelP
         }
 
         @Override
-        public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+        public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
             context.add(this, CommonBlockTags.BARREL, CommonBlockTags.WOODEN_BARREL);
         }
 
         @Override
-        public void registerItemTags(ResourceLocation location, ItemTagBootstrapContext context) {
+        public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
             context.add(this, CommonItemTags.BARREL, CommonItemTags.WOODEN_BARREL);
         }
     }

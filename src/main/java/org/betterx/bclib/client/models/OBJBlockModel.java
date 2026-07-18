@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.*;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
@@ -51,12 +51,12 @@ public class OBJBlockModel implements UnbakedModel, BakedModel {
     protected byte particleIndex;
 
     public OBJBlockModel(
-            ResourceLocation location,
+            Identifier location,
             Vector3f offset,
             boolean useCulling,
             boolean useShading,
             byte particleIndex,
-            ResourceLocation... textureIDs
+            Identifier... textureIDs
     ) {
         for (Direction dir : BlocksHelper.DIRECTIONS) {
             quadsUnbakedMap.put(dir, Lists.newArrayList());
@@ -80,12 +80,12 @@ public class OBJBlockModel implements UnbakedModel, BakedModel {
     // UnbakedModel //
 
     @Override
-    public Collection<ResourceLocation> getDependencies() {
+    public Collection<Identifier> getDependencies() {
         return Collections.emptyList();
     }
 
     @Override
-    public void resolveParents(Function<ResourceLocation, UnbakedModel> function) {
+    public void resolveParents(Function<Identifier, UnbakedModel> function) {
     }
 
     @Nullable
@@ -155,11 +155,11 @@ public class OBJBlockModel implements UnbakedModel, BakedModel {
         return overrides;
     }
 
-    private Resource getResource(ResourceLocation location) {
+    private Resource getResource(Identifier location) {
         return Minecraft.getInstance().getResourceManager().getResource(location).orElse(null);
     }
 
-    private void loadModel(ResourceLocation location, Vector3f offset, byte maxIndex) {
+    private void loadModel(Identifier location, Vector3f offset, byte maxIndex) {
         Resource resource = getResource(location);
         if (resource == null) {
             return;

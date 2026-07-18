@@ -12,15 +12,13 @@ import org.betterx.wover.item.api.ItemTagProvider;
 import org.betterx.wover.tag.api.event.context.ItemTagBootstrapContext;
 import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelProvider, BlockTagProvider, ItemTagProvider, DropSelfLootProvider<BaseButtonBlock> {
     private final Block parent;
@@ -36,24 +34,24 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
             BlockSetType type
     ) {
         super(
-                type, ticksToStayPressed, properties.noCollission()
+                type, ticksToStayPressed, properties.noCollision()
         );
         this.parent = parent;
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         generator.createButton(parent, this);
     }
 
     @Override
-    public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+    public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
         context.add(this, BlockTags.BUTTONS);
     }
 
     @Override
-    public void registerItemTags(ResourceLocation location, ItemTagBootstrapContext context) {
+    public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
         context.add(this, ItemTags.BUTTONS);
     }
 
@@ -69,12 +67,12 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
         }
 
         @Override
-        public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+        public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
             context.add(this, BlockTags.BUTTONS, BlockTags.STONE_BUTTONS);
         }
 
         @Override
-        public void registerItemTags(ResourceLocation location, ItemTagBootstrapContext context) {
+        public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
             context.add(this, ItemTags.BUTTONS, ItemTags.STONE_BUTTONS);
         }
     }
@@ -86,12 +84,12 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
 
 
         @Override
-        public void registerBlockTags(ResourceLocation location, TagBootstrapContext<Block> context) {
+        public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
             context.add(this, BlockTags.BUTTONS, BlockTags.WOODEN_BUTTONS);
         }
 
         @Override
-        public void registerItemTags(ResourceLocation location, ItemTagBootstrapContext context) {
+        public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
             context.add(this, ItemTags.BUTTONS, ItemTags.WOODEN_BUTTONS);
         }
     }

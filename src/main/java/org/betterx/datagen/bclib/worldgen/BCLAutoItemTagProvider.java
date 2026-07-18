@@ -28,17 +28,17 @@ public class BCLAutoItemTagProvider extends WoverTagProvider.ForItems implements
 
     private static void processItemCommon(TagBootstrapContext<Item> context, Item item) {
         if (item instanceof BaseShovelItem) {
-            context.add(item, ToolTags.FABRIC_SHOVELS, ItemTags.SHOVELS);
+            context.add(item, ToolTags.COMMON_SHOVELS, ItemTags.SHOVELS);
         } else if (item instanceof BaseSwordItem) {
-            context.add(item, ToolTags.FABRIC_SWORDS, ItemTags.SWORDS);
+            context.add(item, ToolTags.COMMON_SWORDS, ItemTags.SWORDS);
         } else if (item instanceof BasePickaxeItem) {
-            context.add(item, ToolTags.FABRIC_PICKAXES, ItemTags.PICKAXES);
+            context.add(item, ToolTags.COMMON_PICKAXES, ItemTags.PICKAXES);
         } else if (item instanceof BaseAxeItem) {
-            context.add(item, ToolTags.FABRIC_AXES, ItemTags.AXES);
+            context.add(item, ToolTags.COMMON_AXES, ItemTags.AXES);
         } else if (item instanceof BaseHoeItem) {
-            context.add(item, ToolTags.FABRIC_HOES, ItemTags.HOES);
+            context.add(item, ToolTags.COMMON_HOES, ItemTags.HOES);
         } else if (item instanceof BaseShearsItem) {
-            context.add(item, ToolTags.FABRIC_SHEARS, CommonItemTags.SHEARS);
+            context.add(item, ToolTags.COMMON_SHEARS, CommonItemTags.SHEARS);
         }
     }
 

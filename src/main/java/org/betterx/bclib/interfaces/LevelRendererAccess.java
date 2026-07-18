@@ -4,12 +4,9 @@ package org.betterx.bclib.interfaces;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.core.particles.ParticleOptions;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import org.jetbrains.annotations.Nullable;
 
-@Environment(EnvType.CLIENT)
 public interface LevelRendererAccess {
     @Nullable Particle bcl_addParticle(
             ParticleOptions particleOptions,

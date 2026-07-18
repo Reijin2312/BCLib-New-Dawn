@@ -12,7 +12,7 @@ import org.betterx.bclib.interfaces.RenderLayerProvider;
 import org.betterx.bclib.items.tool.BaseShearsItem;
 import org.betterx.bclib.registry.BaseBlockEntities;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
@@ -21,9 +21,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 
 import com.google.common.collect.Lists;
 
@@ -70,13 +68,14 @@ public class PostInitAPI {
         itemTags = null;
     }
 
-    @Environment(EnvType.CLIENT)
     private static void processBlockClient(Block block) {
         if (block instanceof RenderLayerProvider) {
             BCLRenderLayer layer = ((RenderLayerProvider) block).getRenderLayer();
-            if (layer == BCLRenderLayer.CUTOUT) BlockRenderLayerMap.INSTANCE.putBlock(block, RenderType.cutout());
-            else if (layer == BCLRenderLayer.TRANSLUCENT)
-                BlockRenderLayerMap.INSTANCE.putBlock(block, RenderType.translucent());
+            if (layer == BCLRenderLayer.CUTOUT) {
+                BlockRenderLayerMap.putBlock(block, ChunkSectionLayer.CUTOUT);
+            } else if (layer == BCLRenderLayer.TRANSLUCENT) {
+                BlockRenderLayerMap.putBlock(block, ChunkSectionLayer.TRANSLUCENT);
+            }
         }
         if (block instanceof BaseChestBlock) {
             BaseChestBlockEntityRenderer.registerRenderLayer(block);
@@ -104,11 +103,11 @@ public class PostInitAPI {
         }
 
         if (block instanceof BaseChestBlock) {
-            BaseBlockEntities.CHEST.registerBlock(block);
+            BaseBlockEntities.registerChestBlock(block);
         } else if (block instanceof BaseBarrelBlock) {
-            BaseBlockEntities.BARREL.registerBlock(block);
+            BaseBlockEntities.registerBarrelBlock(block);
         } else if (block instanceof BaseFurnaceBlock) {
-            BaseBlockEntities.FURNACE.registerBlock(block);
+            BaseBlockEntities.registerFurnaceBlock(block);
         }
     }
 }

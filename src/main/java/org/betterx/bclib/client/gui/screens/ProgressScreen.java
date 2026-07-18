@@ -7,13 +7,12 @@ import de.ambertation.wunderlib.ui.layout.values.Value;
 import de.ambertation.wunderlib.ui.vanilla.LayoutScreen;
 import org.betterx.bclib.BCLib;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProgressListener;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,13 +48,7 @@ class ProgressLogoRender extends CustomRenderComponent<ProgressLogoRender> {
             Rectangle transform,
             Rectangle clipRect
     ) {
-        //time += 0.03;
         time += deltaTicks * 0.1;
-
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0f);
 
         final int yBarLocal = (int) (transform.height * percentage);
         final int yBar = yBarLocal;
@@ -71,30 +64,41 @@ class ProgressLogoRender extends CustomRenderComponent<ProgressLogoRender> {
 
 
         final int yBarImage = Math.max(0, Math.min(height, yBarLocal - yOffset));
-        final float relativeY = ((float) yBarImage / height);
+        final float relativeY = height == 0 ? 0.0F : ((float) yBarImage / height);
 
         if (yBarImage > 0) {
             final int uvTopLogo = (int) (relativeY * LOGO_SIZE);
-            guiGraphics.blit(BCLibLayoutScreen.BCLIB_LOGO_LOCATION,
+            guiGraphics.blit(
+                    RenderPipelines.GUI_TEXTURED,
+                    BCLibLayoutScreen.BCLIB_LOGO_LOCATION,
                     xOffset,
                     yOffset,
+                    0,
+                    0,
                     width,
                     yBarImage,
-                    0, 0, LOGO_SIZE, uvTopLogo,
-                    LOGO_SIZE, LOGO_SIZE
+                    LOGO_SIZE,
+                    uvTopLogo,
+                    LOGO_SIZE,
+                    LOGO_SIZE
             );
         }
 
         if (yBarImage < height) {
             final int uvTopPixelated = (int) (relativeY * PIXELATED_SIZE);
-            RenderSystem.setShaderTexture(0, ProgressScreen.BCLIB_LOGO_PIXELATED_LOCATION);
-            guiGraphics.blit(ProgressScreen.BCLIB_LOGO_PIXELATED_LOCATION,
+            guiGraphics.blit(
+                    RenderPipelines.GUI_TEXTURED,
+                    ProgressScreen.BCLIB_LOGO_PIXELATED_LOCATION,
                     xOffset,
                     yOffset + yBarImage,
+                    0,
+                    uvTopPixelated,
                     width,
                     height - yBarImage,
-                    0, uvTopPixelated, PIXELATED_SIZE, PIXELATED_SIZE - uvTopPixelated,
-                    PIXELATED_SIZE, PIXELATED_SIZE
+                    PIXELATED_SIZE,
+                    PIXELATED_SIZE - uvTopPixelated,
+                    PIXELATED_SIZE,
+                    PIXELATED_SIZE
             );
         }
 
@@ -124,7 +128,7 @@ class ProgressLogoRender extends CustomRenderComponent<ProgressLogoRender> {
 
 public class ProgressScreen extends LayoutScreen implements ProgressListener, AtomicProgressListener {
 
-    static final ResourceLocation BCLIB_LOGO_PIXELATED_LOCATION = ResourceLocation.fromNamespaceAndPath(
+    static final Identifier BCLIB_LOGO_PIXELATED_LOCATION = Identifier.fromNamespaceAndPath(
             BCLib.MOD_ID,
             "iconpixelated.png"
     );
@@ -183,18 +187,21 @@ public class ProgressScreen extends LayoutScreen implements ProgressListener, At
 
     @Override
     public void progressStage(Component text) {
-        stageComponent = text;
-        if (stage != null) stage.setText(text);
-        if (stageRow != null) stageRow.reCalculateLayout();
+        runOnGameThread(() -> {
+            stageComponent = text;
+            if (stage != null) stage.setText(text);
+            if (stageRow != null) stageRow.reCalculateLayout();
+        });
     }
 
     @Override
     public void progressStagePercentage(int progress) {
-        if (progress != currentProgress) {
+        if (progress == currentProgress) return;
+        runOnGameThread(() -> {
             currentProgress = progress;
             if (progressImage != null) progressImage.percentage = currentProgress / 100.0f;
             if (this.progress != null) this.progress.setText(getProgressComponent());
-        }
+        });
     }
 
     @Override
@@ -238,5 +245,14 @@ public class ProgressScreen extends LayoutScreen implements ProgressListener, At
         grid.addFiller();
 
         return grid;
+    }
+
+    private static void runOnGameThread(Runnable runner) {
+        Minecraft client = Minecraft.getInstance();
+        if (client.isSameThread()) {
+            runner.run();
+        } else {
+            client.execute(runner);
+        }
     }
 }

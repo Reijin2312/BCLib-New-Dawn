@@ -9,20 +9,16 @@ import org.betterx.bclib.client.models.BCLModels;
 import org.betterx.bclib.client.render.BCLRenderLayer;
 import org.betterx.bclib.interfaces.RenderLayerProvider;
 import org.betterx.wover.block.api.model.BlockModelProvider;
+import org.betterx.wover.block.api.model.DatagenModelDispatch;
 import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
-
-import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraft.data.models.blockstates.MultiVariantGenerator;
-import net.minecraft.data.models.blockstates.Variant;
-import net.minecraft.data.models.blockstates.VariantProperties;
-import net.minecraft.data.models.model.TextureMapping;
-import net.minecraft.data.models.model.TextureSlot;
+import org.betterx.wover.block.api.model.WoverBlockModelGeneratorsAccess;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.data.models.model.TextureSlot;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 public abstract class BaseLadderBlock extends LadderBlock implements RenderLayerProvider, BehaviourClimable, DropSelfLootProvider<BaseLadderBlock>, BlockModelProvider {
     protected BaseLadderBlock(Block block) {
@@ -38,16 +34,16 @@ public abstract class BaseLadderBlock extends LadderBlock implements RenderLayer
         return BCLRenderLayer.CUTOUT;
     }
 
-    @Environment(EnvType.CLIENT)
     @Override
-    public void provideBlockModels(WoverBlockModelGenerators generator) {
+    public void provideBlockModels(Object modelGenerator) {
+        WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
         var mapping = new TextureMapping()
                 .put(TextureSlot.TEXTURE, TextureMapping.getBlockTexture(this));
         var location = BCLModels.LADDER.create(this, mapping, generator.modelOutput());
 
-        generator.acceptBlockState(MultiVariantGenerator
-                .multiVariant(this, Variant.variant().with(VariantProperties.MODEL, location))
-                .with(BlockModelGenerators.createHorizontalFacingDispatch()));
+        Object dispatch = DatagenModelDispatch.multiVariantDispatch(this, BlockModelGenerators.plainVariant(location));
+        dispatch = DatagenModelDispatch.withDispatch(dispatch, WoverBlockModelGeneratorsAccess.createHorizontalFacingDispatch());
+        generator.acceptBlockState(dispatch);
 
         generator.createFlatItem(this);
     }

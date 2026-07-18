@@ -2,7 +2,7 @@ package org.betterx.bclib.mixin.common.shears;
 
 import org.betterx.bclib.items.tool.BaseShearsItem;
 
-import net.minecraft.world.entity.animal.MushroomCow;
+import net.minecraft.world.entity.animal.cow.MushroomCow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;

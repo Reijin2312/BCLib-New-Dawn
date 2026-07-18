@@ -14,15 +14,14 @@ import org.betterx.bclib.furniture.entity.EntityChair;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 
 public class BaseBlockEntities {
     public static final DynamicBlockEntityType<BaseChestBlockEntity> CHEST = registerBlockEntityType(BCLib.makeID(
@@ -33,16 +32,16 @@ public class BaseBlockEntities {
     public static final DynamicBlockEntityType<BaseFurnaceBlockEntity> FURNACE = registerBlockEntityType(BCLib.makeID(
             "furnace"), BaseFurnaceBlockEntity::new);
 
-    public static final EntityType<EntityChair> CHAIR = registerEntity(BCLib.makeID("chair"), FabricEntityTypeBuilder
-            .create(MobCategory.MISC, EntityChair::new)
-            .dimensions(EntityDimensions.fixed(0.5F, 0.8F))
+    public static final EntityType<EntityChair> CHAIR = registerEntity(BCLib.makeID("chair"), EntityType.Builder
+            .of(EntityChair::new, MobCategory.MISC)
+            .sized(0.5F, 0.8F)
             .fireImmune()
-            .disableSummon()
-            .build());
+            .noSummon()
+            .build(ResourceKey.create(Registries.ENTITY_TYPE, BCLib.makeID("chair"))));
 
 
     public static <T extends Entity> EntityType<T> registerEntity(
-            ResourceLocation id,
+            Identifier id,
             EntityType<T> entity
     ) {
         Registry.register(BuiltInRegistries.ENTITY_TYPE, id, entity);
@@ -50,13 +49,25 @@ public class BaseBlockEntities {
     }
 
     public static <T extends BlockEntity> DynamicBlockEntityType<T> registerBlockEntityType(
-            ResourceLocation typeId,
+            Identifier typeId,
             BlockEntitySupplier<? extends T> supplier
     ) {
         return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, typeId, new DynamicBlockEntityType<>(supplier));
     }
 
     public static void register() {
+    }
+
+    public static void registerChestBlock(Block block) {
+        CHEST.registerBlock(block);
+    }
+
+    public static void registerBarrelBlock(Block block) {
+        BARREL.registerBlock(block);
+    }
+
+    public static void registerFurnaceBlock(Block block) {
+        FURNACE.registerBlock(block);
     }
 
     public static Block[] getChests() {

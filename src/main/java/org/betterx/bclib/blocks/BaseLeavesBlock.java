@@ -8,9 +8,8 @@ import org.betterx.bclib.interfaces.RuntimeBlockModelProvider;
 import org.betterx.wover.loot.api.BlockLootProvider;
 import org.betterx.wover.loot.api.LootLookupProvider;
 
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -20,14 +19,15 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 
-public class BaseLeavesBlock extends LeavesBlock implements RuntimeBlockModelProvider, RenderLayerProvider, BehaviourLeaves, BlockLootProvider {
+public abstract class BaseLeavesBlock extends LeavesBlock implements RuntimeBlockModelProvider, RenderLayerProvider, BehaviourLeaves, BlockLootProvider {
+    private static final float DEFAULT_LEAF_PARTICLE_CHANCE = 0.01F;
     protected final Block sapling;
 
     public BaseLeavesBlock(
             Block sapling,
             BlockBehaviour.Properties properties
     ) {
-        super(properties);
+        super(DEFAULT_LEAF_PARTICLE_CHANCE, properties);
         this.sapling = sapling;
     }
 
@@ -37,7 +37,7 @@ public class BaseLeavesBlock extends LeavesBlock implements RuntimeBlockModelPro
             MapColor color,
             Consumer<BlockBehaviour.Properties> customizeProperties
     ) {
-        super(BaseBlock.acceptAndReturn(customizeProperties, BehaviourBuilders.createLeaves(color, true)));
+        super(DEFAULT_LEAF_PARTICLE_CHANCE, BaseBlock.acceptAndReturn(customizeProperties, BehaviourBuilders.createLeaves(color, true)));
         this.sapling = sapling;
     }
 
@@ -48,22 +48,25 @@ public class BaseLeavesBlock extends LeavesBlock implements RuntimeBlockModelPro
             int light,
             Consumer<BlockBehaviour.Properties> customizeProperties
     ) {
-        super(BaseBlock.acceptAndReturn(
-                customizeProperties,
-                BehaviourBuilders.createLeaves(color, true).lightLevel(state -> light)
-        ));
+        super(
+                DEFAULT_LEAF_PARTICLE_CHANCE,
+                BaseBlock.acceptAndReturn(
+                        customizeProperties,
+                        BehaviourBuilders.createLeaves(color, true).lightLevel(state -> light)
+                )
+        );
         this.sapling = sapling;
     }
 
     @Deprecated(forRemoval = true)
     public BaseLeavesBlock(Block sapling, MapColor color) {
-        super(BehaviourBuilders.createLeaves(color, true));
+        super(DEFAULT_LEAF_PARTICLE_CHANCE, BehaviourBuilders.createLeaves(color, true));
         this.sapling = sapling;
     }
 
     @Deprecated(forRemoval = true)
     public BaseLeavesBlock(Block sapling, MapColor color, int light) {
-        super(BehaviourBuilders.createLeaves(color, true).lightLevel(state -> light));
+        super(DEFAULT_LEAF_PARTICLE_CHANCE, BehaviourBuilders.createLeaves(color, true).lightLevel(state -> light));
         this.sapling = sapling;
     }
 
@@ -73,7 +76,7 @@ public class BaseLeavesBlock extends LeavesBlock implements RuntimeBlockModelPro
     }
 
     @Override
-    public BlockModel getItemModel(ResourceLocation resourceLocation) {
+    public Object getItemModel(Identifier resourceLocation) {
         return getBlockModel(resourceLocation, defaultBlockState());
     }
 
@@ -84,7 +87,7 @@ public class BaseLeavesBlock extends LeavesBlock implements RuntimeBlockModelPro
 
     @Override
     public LootTable.Builder registerBlockLoot(
-            @NotNull ResourceLocation location,
+            @NotNull Identifier location,
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {

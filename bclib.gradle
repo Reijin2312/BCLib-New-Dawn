@@ -7,10 +7,12 @@ buildscript {
         gradlePluginPortal()
     }
 }
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
-archivesBaseName = project.archives_base_name
+base { archivesName = project.archives_base_name }
 version = project.mod_version
 group = project.maven_group
 
@@ -42,7 +44,7 @@ loom {
             vmArg "-Dfabric-api.datagen"
             vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
             vmArg "-Dfabric-api.datagen.strict-validation"
-            vmArg "-Dfabric-api.datagen.modid=${archivesBaseName}"
+            vmArg "-Dfabric-api.datagen.modid=${project.base.archivesName.get()}"
 
             runDir "build/datagen"
         }
@@ -55,6 +57,13 @@ loom {
 
 sourceSets {
     main {
+        java {
+            // The legacy OBJ pipeline targets the pre-1.21.11 baked-model API and is
+            // not used by BCLib, BetterEnd or BetterNether assets.
+            exclude 'org/betterx/bclib/client/models/OBJBlockModel.java'
+            exclude 'org/betterx/bclib/client/models/OBJModelBuilder.java'
+            exclude 'org/betterx/bclib/client/models/UnbakedQuad.java'
+        }
         // Add the datagenned files into the jar.
         resources {
             srcDirs += [
@@ -71,10 +80,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
-    modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
-    modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
 
     println "Using local WunderLib: ${local_wunderlib}"
     if (local_wunderlib) {
@@ -96,6 +103,7 @@ dependencies {
 }
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     println "Version: ${project.mod_version}"
     inputs.property "version", project.mod_version
 
@@ -157,6 +165,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 // If you remove this task, sources will not be generated.
 tasks.sourcesJar {
     archiveClassifier = 'sources'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from sourceSets.main.allSource
 }
 

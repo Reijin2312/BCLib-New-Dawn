@@ -1,15 +1,16 @@
 package org.betterx.bclib.mixin.common;
 
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.ComposterBlock;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ComposterBlock.class)
+@Mixin(value = ComposterBlock.class)
 public interface ComposterBlockAccessor {
-    @Invoker
-    static void callAdd(float levelIncreaseChance, ItemLike item) {
-        throw new AssertionError("@Invoker dummy body called");
+    @Accessor(value = "COMPOSTABLES")
+    static Object2FloatMap<ItemLike> bclib_getCompostables() {
+        throw new AssertionError("@Accessor dummy body called");
     }
 }

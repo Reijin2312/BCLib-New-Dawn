@@ -13,7 +13,7 @@ import java.util.List;
 
 @Mixin(value = RegistryDataLoader.class, priority = 500)
 public class RegistryDataLoaderMixin {
-    @Accessor("WORLDGEN_REGISTRIES")
+    @Accessor(value = "WORLDGEN_REGISTRIES")
     @Mutable
     static void wt_set_WORLDGEN_REGISTRIES(List<RegistryDataLoader.RegistryData<?>> list) {
         //SHADOWED
@@ -31,12 +31,4 @@ public class RegistryDataLoaderMixin {
 //        wt_set_WORLDGEN_REGISTRIES(enhanced);
     }
 
-//    // Fabric force changes the directory path for all modded registries to be prefixed with the mod id.
-//    // We do not want this for our BCL-Biome/Surface Rule Registry, so we remove the prefix here.
-//    @Inject(method = "registryDirPath", at = @At("RETURN"), cancellable = true)
-//    private static void bcl_prependDirectoryWithNamespace(ResourceLocation id, CallbackInfoReturnable<String> info) {
-//        if (id.getNamespace().equals(WorldsTogether.MOD_ID) || id.getNamespace().equals(BCLib.MOD_ID)) {
-//            info.setReturnValue(info.getReturnValue());
-//        }
-//    }
 }
