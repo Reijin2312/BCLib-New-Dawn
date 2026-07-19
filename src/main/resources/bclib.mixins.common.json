@@ -29,6 +29,7 @@
     "axe.AxeItemMixin",
     "boat.BoatItemMixin",
     "boat.BoatMixin",
+    "boat.BoatNameMixin",
     "boat.ChestBoatMixin",
     "elytra.LivingEntityMixin",
     "shears.BeehiveBlockMixin",

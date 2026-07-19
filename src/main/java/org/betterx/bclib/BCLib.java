@@ -9,6 +9,7 @@ import org.betterx.bclib.config.Configs;
 import org.betterx.bclib.recipes.AlloyingRecipe;
 import org.betterx.bclib.recipes.AnvilRecipe;
 import org.betterx.bclib.registry.BaseBlockEntities;
+import org.betterx.bclib.util.BCLAttachments;
 import org.betterx.bclib.util.BCLDataComponents;
 import org.betterx.datagen.bclib.worldgen.BCLAutoBlockTagProvider;
 import org.betterx.datagen.bclib.worldgen.BCLAutoItemTagProvider;
@@ -45,6 +46,7 @@ public class BCLib implements ModInitializer {
     public void onInitialize() {
         BCLibArguments.register();
         LevelGenEvents.register();
+        BCLAttachments.ensureStaticInitialization();
         BCLDataComponents.ensureStaticInitialization();
         BaseBlockEntities.register();
         WorldConfig.registerMod(C);

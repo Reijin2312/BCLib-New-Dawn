@@ -60,4 +60,5 @@ public abstract class BoatMixin implements CustomBoatTypeOverride {
         Item item = (Object) this instanceof AbstractChestBoat ? type.getChestBoatItem() : type.getBoatItem();
         if (item != null) cir.setReturnValue(new ItemStack(item));
     }
+
 }

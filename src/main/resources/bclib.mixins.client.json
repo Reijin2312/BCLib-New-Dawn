@@ -13,6 +13,8 @@
     "FogRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",
+    "boat.AbstractBoatRendererMixin",
+    "boat.BoatRenderStateMixin",
     "boat.BoatRendererMixin"
   ],
   "injectors": {
