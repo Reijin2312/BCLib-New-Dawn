@@ -5,7 +5,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -43,7 +42,7 @@ public abstract class ServerLevelMixin extends Level {
 
 
     @Inject(
-            method = "<init>(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;ZLnet/minecraft/world/RandomSequences;)V",
+            method = "<init>(Lnet/minecraft/server/MinecraftServer;Ljava/util/concurrent/Executor;Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Lnet/minecraft/world/level/storage/ServerLevelData;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/world/level/dimension/LevelStem;ZJLjava/util/List;Z)V",
             at = @At("TAIL"),
             require = 0 // keep optional in case constructor signature drifts
     )
@@ -58,7 +57,6 @@ public abstract class ServerLevelMixin extends Level {
             long l,
             List<CustomSpawner> list,
             boolean bl2,
-            RandomSequences randomSequences,
             CallbackInfo ci
     ) {
         if (bclib_lastWorld != null && bclib_lastWorld.equals(levelStorageAccess.getLevelId())) {

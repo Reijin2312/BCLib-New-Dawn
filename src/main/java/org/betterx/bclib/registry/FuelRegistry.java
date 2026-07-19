@@ -1,6 +1,6 @@
 package org.betterx.bclib.registry;
 
-import net.fabricmc.fabric.api.registry.FuelRegistryEvents;
+import net.fabricmc.fabric.api.registry.FuelValueEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 
@@ -14,7 +14,7 @@ public final class FuelRegistry {
     private final Map<Item, Integer> fuels = new IdentityHashMap<>();
 
     private FuelRegistry() {
-        FuelRegistryEvents.BUILD.register((builder, context) ->
+        FuelValueEvents.BUILD.register((builder, context) ->
                 fuels.forEach(builder::add));
     }
 

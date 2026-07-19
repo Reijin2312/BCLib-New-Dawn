@@ -13,7 +13,7 @@ import com.mojang.math.Quadrant;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
-import net.minecraft.client.renderer.block.model.VariantMutator;
+import net.minecraft.client.renderer.block.dispatch.VariantMutator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction;
@@ -221,11 +221,10 @@ public abstract class StalactiteBlock extends BaseBlockNotFull implements Simple
     @Override
     public void provideBlockModels(Object modelGenerator) {
         WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        final Identifier id = TextureMapping.getBlockTexture(this);
         final Object props = DatagenModelDispatch.propertyDispatchInitial(IS_FLOOR, SIZE);
         for (int size = 0; size <= 7; size++) {
             final String suffix = "_" + size;
-            final TextureMapping mapping = new TextureMapping().put(TextureSlot.CROSS, id.withSuffix(suffix));
+            final TextureMapping mapping = new TextureMapping().put(TextureSlot.CROSS, TextureMapping.getBlockTexture(this, suffix));
             final Identifier model = BCLModels.CROSS_SHADED.createWithSuffix(this, suffix, mapping, generator.modelOutput());
             DatagenModelDispatch.propertyDispatchSelect(props, true, size, BlockModelGenerators.plainVariant(model));
             DatagenModelDispatch.propertyDispatchSelect(props, false, size, BlockModelGenerators
@@ -233,7 +232,7 @@ public abstract class StalactiteBlock extends BaseBlockNotFull implements Simple
                     .with(VariantMutator.X_ROT.withValue(Quadrant.R180)));
         }
         generator.acceptBlockState(DatagenModelDispatch.dispatchWith(this, props));
-        generator.createFlatItem(this, TextureMapping.getItemTexture(this.asItem()));
+        generator.createFlatItem(this, TextureMapping.getItemTexture(this.asItem()).sprite());
     }
 
     @Override

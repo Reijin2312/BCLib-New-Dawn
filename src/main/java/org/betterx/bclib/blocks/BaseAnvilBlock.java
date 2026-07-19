@@ -18,11 +18,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
-import net.minecraft.client.renderer.block.model.VariantMutator;
+import net.minecraft.client.renderer.block.dispatch.VariantMutator;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
@@ -99,17 +101,17 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
     @Override
     public void provideBlockModels(Object modelGenerator) {
         WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        final Identifier id = TextureMapping.getBlockTexture(this);
+        final Identifier id = TextureMapping.getBlockTexture(this).sprite();
         final TextureMapping mapping = new TextureMapping()
-                .put(TextureSlot.FRONT, id.withSuffix("_front"))
-                .put(TextureSlot.BACK, id.withSuffix("_back"))
-                .put(TextureSlot.BOTTOM, id.withSuffix("_bottom"))
-                .put(BCLModels.PANEL, id.withSuffix("_panel"));
+                .put(TextureSlot.FRONT, new Material(id.withSuffix("_front")))
+                .put(TextureSlot.BACK, new Material(id.withSuffix("_back")))
+                .put(TextureSlot.BOTTOM, new Material(id.withSuffix("_bottom")))
+                .put(BCLModels.PANEL, new Material(id.withSuffix("_panel")));
 
         final Object prop = DatagenModelDispatch.propertyDispatchInitial(DESTRUCTION, FACING);
 
         for (int d = 0; d < 3; d++) {
-            mapping.put(TextureSlot.TOP, id.withSuffix("_top_" + d));
+            mapping.put(TextureSlot.TOP, new Material(id.withSuffix("_top_" + d)));
             final Identifier model = BCLModels.ANVIL.createWithSuffix(this, "_" + d, mapping, generator.modelOutput());
 
             DatagenModelDispatch.propertyDispatchSelect(prop, d, Direction.NORTH, BlockModelGenerators.plainVariant(model));
@@ -138,7 +140,7 @@ public abstract class BaseAnvilBlock extends AnvilBlock implements AddMineablePi
         int destruction = state.getValue(DESTRUCTION);
         int durability = state.getValue(getDurabilityProp());
         int value = destruction * getMaxDurability() + durability;
-        ItemStack tool = builder.getParameter(LootContextParams.TOOL);
+        ItemInstance tool = builder.getParameter(LootContextParams.TOOL);
         if (LootUtil.isCorrectTool(this, state, tool)) {
             ItemStack itemStack = new ItemStack(this);
 

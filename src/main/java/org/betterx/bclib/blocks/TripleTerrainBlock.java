@@ -7,7 +7,7 @@ import org.betterx.bclib.interfaces.RuntimeBlockModelProvider;
 import org.betterx.wover.block.api.BlockProperties.TripleShape;
 
 import com.mojang.math.Quadrant;
-import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;

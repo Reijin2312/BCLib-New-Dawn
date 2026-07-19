@@ -5,9 +5,8 @@ import org.betterx.bclib.interfaces.ItemModelProvider;
 import org.betterx.bclib.interfaces.RuntimeBlockModelProvider;
 import org.betterx.bclib.models.RecordItemModelProvider;
 
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.multipart.MultiPartModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.multipart.MultiPartModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -150,7 +149,7 @@ public class CustomModelBakery {
         if (!models.containsKey(modelKey)) {
             Identifier itemModelLocation = itemID.withPrefix("item/");
             Object modelObj = provider.getItemModel(modelKey);
-            if (!(modelObj instanceof BlockModel model)) {
+            if (!(modelObj instanceof UnbakedModel model)) {
                 BCLib.LOGGER.warn("Skip runtime item model: missing model for {}", itemID);
                 return;
             }

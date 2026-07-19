@@ -8,7 +8,6 @@ import org.betterx.bclib.interfaces.ItemModelProvider;
 import org.betterx.bclib.util.BlocksHelper;
 import org.betterx.ui.ColorUtil;
 
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.FrontAndTop;
@@ -184,7 +183,7 @@ public class DebugDataItem extends Item implements ItemModelProvider, AirSelecti
 
 
     @Override
-    public BlockModel getItemModel(Identifier resourceLocation) {
+    public Object getItemModel(Identifier resourceLocation) {
         return ModelsHelper.createItemModel(icon);
     }
 

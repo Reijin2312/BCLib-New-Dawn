@@ -2,7 +2,7 @@ package org.betterx.bclib.mixin.common.shears;
 
 import org.betterx.wover.tag.api.predefined.CommonItemTags;
 
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
@@ -38,7 +38,7 @@ public class MatchToolMixin {
     )
     private void bcl_isShears(LootContext lootContext, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValue() && bcl_isShears) {
-            ItemStack itemStack = lootContext.getOptionalParameter(LootContextParams.TOOL);
+            ItemInstance itemStack = lootContext.getOptionalParameter(LootContextParams.TOOL);
             cir.setReturnValue(itemStack != null && itemStack.is(CommonItemTags.SHEARS));
         }
     }

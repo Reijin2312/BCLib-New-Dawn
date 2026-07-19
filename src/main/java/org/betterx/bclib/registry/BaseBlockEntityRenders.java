@@ -11,7 +11,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 
 @Environment(EnvType.CLIENT)
@@ -25,8 +25,8 @@ public class BaseBlockEntityRenders {
         LayerDefinition chestRaftModel = RaftModel.createChestRaftModel();
 
         BoatTypeOverride.values().forEach(type -> {
-            EntityModelLayerRegistry.registerModelLayer(type.boatModelName, () -> type.isRaft ? raftModel : boatModel);
-            EntityModelLayerRegistry.registerModelLayer(
+            ModelLayerRegistry.registerModelLayer(type.boatModelName, () -> type.isRaft ? raftModel : boatModel);
+            ModelLayerRegistry.registerModelLayer(
                     type.chestBoatModelName,
                     () -> type.isRaft ? chestRaftModel : chestBoatModel
             );

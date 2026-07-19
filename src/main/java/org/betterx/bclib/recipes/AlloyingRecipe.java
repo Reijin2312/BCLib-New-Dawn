@@ -20,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.Recipe;
@@ -39,16 +40,16 @@ import org.jetbrains.annotations.Nullable;
 public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownReceipBookCategory {
     public final static String GROUP = "alloying";
     public final static RecipeType<AlloyingRecipe> TYPE = BCLRecipeManager.registerType(BCLib.MOD_ID, GROUP);
-    public final static Serializer SERIALIZER = BCLRecipeManager.registerSerializer(
+    public final static RecipeSerializer<AlloyingRecipe> SERIALIZER = BCLRecipeManager.registerSerializer(
             BCLib.MOD_ID,
             GROUP,
-            new Serializer()
+            new RecipeSerializer<>(Serializer.CODEC, Serializer.STREAM_CODEC)
     );
 
     protected final RecipeType<AlloyingRecipe> type;
     protected final Ingredient primaryInput;
     protected final Ingredient secondaryInput;
-    protected final ItemStack output;
+    protected final ItemStackTemplate output;
     protected final String group;
     protected final float experience;
     protected final int smeltTime;
@@ -57,7 +58,7 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
     private AlloyingRecipe(
             List<Ingredient> inputs,
             Optional<String> group,
-            ItemStack output,
+            ItemStackTemplate output,
             float experience,
             int smeltTime
     ) {
@@ -75,17 +76,25 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
             @NotNull String group,
             Ingredient primaryInput,
             Ingredient secondaryInput,
-            ItemStack output,
+            ItemStackTemplate output,
             float experience,
             int smeltTime
     ) {
         this.group = group;
         this.primaryInput = primaryInput;
         this.secondaryInput = secondaryInput;
-        this.output = ItemStackHelper.callItemStackSetupIfPossible(output);
+        this.output = output;
         this.experience = experience;
         this.smeltTime = smeltTime;
         this.type = TYPE;
+    }
+
+    private ItemStack createOutputStack() {
+        return ItemStackHelper.callItemStackSetupIfPossible(this.output.create());
+    }
+
+    private ItemStack createOutputStack(HolderLookup.Provider provider) {
+        return ItemStackHelper.callItemStackSetupIfPossible(this.output.create(), provider);
     }
 
     public float getExperience() {
@@ -111,8 +120,8 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
     }
 
     @Override
-    public ItemStack assemble(AlloyingRecipeInput recipeInput, HolderLookup.Provider provider) {
-        return this.output.copy();
+    public ItemStack assemble(AlloyingRecipeInput recipeInput) {
+        return this.createOutputStack();
     }
 
     public boolean canCraftInDimensions(int width, int height) {
@@ -120,7 +129,7 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
     }
 
     public ItemStack getResultItem(HolderLookup.Provider provider) {
-        return this.output;
+        return this.createOutputStack(provider);
     }
 
     @Override
@@ -144,6 +153,11 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
     @Override
     public String group() {
         return this.group;
+    }
+
+    @Override
+    public boolean showNotification() {
+        return true;
     }
 
     @Override
@@ -224,14 +238,14 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
                     group == null ? "" : group,
                     primaryInput,
                     secondaryInput,
-                    output,
+                    outputTemplate(),
                     experience,
                     smeltTime
             );
         }
     }
 
-    public static class Serializer implements RecipeSerializer<AlloyingRecipe> {
+    public static class Serializer {
         public static final MapCodec<AlloyingRecipe> CODEC = RecordCodecBuilder.<AlloyingRecipe>mapCodec(instance -> instance.group(
                 Codec.list(Ingredient.CODEC)
                      .fieldOf("ingredients")
@@ -240,28 +254,17 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
                             .forGetter((AlloyingRecipe recipe) -> recipe.group == null || recipe.group.isEmpty()
                                     ? Optional.empty()
                                     : Optional.ofNullable(recipe.group)),
-                ItemUtil.CODEC_ITEM_STACK_WITH_NBT.fieldOf("result").forGetter((AlloyingRecipe recipe) -> recipe.output),
+                ItemUtil.CODEC_ITEM_STACK_TEMPLATE_WITH_NBT.fieldOf("result").forGetter((AlloyingRecipe recipe) -> recipe.output),
                 Codec.FLOAT.optionalFieldOf("experience", 0f).forGetter((AlloyingRecipe recipe) -> recipe.experience),
                 Codec.INT.optionalFieldOf("smelttime", 350).forGetter((AlloyingRecipe recipe) -> recipe.smeltTime)
         ).apply(instance, AlloyingRecipe::new));
         public static final StreamCodec<RegistryFriendlyByteBuf, AlloyingRecipe> STREAM_CODEC = StreamCodec.of(AlloyingRecipe.Serializer::toNetwork, AlloyingRecipe.Serializer::fromNetwork);
 
-        @Override
-        public @NotNull MapCodec<AlloyingRecipe> codec() {
-            return CODEC;
-        }
-
-
-        @Override
-        public StreamCodec<RegistryFriendlyByteBuf, AlloyingRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
-
         public static @NotNull AlloyingRecipe fromNetwork(RegistryFriendlyByteBuf packetBuffer) {
             String group = packetBuffer.readUtf();
             Ingredient primary = Ingredient.CONTENTS_STREAM_CODEC.decode(packetBuffer);
             Ingredient secondary = Ingredient.CONTENTS_STREAM_CODEC.decode(packetBuffer);
-            ItemStack output = ItemStack.STREAM_CODEC.decode(packetBuffer);
+            ItemStackTemplate output = ItemStackTemplate.STREAM_CODEC.decode(packetBuffer);
             float experience = packetBuffer.readFloat();
             int smeltTime = packetBuffer.readVarInt();
 
@@ -273,7 +276,7 @@ public class AlloyingRecipe implements Recipe<AlloyingRecipeInput>, UnknownRecei
             packetBuffer.writeUtf(recipe.group);
             Ingredient.CONTENTS_STREAM_CODEC.encode(packetBuffer, recipe.primaryInput);
             Ingredient.CONTENTS_STREAM_CODEC.encode(packetBuffer, recipe.secondaryInput);
-            ItemStack.STREAM_CODEC.encode(packetBuffer, recipe.output);
+            ItemStackTemplate.STREAM_CODEC.encode(packetBuffer, recipe.output);
             packetBuffer.writeFloat(recipe.experience);
             packetBuffer.writeVarInt(recipe.smeltTime);
         }

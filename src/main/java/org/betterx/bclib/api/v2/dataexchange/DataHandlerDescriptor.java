@@ -83,9 +83,9 @@ public class DataHandlerDescriptor<T extends DataHandlerDescriptor.PacketPayload
         );
 
         if (direction == Direction.SERVER_TO_CLIENT)
-            PayloadTypeRegistry.playS2C().register(this.IDENTIFIER, STREAM_CODEC);
+            PayloadTypeRegistry.clientboundPlay().register(this.IDENTIFIER, STREAM_CODEC);
         else if (direction == Direction.CLIENT_TO_SERVER)
-            PayloadTypeRegistry.playC2S().register(this.IDENTIFIER, STREAM_CODEC);
+            PayloadTypeRegistry.serverboundPlay().register(this.IDENTIFIER, STREAM_CODEC);
     }
 
     public final Direction DIRECTION;

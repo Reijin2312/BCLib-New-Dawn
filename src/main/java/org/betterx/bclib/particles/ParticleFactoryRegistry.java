@@ -20,7 +20,7 @@ public final class ParticleFactoryRegistry {
     }
 
     public <T extends ParticleOptions> void register(ParticleType<T> type, PendingParticleFactory<T> factory) {
-        net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry.getInstance()
+        net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry.getInstance()
                 .register(type, factory::create);
     }
 }

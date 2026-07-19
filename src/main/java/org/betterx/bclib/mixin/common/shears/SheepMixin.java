@@ -18,10 +18,10 @@ public class SheepMixin {
             method = "mobInteract",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/ItemStack;is(Lnet/minecraft/world/item/Item;)Z"
+                    target = "Lnet/minecraft/world/item/ItemStack;is(Ljava/lang/Object;)Z"
             )
     )
-    private boolean bclib_isShears(ItemStack instance, Item item, Operation<Boolean> original) {
+    private boolean bclib_isShears(ItemStack instance, Object item, Operation<Boolean> original) {
         return original.call(instance, item) || (item == Items.SHEARS && BaseShearsItem.isShear(instance));
     }
 }

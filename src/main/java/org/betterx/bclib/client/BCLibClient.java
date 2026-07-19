@@ -9,8 +9,13 @@ import org.betterx.bclib.client.textures.SpriteLister;
 import org.betterx.bclib.registry.BaseBlockEntityRenders;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.color.block.BlockTintSource;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 public class BCLibClient implements ClientModInitializer {
+    private static final int LEGACY_TINT_LAYER_COUNT = 32;
     private static CustomModelBakery modelBakery;
 
     public static CustomModelBakery lazyModelbakery() {
@@ -18,6 +23,28 @@ public class BCLibClient implements ClientModInitializer {
             modelBakery = new CustomModelBakery();
         }
         return modelBakery;
+    }
+
+    public static List<BlockTintSource> createBlockTintSources(
+            org.betterx.bclib.interfaces.CustomColorProvider provider
+    ) {
+        return IntStream.range(0, LEGACY_TINT_LAYER_COUNT)
+                        .mapToObj(tintIndex -> (BlockTintSource) new BlockTintSource() {
+                            @Override
+                            public int color(net.minecraft.world.level.block.state.BlockState state) {
+                                return provider.getProvider().getColor(state, null, null, tintIndex);
+                            }
+
+                            @Override
+                            public int colorInWorld(
+                                    net.minecraft.world.level.block.state.BlockState state,
+                                    net.minecraft.client.renderer.block.BlockAndTintGetter level,
+                                    net.minecraft.core.BlockPos pos
+                            ) {
+                                return provider.getProvider().getColor(state, level, pos, tintIndex);
+                            }
+                        })
+                        .toList();
     }
 
     @Override

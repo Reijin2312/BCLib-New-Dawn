@@ -1,12 +1,12 @@
 package org.betterx.bclib.client.models;
 
 import com.mojang.math.Quadrant;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.SingleVariant;
-import net.minecraft.client.renderer.block.model.Variant;
-import net.minecraft.client.renderer.block.model.multipart.MultiPartModel;
-import net.minecraft.client.resources.model.WeightedVariants;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
+import net.minecraft.client.renderer.block.dispatch.Variant;
+import net.minecraft.client.renderer.block.dispatch.WeightedVariants;
+import net.minecraft.client.renderer.block.dispatch.multipart.MultiPartModel;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.WeightedList;
@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 
+import net.minecraft.client.resources.model.cuboid.CuboidModel;
 
 import com.google.common.collect.Lists;
 
@@ -24,24 +25,24 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ModelsHelper {
-    public static BlockModel fromPattern(Optional<String> pattern) {
-        return pattern.map(json -> BlockModel.fromStream(new StringReader(json))).orElse(null);
+    public static UnbakedModel fromPattern(Optional<String> pattern) {
+        return pattern.map(json -> CuboidModel.fromStream(new StringReader(json))).orElse(null);
     }
 
-    public static BlockModel createItemModel(Identifier resourceLocation) {
+    public static UnbakedModel createItemModel(Identifier resourceLocation) {
         return fromPattern(PatternsHelper.createItemGenerated(resourceLocation));
     }
 
-    public static BlockModel createHandheldItem(Identifier resourceLocation) {
+    public static UnbakedModel createHandheldItem(Identifier resourceLocation) {
         return fromPattern(PatternsHelper.createItemHandheld(resourceLocation));
     }
 
-    public static BlockModel createBlockItem(Identifier resourceLocation) {
+    public static UnbakedModel createBlockItem(Identifier resourceLocation) {
         Optional<String> pattern = PatternsHelper.createJson(BasePatterns.ITEM_BLOCK, resourceLocation);
         return fromPattern(pattern);
     }
 
-    public static BlockModel createBlockEmpty(Identifier resourceLocation) {
+    public static UnbakedModel createBlockEmpty(Identifier resourceLocation) {
         Optional<String> pattern = PatternsHelper.createJson(BasePatterns.BLOCK_EMPTY, resourceLocation);
         return fromPattern(pattern);
     }

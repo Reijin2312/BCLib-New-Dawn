@@ -97,7 +97,7 @@ modrinth {
     projectId = project.archives_base_name
     versionNumber = project.mod_version
     versionType = project.release_channel
-    uploadFile = remapJar
+    uploadFile = jar
     gameVersions = slurper.parseText(project.modrinth_versions)
     loaders = ["fabric"]
     changelog = changes
@@ -178,7 +178,7 @@ task nextVersion() {
 import org.kohsuke.github.GHReleaseBuilder
 import org.kohsuke.github.GitHub
 
-task github(dependsOn: [build, remapJar, sourcesJar, javadocJar]) {
+task github(dependsOn: [build, jar, sourcesJar, javadocJar]) {
     group = 'publishing'
     def slurper = new groovy.json.JsonSlurper()
     def apiKey = new File(projectDir, "../GITHUB_TOKEN")
@@ -222,11 +222,11 @@ publishing {
             def githubName = findProperty('github_base_name') ?: project.archives_base_name
             artifactId = project.archives_base_name
             // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                builtBy remapJar
+            artifact(jar) {
+                builtBy jar
             }
             artifact(sourcesJar) {
-                builtBy remapSourcesJar
+                builtBy sourcesJar
             }
 
             // Optional POM configuration

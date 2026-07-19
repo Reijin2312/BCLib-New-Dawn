@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -123,6 +124,16 @@ public class FullReferenceHolder<T> implements Holder<T> {
     @Override
     public boolean isBound() {
         return this.key != null && this.value != null;
+    }
+
+    @Override
+    public boolean areComponentsBound() {
+        return true;
+    }
+
+    @Override
+    public DataComponentMap components() {
+        return DataComponentMap.EMPTY;
     }
 
     @Override

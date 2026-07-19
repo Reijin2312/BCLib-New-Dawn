@@ -124,7 +124,7 @@ public class EntityChair extends Entity {
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand interactionHand) {
+    public InteractionResult interact(Player player, InteractionHand interactionHand, Vec3 hitLocation) {
         if (player.isSecondaryUseActive()) {
             return InteractionResult.PASS;
         }

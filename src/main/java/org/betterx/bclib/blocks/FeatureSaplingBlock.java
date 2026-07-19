@@ -9,7 +9,6 @@ import org.betterx.bclib.client.render.BCLRenderLayer;
 import org.betterx.bclib.interfaces.RenderLayerProvider;
 import org.betterx.bclib.interfaces.RuntimeBlockModelProvider;
 
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -155,12 +154,12 @@ public class FeatureSaplingBlock<F extends Feature<FC>, FC extends FeatureConfig
     }
 
     @Override
-    public BlockModel getItemModel(Identifier resourceLocation) {
+    public Object getItemModel(Identifier resourceLocation) {
         return ModelsHelper.createBlockItem(resourceLocation);
     }
 
     @Override
-    public @Nullable BlockModel getBlockModel(Identifier resourceLocation, BlockState blockState) {
+    public @Nullable Object getBlockModel(Identifier resourceLocation, BlockState blockState) {
         Optional<String> pattern = PatternsHelper.createJson(BasePatterns.BLOCK_CROSS, resourceLocation);
         return ModelsHelper.fromPattern(pattern);
     }

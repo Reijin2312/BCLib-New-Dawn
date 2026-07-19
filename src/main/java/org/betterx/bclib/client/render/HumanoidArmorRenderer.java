@@ -94,7 +94,13 @@ public abstract class HumanoidArmorRenderer {
     }
 
     protected void setPartVisibility(HumanoidModel<?> humanoidModel, EquipmentSlot equipmentSlot) {
-        humanoidModel.setAllVisible(false);
+        humanoidModel.head.visible = false;
+        humanoidModel.hat.visible = false;
+        humanoidModel.body.visible = false;
+        humanoidModel.rightArm.visible = false;
+        humanoidModel.leftArm.visible = false;
+        humanoidModel.rightLeg.visible = false;
+        humanoidModel.leftLeg.visible = false;
         switch (equipmentSlot) {
             case HEAD -> {
                 humanoidModel.head.visible = true;

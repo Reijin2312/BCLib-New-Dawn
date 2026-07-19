@@ -108,11 +108,8 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         if (bcl_currentRecipe != null) {
             AnvilRecipeInput recipeInput = this.bcl_AnvilRecipeInput(bcl_currentRecipe.value().getAllowedTools());
             recipeInput.getIngredient().shrink(bcl_currentRecipe.value().getInputCount());
-            if (!player.isCreative()) {
-                bcl_currentRecipe.value().damageHammer(bcl_getHammerStack(recipeInput), player);
-            }
+            bcl_currentRecipe.value().craft(recipeInput, player);
             slotsChanged(inputSlots);
-            broadcastChanges();
 
             access.execute((level, blockPos) -> {
                 final BlockState anvilState = level.getBlockState(blockPos);
@@ -130,18 +127,6 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
             });
             info.cancel();
         }
-    }
-
-    @Unique
-    private ItemStack bcl_getHammerStack(AnvilRecipeInput recipeInput) {
-        ItemStack hammer = recipeInput.getHammer();
-        if (this.inputSlots.getItem(0) == hammer) {
-            return this.inputSlots.getItem(0);
-        }
-        if (this.inputSlots.getItem(1) == hammer) {
-            return this.inputSlots.getItem(1);
-        }
-        return hammer;
     }
 
     @Inject(remap = false, method = "onTake", at = @At("TAIL"), require = 0)
@@ -167,10 +152,11 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
             return;
         }
 
-        bcl_recipes = ((RecipeManagerAccessor) recipeManager)
-                .bclib_getRecipes()
-                .getRecipesFor(AnvilRecipe.TYPE, recipeInput, player.level())
-                .toList();
+        bcl_recipes = recipeManager.getRecipes().stream()
+                                     .filter(holder -> holder.value().getType() == AnvilRecipe.TYPE)
+                                     .map(holder -> (RecipeHolder<AnvilRecipe>) holder)
+                                     .filter(holder -> holder.value().matches(recipeInput, player.level()))
+                                     .toList();
 
         if (!bcl_recipes.isEmpty()) {
             int anvilLevel = this.bcl_anvilLevel.get();
@@ -221,7 +207,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
     private void bcl_updateResult() {
         if (bcl_currentRecipe == null) return;
         AnvilRecipeInput recipeInput = this.bcl_AnvilRecipeInput(bcl_currentRecipe.value().getAllowedTools());
-        resultSlots.setItem(0, bcl_currentRecipe.value().assemble(recipeInput, this.player.level().registryAccess()));
+        resultSlots.setItem(0, bcl_currentRecipe.value().assemble(recipeInput));
         broadcastChanges();
     }
 

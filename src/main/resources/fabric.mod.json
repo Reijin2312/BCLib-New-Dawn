@@ -42,18 +42,18 @@
         "bclib.mixins.client.json"
     ],
     "depends": {
-        "fabricloader": ">=0.18.1",
-        "fabric-api": ">=0.139.0",
-        "java": ">=21",
+        "fabricloader": ">=0.19.3",
+        "fabric-api": ">=0.155.2",
+        "java": ">=25",
         "minecraft": [
-            "1.21.11"
+            ">=26.1 <26.1.3"
         ],
-        "wunderlib": "21.11.x",
-        "wover": "21.11.x"
+        "wunderlib": "26.1.x",
+        "wover": "26.1.x"
     },
     "breaks": {
-        "wunderlib": "<21.11.0",
-        "wover": "<21.11.0"
+        "wunderlib": "<26.1.0",
+        "wover": "<26.1.0"
     },
     "custom": {
         "wover": {

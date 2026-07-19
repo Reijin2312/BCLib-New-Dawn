@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "org.betterx.bclib.mixin.client",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "AnvilScreenMixin",
     "AtlasSetMixin",
@@ -10,6 +10,7 @@
     "ClientLevelMixin",
     "ClientPacketListenerMixin",
     "ClientRecipeBookMixin",
+    "ChestRendererMixin",
     "FogRendererMixin",
     "MinecraftMixin",
     "ModelManagerMixin",

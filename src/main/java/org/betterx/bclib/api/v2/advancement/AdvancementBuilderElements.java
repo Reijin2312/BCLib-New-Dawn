@@ -6,12 +6,15 @@ import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 class Display {
-    ItemStack icon;
+    ItemStackTemplate icon;
     Component title;
     net.minecraft.network.chat.Component description;
     @Nullable Identifier background;
@@ -41,5 +44,21 @@ class Display {
                 background == null ? Optional.empty() : Optional.of(new ClientAsset.ResourceTexture(background)),
                 frame, showToast, announceChat, hidden
         );
+    }
+
+    void setIcon(ItemLike value) {
+        if (value == null || value.asItem() == Items.AIR) {
+            icon = new ItemStackTemplate(Items.AIR);
+        } else {
+            icon = new ItemStackTemplate(value.asItem());
+        }
+    }
+
+    void setIcon(ItemStack value) {
+        if (value == null || value.isEmpty()) {
+            icon = new ItemStackTemplate(Items.AIR);
+        } else {
+            icon = ItemStackTemplate.fromNonEmptyStack(value);
+        }
     }
 }

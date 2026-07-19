@@ -3,10 +3,12 @@ package org.betterx.bclib.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -41,7 +43,7 @@ public class ItemUtil {
         return RecordCodecBuilder.mapCodec((instance) -> instance.group(
                 BuiltInRegistries.ITEM.holderByNameCodec()
                                       .fieldOf("item")
-                                      .forGetter(o -> getter.apply(o).getItemHolder()),
+                                      .forGetter(o -> getter.apply(o).typeHolder()),
                 Codec.INT.optionalFieldOf("count", 1)
                          .forGetter(o -> getter.apply(o).getCount()),
                 DataComponentMap.CODEC.optionalFieldOf("nbt", DataComponentMap.EMPTY)
@@ -55,6 +57,26 @@ public class ItemUtil {
 
 
     public static MapCodec<ItemStack> CODEC_ITEM_STACK_WITH_NBT = codecItemStackWithNBT(
+            Function.identity(),
+            Function.identity()
+    );
+
+    public static <T> MapCodec<T> codecItemStackTemplateWithNBT(
+            Function<T, ItemStackTemplate> getter,
+            Function<ItemStackTemplate, T> factory
+    ) {
+        return RecordCodecBuilder.mapCodec((instance) -> instance.group(
+                BuiltInRegistries.ITEM.holderByNameCodec()
+                                      .fieldOf("item")
+                                      .forGetter(o -> getter.apply(o).item()),
+                Codec.INT.optionalFieldOf("count", 1)
+                         .forGetter(o -> getter.apply(o).count()),
+                DataComponentPatch.CODEC.optionalFieldOf("nbt", DataComponentPatch.EMPTY)
+                                        .forGetter(o -> getter.apply(o).components())
+        ).apply(instance, (item, count, nbt) -> factory.apply(new ItemStackTemplate(item, count, nbt))));
+    }
+
+    public static MapCodec<ItemStackTemplate> CODEC_ITEM_STACK_TEMPLATE_WITH_NBT = codecItemStackTemplateWithNBT(
             Function.identity(),
             Function.identity()
     );

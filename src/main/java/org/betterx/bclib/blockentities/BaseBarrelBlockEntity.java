@@ -192,7 +192,7 @@ public class BaseBarrelBlockEntity extends RandomizableContainerBlockEntity {
             double z = this.worldPosition.getZ() + 0.5D + facingDir.getZ() / 2.0D;
             level.playSound(
                     null, x, y, z,
-                    soundEvent, SoundSource.BLOCKS, 0.5F, this.level.random.nextFloat() * 0.1F + 0.9F
+                    soundEvent, SoundSource.BLOCKS, 0.5F, this.level.getRandom().nextFloat() * 0.1F + 0.9F
             );
         }
     }

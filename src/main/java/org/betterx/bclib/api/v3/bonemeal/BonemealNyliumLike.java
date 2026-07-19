@@ -111,7 +111,7 @@ public interface BonemealNyliumLike extends BonemealableBlock {
                 convertedSubstrate = true;
             }
 
-            BlockState plantState = config.stateProvider.getState(randomSource, targetPos);
+            BlockState plantState = config.stateProvider.getState(serverLevel, randomSource, targetPos);
             if (plantState.canSurvive(serverLevel, targetPos)) {
                 serverLevel.setBlock(targetPos, plantState, 2);
             } else if (convertedSubstrate) {

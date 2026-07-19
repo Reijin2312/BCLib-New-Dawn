@@ -9,6 +9,7 @@ import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 
 import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.client.data.models.model.TextureSlot;
+import net.minecraft.client.resources.model.sprite.Material;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
@@ -23,13 +24,13 @@ public abstract class BaseBarkBlock extends BaseRotatedPillarBlock {
     @Override
     public void provideBlockModels(Object modelGenerator) {
     WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        var res = TextureMapping.getBlockTexture(this);
+        var res = TextureMapping.getBlockTexture(this).sprite();
         var log = Identifier.fromNamespaceAndPath(res.getNamespace(), res
                 .getPath()
                 .replace("_bark", "_log"));
         generator.createRotatedPillar(this, new TextureMapping()
-                .put(TextureSlot.SIDE, log.withSuffix("_side"))
-                .put(TextureSlot.END, log.withSuffix("_side")));
+                .put(TextureSlot.SIDE, new Material(log.withSuffix("_side")))
+                .put(TextureSlot.END, new Material(log.withSuffix("_side"))));
 
     }
 

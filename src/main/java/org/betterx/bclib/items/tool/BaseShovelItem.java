@@ -3,7 +3,6 @@ package org.betterx.bclib.items.tool;
 import org.betterx.bclib.client.models.ModelsHelper;
 import org.betterx.bclib.interfaces.ItemModelProvider;
 
-import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.ToolMaterial;
@@ -19,7 +18,7 @@ public class BaseShovelItem extends ShovelItem implements ItemModelProvider {
     }
 
     @Override
-    public BlockModel getItemModel(Identifier resourceLocation) {
+    public Object getItemModel(Identifier resourceLocation) {
         return ModelsHelper.createHandheldItem(resourceLocation);
     }
 }
