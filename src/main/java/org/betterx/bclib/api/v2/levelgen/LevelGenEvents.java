@@ -61,7 +61,9 @@ public class LevelGenEvents {
             boolean b
     ) {
         beforeWorldLoad(levelStorageAccess);
-        DataFixerAPI.initializePatchData();
+        if (!ModCore.isServer() || BCLib.isClient()) {
+            DataFixerAPI.initializePatchData();
+        }
     }
 
     private static void beforeWorldLoad(LevelStorageSource.LevelStorageAccess levelStorageAccess) {

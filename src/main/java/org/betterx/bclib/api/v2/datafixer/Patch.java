@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class Patch {
@@ -41,6 +42,13 @@ public abstract class Patch {
 
     static List<Patch> getALL() {
         return ALL;
+    }
+
+    /**
+     * Registers a patch without loading the client-aware DataFixerAPI class.
+     */
+    public static void register(Supplier<Patch> patch) {
+        ALL.add(patch.get());
     }
 
     /**

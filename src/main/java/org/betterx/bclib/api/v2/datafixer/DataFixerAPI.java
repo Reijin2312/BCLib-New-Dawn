@@ -680,7 +680,7 @@ public class DataFixerAPI {
      * @param patch A #Supplier that will instantiate the new Patch Object
      */
     public static void registerPatch(Supplier<Patch> patch) {
-        Patch.getALL().add(patch.get());
+        Patch.register(patch);
     }
 
     private static CompoundTag readNbt(Path file) throws IOException {

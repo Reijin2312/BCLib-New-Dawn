@@ -1,14 +1,13 @@
 package org.betterx.bclib;
 
 import de.ambertation.wunderlib.utils.Version;
-import org.betterx.bclib.api.v2.datafixer.DataFixerAPI;
 import org.betterx.bclib.api.v2.datafixer.Patch;
 
 import java.util.Map;
 
 public final class BCLibPatch {
     public static void register() {
-        DataFixerAPI.registerPatch(SignPatch::new);
+        Patch.register(SignPatch::new);
     }
 }
 
