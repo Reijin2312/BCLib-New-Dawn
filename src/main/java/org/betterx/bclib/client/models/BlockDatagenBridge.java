@@ -31,5 +31,6 @@ public final class BlockDatagenBridge {
         Identifier location = BCLModels.PATH.create(pathBlock, mapping, generator.modelOutput());
 
         generator.acceptBlockState(generator.randomTopModelVariant(pathBlock, location));
+        generator.delegateItemModel(pathBlock, location);
     }
 }

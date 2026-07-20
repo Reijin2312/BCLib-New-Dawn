@@ -116,6 +116,7 @@ public abstract class BaseTrapdoorBlock extends TrapDoorBlock implements RenderL
         }
 
         generator.acceptBlockState(DatagenModelDispatch.dispatchWith(this, props));
+        generator.delegateItemModel(this, model);
     }
 
     public static class Wood extends BaseTrapdoorBlock implements BehaviourWood {

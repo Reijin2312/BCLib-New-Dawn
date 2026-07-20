@@ -79,6 +79,7 @@ public abstract class BaseFurnaceBlock extends FurnaceBlock implements RenderLay
                 .put(TextureSlot.SIDE, TextureMapping.getBlockTexture(this, "_side"))
                 .put(TextureSlot.FRONT, TextureMapping.getBlockTexture(this, "_front_on"))
                 .put(TextureSlot.BOTTOM, TextureMapping.getBlockTexture(this, "_top"))
+                .put(TextureSlot.PARTICLE, TextureMapping.getBlockTexture(this, "_side"))
                 .put(BCLModels.GLOW, TextureMapping.getBlockTexture(this, "_glow"));
         final var glowModel = BCLModels.FURNACE_GLOW.createWithSuffix(this, "_lit", mappingGlow, generator.modelOutput());
 
@@ -87,6 +88,7 @@ public abstract class BaseFurnaceBlock extends FurnaceBlock implements RenderLay
         addRotationModels(prop, glowModel, true);
 
         generator.acceptBlockState(DatagenModelDispatch.dispatchWith(this, prop));
+        generator.delegateItemModel(this, furnaceModel);
     }
 
     private static void addRotationModels(

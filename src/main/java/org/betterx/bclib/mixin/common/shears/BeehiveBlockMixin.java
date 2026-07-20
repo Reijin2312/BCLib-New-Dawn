@@ -2,7 +2,6 @@ package org.betterx.bclib.mixin.common.shears;
 
 import org.betterx.bclib.items.tool.BaseShearsItem;
 
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.BeehiveBlock;
