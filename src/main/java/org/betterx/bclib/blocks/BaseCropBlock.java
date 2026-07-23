@@ -77,8 +77,8 @@ public class BaseCropBlock extends BasePlantBlock implements SurvivesOnBlocks, B
 
     @Override
     @SuppressWarnings("deprecation")
-    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
-        super.tick(state, world, pos, random);
+    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        super.randomTick(state, world, pos, random);
         if (isBonemealSuccess(world, random, pos, state) && random.nextInt(8) == 0) {
             performBonemeal(world, random, pos, state);
         }
