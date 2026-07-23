@@ -96,7 +96,7 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
         } else if (blockState.getFluidState().getAmount() == 8) {
             return false;
         } else {
-            int i = LightEngine.getLightBlockInto(
+            int i = LightEngine.getLightDampeningInto(
                     state,
                     blockState,
                     Direction.UP,

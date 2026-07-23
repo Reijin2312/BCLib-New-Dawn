@@ -49,7 +49,7 @@ public abstract class BaseBarkBlock extends BaseRotatedPillarBlock {
         public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
             context.add(BlockTags.LOGS, this);
             if (flammable) {
-                context.add(BlockTags.LOGS_THAT_BURN, this);
+                context.add(net.minecraft.tags.BlockItemTags.LOGS_THAT_BURN.block(), this);
             }
         }
 

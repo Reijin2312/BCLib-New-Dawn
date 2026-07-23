@@ -56,7 +56,7 @@ public abstract class BaseChair extends AbstractChair {
 
     @Deprecated(forRemoval = true)
     public BaseChair(Block baseMaterial) {
-        this(baseMaterial, Blocks.RED_WOOL);
+        this(baseMaterial, Blocks.WOOL.red());
     }
 
     @Override
@@ -137,7 +137,7 @@ public abstract class BaseChair extends AbstractChair {
     public static class Wood extends BaseChair implements BehaviourWood {
         @Deprecated(forRemoval = true)
         public Wood(Block baseMaterial) {
-            super(baseMaterial, Blocks.RED_WOOL);
+            super(baseMaterial, Blocks.WOOL.red());
         }
 
         public Wood(Block baseMaterial, Block clothMaterial) {
@@ -148,7 +148,7 @@ public abstract class BaseChair extends AbstractChair {
     public static class Stone extends BaseChair implements BehaviourStone {
         @Deprecated(forRemoval = true)
         public Stone(Block baseMaterial) {
-            super(baseMaterial, Blocks.RED_WOOL);
+            super(baseMaterial, Blocks.WOOL.red());
         }
 
         public Stone(Block baseMaterial, Block clothMaterial) {
@@ -159,7 +159,7 @@ public abstract class BaseChair extends AbstractChair {
     public static class Metal extends BaseChair implements BehaviourMetal {
         @Deprecated(forRemoval = true)
         public Metal(Block baseMaterial) {
-            super(baseMaterial, Blocks.RED_WOOL);
+            super(baseMaterial, Blocks.WOOL.red());
         }
 
         public Metal(Block baseMaterial, Block clothMaterial) {
@@ -191,7 +191,7 @@ public abstract class BaseChair extends AbstractChair {
     ) {
         var bottomShape = LootItemBlockStatePropertyCondition
                 .hasBlockStateProperties(this)
-                .setProperties(net.minecraft.advancements.criterion.StatePropertiesPredicate.Builder
+                .setProperties(net.minecraft.advancements.predicates.StatePropertiesPredicate.Builder
                         .properties()
                         .hasProperty(TOP, false));
         return LootTable

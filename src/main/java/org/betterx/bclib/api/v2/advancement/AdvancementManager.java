@@ -7,7 +7,9 @@ import org.betterx.wover.complex.api.equipment.EquipmentSet;
 import org.betterx.wover.complex.api.equipment.ToolSlot;
 
 import net.minecraft.advancements.*;
-import net.minecraft.advancements.criterion.*;
+import net.minecraft.advancements.predicates.ItemPredicate;
+import net.minecraft.advancements.predicates.LocationPredicate;
+import net.minecraft.advancements.triggers.*;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;

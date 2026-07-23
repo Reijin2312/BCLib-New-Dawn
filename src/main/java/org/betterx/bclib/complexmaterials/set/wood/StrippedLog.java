@@ -38,7 +38,7 @@ public class StrippedLog extends SimpleMaterialSlot<WoodenComplexMaterial> {
             entry
                     .setBlockTags(
                             BlockTags.LOGS,
-                            BlockTags.LOGS_THAT_BURN,
+                            net.minecraft.tags.BlockItemTags.LOGS_THAT_BURN.block(),
                             parentMaterial.getBlockTag(WoodenComplexMaterial.TAG_LOGS)
                     )
                     .setItemTags(

@@ -66,7 +66,7 @@ public abstract class BaseDoorBlock extends DoorBlock implements RenderLayerProv
 
     @Override
     public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-        context.add(this, ItemTags.DOORS);
+        context.add(this, net.minecraft.tags.BlockItemTags.DOORS.item());
     }
 
     //    @Override
@@ -202,7 +202,7 @@ public abstract class BaseDoorBlock extends DoorBlock implements RenderLayerProv
 
         @Override
         public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-            context.add(this, ItemTags.DOORS, ItemTags.WOODEN_DOORS);
+            context.add(this, net.minecraft.tags.BlockItemTags.DOORS.item(), ItemTags.WOODEN_DOORS);
         }
     }
 

@@ -1,10 +1,9 @@
 package org.betterx.bclib.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -26,7 +25,7 @@ public abstract class HumanoidArmorRenderer {
 
     public void render(
             PoseStack pose,
-            MultiBufferSource buffer,
+            SubmitNodeCollector submitNodeCollector,
             ItemStack stack,
             @Nullable LivingEntity entity,
             EquipmentSlot slot,
@@ -51,10 +50,10 @@ public abstract class HumanoidArmorRenderer {
 
         setPartVisibility(model, slot);
         setupAnim(model, renderState);
-        renderModel(pose, buffer, light, model, getTextureForSlot(slot, usesInnerModel(slot)), 0xFFFFFFFF);
+        renderModel(pose, submitNodeCollector, light, model, renderState, getTextureForSlot(slot, usesInnerModel(slot)), 0xFFFFFFFF);
 
         if (stack.hasFoil()) {
-            renderGlint(pose, buffer, light, model);
+            renderGlint(pose, submitNodeCollector, light, model, renderState);
         }
     }
 
@@ -69,27 +68,47 @@ public abstract class HumanoidArmorRenderer {
 
     protected void renderModel(
             PoseStack pose,
-            MultiBufferSource buffer,
+            SubmitNodeCollector submitNodeCollector,
             int light,
             HumanoidModel<?> humanoidModel,
+            HumanoidRenderState renderState,
             Identifier texture,
             int color
     ) {
-        VertexConsumer vertexConsumer = buffer.getBuffer(RenderTypes.armorCutoutNoCull(texture));
-        humanoidModel.renderToBuffer(pose, vertexConsumer, light, OverlayTexture.NO_OVERLAY, color);
+        submitModel(submitNodeCollector, humanoidModel, renderState, pose, RenderTypes.armorCutoutNoCull(texture), light, color);
     }
 
     protected void renderGlint(
             PoseStack pose,
-            MultiBufferSource buffer,
+            SubmitNodeCollector submitNodeCollector,
             int light,
-            HumanoidModel<?> humanoidModel
+            HumanoidModel<?> humanoidModel,
+            HumanoidRenderState renderState
     ) {
-        humanoidModel.renderToBuffer(
+        submitModel(submitNodeCollector, humanoidModel, renderState, pose, RenderTypes.armorEntityGlint(), light, 0xFFFFFFFF);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void submitModel(
+            SubmitNodeCollector collector,
+            HumanoidModel<?> model,
+            HumanoidRenderState state,
+            PoseStack pose,
+            net.minecraft.client.renderer.rendertype.RenderType renderType,
+            int light,
+            int color
+    ) {
+        collector.submitModel(
+                (HumanoidModel) model,
+                state,
                 pose,
-                buffer.getBuffer(RenderTypes.armorEntityGlint()),
+                renderType,
                 light,
-                OverlayTexture.NO_OVERLAY
+                OverlayTexture.NO_OVERLAY,
+                color,
+                null,
+                0,
+                null
         );
     }
 

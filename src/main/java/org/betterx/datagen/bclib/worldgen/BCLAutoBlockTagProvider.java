@@ -86,7 +86,7 @@ public class BCLAutoBlockTagProvider extends WoverTagProvider.ForBlocks implemen
         }
 
         if (block instanceof BehaviourSaplingLike) {
-            context.add(block, CommonBlockTags.SAPLINGS, BlockTags.SAPLINGS);
+            context.add(block, CommonBlockTags.SAPLINGS, net.minecraft.tags.BlockItemTags.SAPLINGS.block());
         }
 
         if (block instanceof BehaviourClimable c) {

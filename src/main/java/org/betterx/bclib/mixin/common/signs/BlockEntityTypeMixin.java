@@ -7,6 +7,7 @@ import org.betterx.bclib.blocks.signs.BaseWallSignBlock;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.state.BlockState;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,12 +20,12 @@ public class BlockEntityTypeMixin {
     @Inject(remap = false, method = "isValid", at = @At("HEAD"), cancellable = true)
     void bcl_isValid(BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
         final BlockEntityType self = (BlockEntityType) (Object) this;
-        if (self == BlockEntityType.SIGN) {
+        if (self == BlockEntityTypes.SIGN) {
             final Block block = blockState.getBlock();
             if ((block instanceof BaseSignBlock) || (block instanceof BaseWallSignBlock)) {
                 cir.setReturnValue(true);
             }
-        } else if (self == BlockEntityType.HANGING_SIGN) {
+        } else if (self == BlockEntityTypes.HANGING_SIGN) {
             final Block block = blockState.getBlock();
             if ((block instanceof BaseHangingSignBlock) || (block instanceof BaseWallHangingSignBlock)) {
                 cir.setReturnValue(true);

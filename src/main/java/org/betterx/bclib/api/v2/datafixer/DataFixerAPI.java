@@ -89,7 +89,7 @@ public class DataFixerAPI {
         } catch (IOException e) {
             BCLib.LOGGER.warn("Failed to read level {} data", levelID, e);
             SystemToast.onWorldAccessFailure(Minecraft.getInstance(), levelID);
-            Minecraft.getInstance().setScreen(null);
+            Minecraft.getInstance().gui.setScreen(null);
             return true;
         }
 
@@ -160,11 +160,11 @@ public class DataFixerAPI {
 
     private static AtomicProgressListener showProgressScreen() {
         ProgressScreen ps = new ProgressScreen(
-                Minecraft.getInstance().screen,
+                Minecraft.getInstance().gui.screen(),
                 Component.translatable("title.bclib.datafixer.progress"),
                 Component.translatable("message.bclib.datafixer.progress")
         );
-        Minecraft.getInstance().setScreen(ps);
+        Minecraft.getInstance().gui.setScreen(ps);
         return ps;
     }
 
@@ -229,13 +229,12 @@ public class DataFixerAPI {
     }
 
     private static void showBackupToast(Minecraft minecraft, Component title, Component message) {
-        runOnMinecraftThread(() -> minecraft.getToastManager()
-                                            .addToast(SystemToast.multiline(
-                                                    minecraft,
-                                                    SystemToast.SystemToastId.WORLD_BACKUP,
-                                                    title,
-                                                    message
-                                            )));
+        runOnMinecraftThread(() -> SystemToast.add(
+                minecraft.gui.toastManager(),
+                SystemToast.SystemToastId.WORLD_BACKUP,
+                title,
+                message
+        ));
     }
 
     private static void runOnMinecraftThread(Runnable runner) {
@@ -415,16 +414,16 @@ public class DataFixerAPI {
     }
 
     private static void showLevelFixErrorScreen(State state, Listener onContinue) {
-        Minecraft.getInstance()
+        Minecraft.getInstance().gui
                  .setScreen(new LevelFixErrorScreen(
-                         Minecraft.getInstance().screen,
+                         Minecraft.getInstance().gui.screen(),
                          state.getErrorMessages(),
                          onContinue
                  ));
     }
 
     private static void showBackupFailedScreen(Runnable onBack, Runnable onContinue) {
-        Minecraft.getInstance().setScreen(new BackupFailedScreen(null, onBack, onContinue));
+        Minecraft.getInstance().gui.setScreen(new BackupFailedScreen(null, onBack, onContinue));
     }
 
     private static MigrationProfile loadProfileIfNeeded(File levelBaseDir) {
@@ -452,7 +451,7 @@ public class DataFixerAPI {
     }
 
     static void showBackupWarning(String levelID, BiConsumer<Boolean, Boolean> whenFinished) {
-        Minecraft.getInstance().setScreen(new ConfirmFixScreen(null, whenFinished::accept));
+        Minecraft.getInstance().gui.setScreen(new ConfirmFixScreen(null, whenFinished::accept));
     }
 
     private static State runDataFixes(
