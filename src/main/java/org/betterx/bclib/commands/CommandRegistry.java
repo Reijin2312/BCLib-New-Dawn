@@ -78,28 +78,28 @@ public class CommandRegistry {
     private static final Map<Holder<Biome>, BlockState> biomeMap = new HashMap<>();
     private static int biomeMapIdx = 0;
     private static final BlockState[] states = {
-            Blocks.RED_STAINED_GLASS.defaultBlockState(),
-            Blocks.BLUE_STAINED_GLASS.defaultBlockState(),
-            Blocks.YELLOW_STAINED_GLASS.defaultBlockState(),
-            Blocks.LIME_STAINED_GLASS.defaultBlockState(),
-            Blocks.PINK_STAINED_GLASS.defaultBlockState(),
-            Blocks.GREEN_STAINED_GLASS.defaultBlockState(),
-            Blocks.WHITE_STAINED_GLASS.defaultBlockState(),
-            Blocks.BLACK_STAINED_GLASS.defaultBlockState(),
-            Blocks.ORANGE_STAINED_GLASS.defaultBlockState(),
-            Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState()
+            Blocks.STAINED_GLASS.red().defaultBlockState(),
+            Blocks.STAINED_GLASS.blue().defaultBlockState(),
+            Blocks.STAINED_GLASS.yellow().defaultBlockState(),
+            Blocks.STAINED_GLASS.lime().defaultBlockState(),
+            Blocks.STAINED_GLASS.pink().defaultBlockState(),
+            Blocks.STAINED_GLASS.green().defaultBlockState(),
+            Blocks.STAINED_GLASS.white().defaultBlockState(),
+            Blocks.STAINED_GLASS.black().defaultBlockState(),
+            Blocks.STAINED_GLASS.orange().defaultBlockState(),
+            Blocks.STAINED_GLASS.lightBlue().defaultBlockState()
     };
     private static final BlockState[] states2 = {
-            Blocks.RED_CONCRETE.defaultBlockState(),
-            Blocks.BLUE_CONCRETE.defaultBlockState(),
-            Blocks.YELLOW_CONCRETE.defaultBlockState(),
-            Blocks.LIME_CONCRETE.defaultBlockState(),
-            Blocks.PINK_CONCRETE.defaultBlockState(),
-            Blocks.GREEN_CONCRETE.defaultBlockState(),
-            Blocks.WHITE_CONCRETE.defaultBlockState(),
-            Blocks.BLACK_CONCRETE.defaultBlockState(),
-            Blocks.ORANGE_CONCRETE.defaultBlockState(),
-            Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState()
+            Blocks.CONCRETE.red().defaultBlockState(),
+            Blocks.CONCRETE.blue().defaultBlockState(),
+            Blocks.CONCRETE.yellow().defaultBlockState(),
+            Blocks.CONCRETE.lime().defaultBlockState(),
+            Blocks.CONCRETE.pink().defaultBlockState(),
+            Blocks.CONCRETE.green().defaultBlockState(),
+            Blocks.CONCRETE.white().defaultBlockState(),
+            Blocks.CONCRETE.black().defaultBlockState(),
+            Blocks.CONCRETE.orange().defaultBlockState(),
+            Blocks.CONCRETE.lightBlue().defaultBlockState()
     };
 
     private static int revealOre(CommandContext<CommandSourceStack> ctx, int chunks) throws CommandSyntaxException {
@@ -136,14 +136,14 @@ public class CommandRegistry {
                             if (y == 1 || !state.is(Blocks.AIR)) {
                                 if (!(state.is(CommonBlockTags.NETHER_ORES)
                                         || state.is(CommonBlockTags.END_ORES)
-                                        || state.is(BlockTags.COAL_ORES)
+                                        || state.is(net.minecraft.tags.BlockItemTags.COAL_ORES.block())
                                         || state.is(BlockTags.COPPER_ORES)
-                                        || state.is(BlockTags.DIAMOND_ORES)
-                                        || state.is(BlockTags.EMERALD_ORES)
+                                        || state.is(net.minecraft.tags.BlockItemTags.DIAMOND_ORES.block())
+                                        || state.is(net.minecraft.tags.BlockItemTags.EMERALD_ORES.block())
                                         || state.is(BlockTags.GOLD_ORES)
                                         || state.is(BlockTags.IRON_ORES)
-                                        || state.is(BlockTags.LAPIS_ORES)
-                                        || state.is(BlockTags.REDSTONE_ORES)
+                                        || state.is(net.minecraft.tags.BlockItemTags.LAPIS_ORES.block())
+                                        || state.is(net.minecraft.tags.BlockItemTags.REDSTONE_ORES.block())
                                         || state.is(Blocks.NETHER_QUARTZ_ORE)
                                         || state.is(Blocks.NETHER_GOLD_ORE)
                                         || state.is(Blocks.ANCIENT_DEBRIS))) {
@@ -211,9 +211,9 @@ public class CommandRegistry {
         org.betterx.bclib.util.BlocksHelper.setWithoutUpdate(
                 level,
                 new BlockPos((int) pos.x, (int) pos.y, (int) pos.z),
-                Blocks.YELLOW_CONCRETE
+                Blocks.CONCRETE.yellow()
         );
-        org.betterx.bclib.util.BlocksHelper.setWithoutUpdate(level, mPos, Blocks.LIGHT_BLUE_CONCRETE);
+        org.betterx.bclib.util.BlocksHelper.setWithoutUpdate(level, mPos, Blocks.CONCRETE.lightBlue());
         return Command.SINGLE_SUCCESS;
     }
 }

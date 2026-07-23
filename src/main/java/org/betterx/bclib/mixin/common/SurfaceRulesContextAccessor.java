@@ -10,8 +10,6 @@ import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.function.Supplier;
-
 @Mixin(value = SurfaceRules.Context.class)
 public interface SurfaceRulesContextAccessor {
     @Accessor(value = "blockX")
@@ -27,7 +25,7 @@ public interface SurfaceRulesContextAccessor {
     int getSurfaceDepth();
 
     @Accessor(value = "biome")
-    Supplier<Holder<Biome>> getBiome();
+    Holder<Biome> getBiome();
 
     @Accessor(value = "chunk")
     ChunkAccess getChunk();

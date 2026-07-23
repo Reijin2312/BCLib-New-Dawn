@@ -46,7 +46,7 @@ public abstract class BaseStripableBarkBlock extends BaseBarkBlock implements Ax
         public void registerBlockTags(Identifier location, TagBootstrapContext<Block> context) {
             context.add(this, BlockTags.LOGS);
             if (flammable) {
-                context.add(this, BlockTags.LOGS_THAT_BURN);
+                context.add(this, net.minecraft.tags.BlockItemTags.LOGS_THAT_BURN.block());
             }
         }
 

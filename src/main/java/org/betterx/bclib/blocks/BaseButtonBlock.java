@@ -52,7 +52,7 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
 
     @Override
     public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-        context.add(this, ItemTags.BUTTONS);
+        context.add(this, net.minecraft.tags.BlockItemTags.BUTTONS.item());
     }
 
     public static class Metal extends BaseButtonBlock implements BehaviourMetal {
@@ -73,7 +73,7 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
 
         @Override
         public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-            context.add(this, ItemTags.BUTTONS, ItemTags.STONE_BUTTONS);
+            context.add(this, net.minecraft.tags.BlockItemTags.BUTTONS.item(), net.minecraft.tags.BlockItemTags.STONE_BUTTONS.item());
         }
     }
 
@@ -90,7 +90,7 @@ public abstract class BaseButtonBlock extends ButtonBlock implements BlockModelP
 
         @Override
         public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-            context.add(this, ItemTags.BUTTONS, ItemTags.WOODEN_BUTTONS);
+            context.add(this, net.minecraft.tags.BlockItemTags.BUTTONS.item(), ItemTags.WOODEN_BUTTONS);
         }
     }
 

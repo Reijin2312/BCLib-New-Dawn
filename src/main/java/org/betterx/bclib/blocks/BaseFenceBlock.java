@@ -110,7 +110,7 @@ public abstract class BaseFenceBlock extends FenceBlock implements RuntimeBlockM
 
     @Override
     public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-        context.add(this, ItemTags.FENCES);
+        context.add(this, net.minecraft.tags.BlockItemTags.FENCES.item());
     }
 
     public static class Wood extends BaseFenceBlock implements BehaviourWood {
@@ -125,7 +125,7 @@ public abstract class BaseFenceBlock extends FenceBlock implements RuntimeBlockM
 
         @Override
         public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-            context.add(this, ItemTags.FENCES, ItemTags.WOODEN_FENCES);
+            context.add(this, net.minecraft.tags.BlockItemTags.FENCES.item(), ItemTags.WOODEN_FENCES);
         }
     }
 

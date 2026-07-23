@@ -30,7 +30,7 @@ public abstract class BaseBarStool extends AbstractChair {
 
     @Deprecated(forRemoval = true)
     public BaseBarStool(Block baseMaterial) {
-        this(baseMaterial, Blocks.RED_WOOL);
+        this(baseMaterial, Blocks.WOOL.red());
     }
 
     @Override
@@ -41,7 +41,7 @@ public abstract class BaseBarStool extends AbstractChair {
     public static class Wood extends BaseBarStool implements BehaviourWood {
         @Deprecated(forRemoval = true)
         public Wood(Block baseMaterial) {
-            super(baseMaterial, Blocks.RED_WOOL);
+            super(baseMaterial, Blocks.WOOL.red());
         }
 
         public Wood(Block baseMaterial, Block clothMaterial) {
@@ -52,7 +52,7 @@ public abstract class BaseBarStool extends AbstractChair {
     public static class Stone extends BaseBarStool implements BehaviourStone {
         @Deprecated(forRemoval = true)
         public Stone(Block baseMaterial) {
-            super(baseMaterial, Blocks.RED_WOOL);
+            super(baseMaterial, Blocks.WOOL.red());
         }
 
         public Stone(Block baseMaterial, Block clothMaterial) {
@@ -63,7 +63,7 @@ public abstract class BaseBarStool extends AbstractChair {
     public static class Metal extends BaseBarStool implements BehaviourMetal {
         @Deprecated(forRemoval = true)
         public Metal(Block baseMaterial) {
-            super(baseMaterial, Blocks.RED_WOOL);
+            super(baseMaterial, Blocks.WOOL.red());
         }
 
         public Metal(Block baseMaterial, Block clothMaterial) {

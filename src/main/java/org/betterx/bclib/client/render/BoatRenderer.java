@@ -45,7 +45,7 @@ public class BoatRenderer {
         }
 
         boolean hasChest = ext.bclib_isChest();
-        Object modelObj = type.getBoatModel(hasChest);
+        Object modelObj = BoatModelManager.getBoatModel(type, hasChest);
         if (!(modelObj instanceof EntityModel<?> rawModel)) {
             return false;
         }

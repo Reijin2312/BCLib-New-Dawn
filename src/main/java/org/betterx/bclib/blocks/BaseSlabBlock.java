@@ -46,7 +46,7 @@ public abstract class BaseSlabBlock extends SlabBlock implements CustomBlockItem
 
     @Override
     public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-        context.add(ItemTags.SLABS, this);
+        context.add(net.minecraft.tags.BlockItemTags.SLABS.item(), this);
     }
 
     @Override
@@ -91,7 +91,7 @@ public abstract class BaseSlabBlock extends SlabBlock implements CustomBlockItem
 
         @Override
         public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-            context.add(this, ItemTags.SLABS, ItemTags.WOODEN_SLABS);
+            context.add(this, net.minecraft.tags.BlockItemTags.SLABS.item(), ItemTags.WOODEN_SLABS);
         }
     }
 

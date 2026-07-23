@@ -52,7 +52,7 @@ public abstract class BaseStairsBlock extends StairBlock implements BlockModelPr
 
     @Override
     public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-        context.add(this, ItemTags.STAIRS);
+        context.add(this, net.minecraft.tags.BlockItemTags.STAIRS.item());
     }
 
     public static class Stone extends BaseStairsBlock implements BehaviourStone {
@@ -92,7 +92,7 @@ public abstract class BaseStairsBlock extends StairBlock implements BlockModelPr
 
         @Override
         public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-            context.add(this, ItemTags.STAIRS, ItemTags.WOODEN_STAIRS);
+            context.add(this, net.minecraft.tags.BlockItemTags.STAIRS.item(), ItemTags.WOODEN_STAIRS);
         }
     }
 

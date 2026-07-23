@@ -54,7 +54,7 @@ public abstract class BaseTrapdoorBlock extends TrapDoorBlock implements RenderL
 
     @Override
     public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-        context.add(this, ItemTags.TRAPDOORS);
+        context.add(this, net.minecraft.tags.BlockItemTags.TRAPDOORS.item());
     }
 
     private Quadrant xRotationForState(boolean isTop, boolean isOpen, Direction dir) {
@@ -135,7 +135,7 @@ public abstract class BaseTrapdoorBlock extends TrapDoorBlock implements RenderL
 
         @Override
         public void registerItemTags(Identifier location, ItemTagBootstrapContext context) {
-            context.add(this, ItemTags.TRAPDOORS, ItemTags.WOODEN_TRAPDOORS);
+            context.add(this, net.minecraft.tags.BlockItemTags.TRAPDOORS.item(), ItemTags.WOODEN_TRAPDOORS);
         }
     }
 
