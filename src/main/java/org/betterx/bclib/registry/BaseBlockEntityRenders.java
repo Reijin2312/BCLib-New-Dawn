@@ -1,6 +1,7 @@
 package org.betterx.bclib.registry;
 
 import org.betterx.bclib.client.render.BaseChestBlockEntityRenderer;
+import org.betterx.bclib.client.render.BoatModelManager;
 import org.betterx.bclib.furniture.renderer.RenderChair;
 import org.betterx.bclib.items.boat.BoatTypeOverride;
 
@@ -25,9 +26,9 @@ public class BaseBlockEntityRenders {
         LayerDefinition chestRaftModel = RaftModel.createChestRaftModel();
 
         BoatTypeOverride.values().forEach(type -> {
-            ModelLayerRegistry.registerModelLayer(type.boatModelName, () -> type.isRaft ? raftModel : boatModel);
+            ModelLayerRegistry.registerModelLayer(BoatModelManager.boatLayer(type), () -> type.isRaft ? raftModel : boatModel);
             ModelLayerRegistry.registerModelLayer(
-                    type.chestBoatModelName,
+                    BoatModelManager.chestBoatLayer(type),
                     () -> type.isRaft ? chestRaftModel : chestBoatModel
             );
         });

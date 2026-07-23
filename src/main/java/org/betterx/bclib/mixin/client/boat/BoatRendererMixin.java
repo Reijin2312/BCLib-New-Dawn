@@ -17,6 +17,6 @@ public abstract class BoatRendererMixin {
     private void bcl_init(EntityRendererProvider.Context context, ModelLayerLocation layer, CallbackInfo ci) {
         // Keep custom boat model layers baked and ready even while the custom submit/render hook is still disabled.
         org.betterx.bclib.client.render.BoatRenderer.initialize(context);
-        BoatTypeOverride.values().forEach(type -> type.createBoatModels(context));
+        BoatTypeOverride.values().forEach(type -> org.betterx.bclib.client.render.BoatModelManager.createBoatModels(context, type));
     }
 }
