@@ -99,13 +99,6 @@ dependencies {
     jarJar "io.github.llamalad7:mixinextras-neoforge:0.5.0"
     annotationProcessor "org.spongepowered:mixin:0.8.7:processor"
 
-    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-    if (enableEmiRuntime) {
-        runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
-    } else {
-        println "EMI runtime disabled (set -Penable_emi_runtime=true to re-enable)"
-    }
-
     println "Using local WunderLib: ${local_wunderlib}"
     if (local_wunderlib) {
         implementation project(path: ":wunderlib")
