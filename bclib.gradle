@@ -45,6 +45,10 @@ def rawRefmapFile = layout.buildDirectory.file("generated/mixin-refmaps/${refmap
 def fixedRefmapFile = layout.buildDirectory.file("resources/main/${refmapName}")
 
 repositories {
+    maven {
+        url "https://api.modrinth.com/maven"
+        content { includeGroup "maven.modrinth" }
+    }
     maven { url 'https://maven.neoforged.net/releases' }
     maven { url "https://maven.dblsaiko.net/" }
     maven { url "https://maven.shedaniel.me/" }
@@ -110,8 +114,8 @@ dependencies {
     jarJar "io.github.llamalad7:mixinextras-neoforge:0.5.0"
     annotationProcessor "org.spongepowered:mixin:0.8.7:processor"
 
-    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-    runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+    compileOnly "maven.modrinth:emi:${emi_version}+neoforge"
+    runtimeOnly "maven.modrinth:emi:${emi_version}+neoforge"
 
     println "Using local WunderLib: ${local_wunderlib}"
     if (local_wunderlib) {
