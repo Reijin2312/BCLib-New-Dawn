@@ -157,7 +157,7 @@ public abstract class BaseDoublePlantBlock extends BaseBlockNotFull implements R
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {
-        return provider.dropDoublePlantShears(this);
+        return provider.dropDoublePlant(this);
     }
 
     @Override
