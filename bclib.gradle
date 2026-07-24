@@ -393,7 +393,6 @@ tasks.sourcesJar {
 
 jar {
     dependsOn("fixMixinRefmap")
-    dependsOn(tasks.matching { it.name == "runClientData" })
     from("src/main/generated")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from "LICENSE"
