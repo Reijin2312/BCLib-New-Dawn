@@ -81,8 +81,6 @@ dependencies {
 
     modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-    modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
-
     println "Using local WunderLib: ${local_wunderlib}"
     if (local_wunderlib) {
         implementation project(path: ":wunderlib", configuration: 'dev')
