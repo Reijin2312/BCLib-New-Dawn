@@ -27,6 +27,8 @@ public class WoodSlots {
     public static final MaterialSlot<WoodenComplexMaterial> COMPOSTER = new Composter();
     public static final MaterialSlot<WoodenComplexMaterial> BOAT = new Boat();
     public static final MaterialSlot<WoodenComplexMaterial> CHEST_BOAT = new ChestBoat();
+    public static final MaterialSlot<WoodenComplexMaterial> RAFT = new Raft();
+    public static final MaterialSlot<WoodenComplexMaterial> CHEST_RAFT = new ChestRaft();
 
     public static final String WALL_SIGN = Sign.WALL_SUFFFIX;
     public static final String WALL_HANGING_SIGN = HangingSign.WALL_SUFFFIX;
