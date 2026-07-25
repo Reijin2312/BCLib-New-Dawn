@@ -53,7 +53,7 @@ public abstract class BaseWallPlantBlock extends BasePlantBlock {
     }
 
     public boolean isSupport(LevelReader world, BlockPos pos, BlockState blockState, Direction direction) {
-        return blockState.isSolid() && blockState.isFaceSturdy(world, pos, direction);
+        return BlocksHelper.isDecorationSupport(world, pos, blockState, direction);
     }
 
     @Override
