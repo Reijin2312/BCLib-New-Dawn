@@ -57,8 +57,8 @@ public final class BoatTypeOverride {
         if (BCLib.isClient()) {
             this.boatModelName = createBoatModelName(id.getNamespace(), id.getPath());
             this.chestBoatModelName = createChestBoatModelName(id.getNamespace(), id.getPath());
-            this.boatTexture = getTextureLocation(modCore.namespace, name, false);
-            this.chestBoatTexture = getTextureLocation(modCore.namespace, name, true);
+            this.boatTexture = getTextureLocation(modCore.namespace, name, false, isRaft);
+            this.chestBoatTexture = getTextureLocation(modCore.namespace, name, true, isRaft);
         } else {
             this.boatModelName = null;
             this.chestBoatModelName = null;
@@ -139,11 +139,13 @@ public final class BoatTypeOverride {
         return new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(modID, "chest_boat/" + name), DEFAULT_LAYER);
     }
 
-    private static ResourceLocation getTextureLocation(String modID, String name, boolean chest) {
+    private static ResourceLocation getTextureLocation(String modID, String name, boolean chest, boolean raft) {
+        String suffix = raft ? "_raft" : "_boat";
         if (chest) {
-            return ResourceLocation.fromNamespaceAndPath(modID, "textures/entity/chest_boat/" + name + ".png");
+            suffix = "_chest" + suffix;
+            return ResourceLocation.fromNamespaceAndPath(modID, "textures/entity/chest_boat/" + name + suffix + ".png");
         }
-        return ResourceLocation.fromNamespaceAndPath(modID, "textures/entity/boat/" + name + ".png");
+        return ResourceLocation.fromNamespaceAndPath(modID, "textures/entity/boat/" + name + suffix + ".png");
     }
 
     public static BoatTypeOverride create(ModCore modCore, String name, Block planks) {
