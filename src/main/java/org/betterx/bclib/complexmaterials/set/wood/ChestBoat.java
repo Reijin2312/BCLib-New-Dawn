@@ -25,7 +25,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChestBoat extends SimpleMaterialSlot<WoodenComplexMaterial> {
     public ChestBoat() {
-        super("chest_boat");
+        this("chest_boat");
+    }
+
+    protected ChestBoat(String suffix) {
+        super(suffix);
     }
 
     @Override
@@ -50,12 +54,21 @@ public class ChestBoat extends SimpleMaterialSlot<WoodenComplexMaterial> {
 
     @Override
     protected @Nullable void makeRecipe(RecipeOutput context, ComplexMaterial parentMaterial, ResourceLocation id) {
-        makeChestBoatRecipe(context, id, parentMaterial.getItem(WoodSlots.BOAT), parentMaterial.getItem(WoodSlots.CHEST_BOAT));
+        makeChestBoatRecipe(
+                context,
+                id,
+                getBaseBoat((WoodenComplexMaterial) parentMaterial),
+                parentMaterial.getItem(suffix)
+        );
     }
 
     @Override
     public void onInit(WoodenComplexMaterial parentMaterial) {
         parentMaterial.initBoatType();
+    }
+
+    protected Item getBaseBoat(WoodenComplexMaterial parentMaterial) {
+        return parentMaterial.getItem(WoodSlots.BOAT);
     }
 
     public static void makeChestBoatRecipe(RecipeOutput context, ResourceLocation id, Item boat, Item chestBoat) {
