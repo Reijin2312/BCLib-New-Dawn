@@ -22,7 +22,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class Boat extends SimpleMaterialSlot<WoodenComplexMaterial> {
     public Boat() {
-        super("boat");
+        this("boat");
+    }
+
+    protected Boat(String suffix) {
+        super(suffix);
     }
 
     @Override

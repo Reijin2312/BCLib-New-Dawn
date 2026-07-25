@@ -9,7 +9,12 @@ public class BaseBoatItem extends BoatItem implements CustomBoatTypeOverride, It
     BoatTypeOverride customType;
 
     public BaseBoatItem(boolean bl, BoatTypeOverride type, Properties properties) {
-        super(bl ? EntityType.OAK_CHEST_BOAT : EntityType.OAK_BOAT, properties);
+        super(
+                bl
+                        ? (type.isRaft ? EntityType.BAMBOO_CHEST_RAFT : EntityType.OAK_CHEST_BOAT)
+                        : (type.isRaft ? EntityType.BAMBOO_RAFT : EntityType.OAK_BOAT),
+                properties
+        );
         bcl_setCustomType(type);
     }
 
