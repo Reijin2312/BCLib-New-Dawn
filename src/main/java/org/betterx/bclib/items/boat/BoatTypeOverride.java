@@ -46,8 +46,8 @@ public final class BoatTypeOverride {
         this.isRaft = isRaft;
         this.boatModelName = createBoatModelName(id.getNamespace(), id.getPath());
         this.chestBoatModelName = createChestBoatModelName(id.getNamespace(), id.getPath());
-        this.boatTexture = getTextureLocation(modCore.namespace, name, false);
-        this.chestBoatTexture = getTextureLocation(modCore.namespace, name, true);
+        this.boatTexture = getTextureLocation(modCore.namespace, name, false, isRaft);
+        this.chestBoatTexture = getTextureLocation(modCore.namespace, name, true, isRaft);
 
         values.add(this);
     }
@@ -84,11 +84,13 @@ public final class BoatTypeOverride {
         return Identifier.fromNamespaceAndPath(modID, "chest_boat/" + name);
     }
 
-    private static Identifier getTextureLocation(String modID, String name, boolean chest) {
+    private static Identifier getTextureLocation(String modID, String name, boolean chest, boolean raft) {
+        String suffix = raft ? "_raft" : "_boat";
         if (chest) {
-            return Identifier.fromNamespaceAndPath(modID, "textures/entity/chest_boat/" + name + ".png");
+            suffix = "_chest" + suffix;
+            return Identifier.fromNamespaceAndPath(modID, "textures/entity/chest_boat/" + name + suffix + ".png");
         }
-        return Identifier.fromNamespaceAndPath(modID, "textures/entity/boat/" + name + ".png");
+        return Identifier.fromNamespaceAndPath(modID, "textures/entity/boat/" + name + suffix + ".png");
     }
 
     public static BoatTypeOverride create(ModCore modCore, String name, Block planks) {
