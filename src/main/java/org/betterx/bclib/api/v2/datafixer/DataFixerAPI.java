@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -171,7 +173,7 @@ public class DataFixerAPI {
     ) {
         if (currentAccess != null) {
             try {
-                EditWorldScreen.makeBackupAndShowToast(currentAccess);
+                makeBackupOnRenderThread(currentAccess);
                 return true;
             } catch (RuntimeException ex) {
                 LOGGER.warn(
@@ -185,7 +187,7 @@ public class DataFixerAPI {
         boolean didOpen = false;
         try (LevelStorageSource.LevelStorageAccess access = storageSource.createAccess(levelID);) {
             didOpen = true;
-            EditWorldScreen.makeBackupAndShowToast(access);
+            makeBackupOnRenderThread(access);
             return true;
         } catch (IOException ex) {
             if (!didOpen) {
@@ -193,6 +195,44 @@ public class DataFixerAPI {
             }
             LOGGER.warn("Failed to create backup of level {}", levelID, ex);
             return false;
+        }
+    }
+
+    /**
+     * EditWorldScreen.makeBackupAndShowToast touches the render system while
+     * creating the toast. Data fixes run on a worker thread, so dispatch the
+     * whole operation to the client thread and wait before releasing the level
+     * access (otherwise the backup can race with the close and leave the file
+     * locked).
+     */
+    private static void makeBackupOnRenderThread(LevelStorageAccess access) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.isSameThread()) {
+            EditWorldScreen.makeBackupAndShowToast(access);
+            return;
+        }
+
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        minecraft.execute(() -> {
+            try {
+                EditWorldScreen.makeBackupAndShowToast(access);
+                result.complete(null);
+            } catch (Throwable throwable) {
+                result.completeExceptionally(throwable);
+            }
+        });
+
+        try {
+            result.join();
+        } catch (CompletionException exception) {
+            Throwable cause = exception.getCause();
+            if (cause instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            throw exception;
         }
     }
 
