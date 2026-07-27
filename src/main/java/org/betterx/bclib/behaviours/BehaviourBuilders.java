@@ -24,12 +24,20 @@ public class BehaviourBuilders {
     }
 
     public static BlockBehaviour.Properties createWalkablePlant(MapColor color) {
+        return createWalkablePlant(color, BlockBehaviour.OffsetType.NONE);
+    }
+
+    public static BlockBehaviour.Properties createWalkablePlant(
+            MapColor color,
+            BlockBehaviour.OffsetType offsetType
+    ) {
         return BlockBehaviour.Properties
                 .of()
                 .mapColor(color)
                 .noOcclusion()
                 .instabreak()
                 .sound(SoundType.GRASS)
+                .offsetType(offsetType)
                 .pushReaction(PushReaction.DESTROY);
     }
 
