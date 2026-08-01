@@ -126,7 +126,6 @@ javadoc {
         charSet = "UTF-8"
         tags = ["reason"]
         memberLevel = JavadocMemberLevel.PROTECTED
-        links("https://docs.oracle.com/en/java/javase/17/docs/api/")
         // Disable the crazy super-strict doclint tool in Java 8
         addStringOption("Xdoclint:none", "-quiet")
         addStringOption("noqualifier", "net.minecraft.*:com.mojang.*:net.fabricmc.*")
@@ -188,7 +187,7 @@ artifacts {
     dev jar
 }
 
-def modrinthModsDir = file(findProperty("modrinth_mods_dir") ?: "C:/Users/Roboute Guilliman/AppData/Roaming/ModrinthApp/profiles/26.1-fab/mods")
+def modrinthModsDir = file(findProperty("modrinth_mods_dir") ?: "C:/Users/Redmi/AppData/Roaming/ModrinthApp/profiles/Fabric 26.2/mods")
 def fabricRuntimeProjects = [project]
 if (local_wover) fabricRuntimeProjects.add(project(":WorldWeaver"))
 if (local_wunderlib) fabricRuntimeProjects.add(project(":wunderlib"))

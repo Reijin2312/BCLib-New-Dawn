@@ -1,7 +1,5 @@
 package org.betterx.bclib.mixin.common;
 
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.RandomState;
@@ -23,9 +21,6 @@ public interface SurfaceRulesContextAccessor {
 
     @Accessor(value = "surfaceDepth")
     int getSurfaceDepth();
-
-    @Accessor(value = "biome")
-    Holder<Biome> getBiome();
 
     @Accessor(value = "chunk")
     ChunkAccess getChunk();

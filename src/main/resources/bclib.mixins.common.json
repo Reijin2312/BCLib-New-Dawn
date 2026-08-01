@@ -16,6 +16,7 @@
     "FireBlockAccessor",
     "LayerLightSectionStorageMixin",
     "LootPoolMixin",
+    "LootTableBuilderMixin",
     "MobSpawnSettingsAccessor",
     "PistonBaseBlockMixin",
     "PortalShapeMixin",

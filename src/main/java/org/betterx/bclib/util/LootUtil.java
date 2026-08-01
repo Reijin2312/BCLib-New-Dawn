@@ -1,7 +1,6 @@
 package org.betterx.bclib.util;
 
-import org.betterx.bclib.BCLib;
-import org.betterx.bclib.interfaces.LootPoolAccessor;
+import org.betterx.bclib.interfaces.LootTableBuilderAccessor;
 import org.betterx.bclib.interfaces.tools.*;
 import org.betterx.bclib.items.tool.BaseShearsItem;
 import org.betterx.wover.tag.api.predefined.CommonItemTags;
@@ -16,13 +15,11 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,35 +45,7 @@ public class LootUtil {
     }
 
     public static boolean addToPool(LootTable.Builder table, int index, ArrayList<LootPoolEntryContainer> newEntries) {
-        List<LootPool> pools = new ArrayList<>(0);
-        try {
-            for (Field f : table.getClass()
-                                .getDeclaredFields()) {
-                if (List.class.isAssignableFrom(f.getType())) {
-                    f.setAccessible(true);
-                    List<?> list = (List<?>) f.get(table);
-                    if (list != null && list.size() > 0) {
-                        Object first = list.get(0);
-                        if (first != null && LootPool.class.isAssignableFrom(first.getClass())) {
-                            pools = (List<LootPool>) list;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (pools != null && pools.size() > index) {
-                LootPool pool = pools.get(index);
-                LootPoolAccessor acc = (LootPoolAccessor) pool;
-                pools.set(index, acc.bcl_mergeEntries(newEntries));
-
-                return true;
-            }
-        } catch (Throwable t) {
-            BCLib.LOGGER.error("ERROR building loot table: " + t.getMessage());
-        }
-
-        return false;
+        return ((LootTableBuilderAccessor) table).bcl_addToPool(index, newEntries);
     }
 
     public static boolean isCorrectTool(ItemLike block, BlockState state, ItemInstance tool) {
