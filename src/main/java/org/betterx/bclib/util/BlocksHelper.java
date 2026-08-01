@@ -9,9 +9,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.LavaFluid;
 import net.minecraft.world.level.material.PushReaction;
@@ -348,6 +350,15 @@ public class BlocksHelper {
 
     public static boolean isTerrainOrFluid(BlockState state) {
         return state.is(CommonBlockTags.TERRAIN) || isFluid(state);
+    }
+
+    public static boolean isDecorationSupport(
+            LevelReader level,
+            BlockPos pos,
+            BlockState state,
+            Direction direction
+    ) {
+        return state.is(BlockTags.LEAVES) || state.isFaceSturdy(level, pos, direction);
     }
 
     public static Boolean replaceableOrPlant(BlockState state) {

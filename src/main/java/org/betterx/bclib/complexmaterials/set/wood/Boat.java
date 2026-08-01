@@ -12,6 +12,8 @@ import org.betterx.wover.recipe.api.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -22,7 +24,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class Boat extends SimpleMaterialSlot<WoodenComplexMaterial> {
     public Boat() {
-        super("boat");
+        this("boat");
+    }
+
+    protected Boat(String suffix) {
+        super(suffix);
     }
 
     @Override
@@ -39,7 +45,10 @@ public class Boat extends SimpleMaterialSlot<WoodenComplexMaterial> {
 
     @Override
     protected @Nullable ItemEntry getItemEntry(WoodenComplexMaterial parentMaterial) {
-        return new ItemEntry(suffix, (cmx, settings) -> parentMaterial.getBoatType().createItem(false));
+        return new ItemEntry(
+                suffix,
+                (cmx, settings) -> parentMaterial.getBoatType().createItem(false)
+        ).setItemTags(new TagKey[]{ItemTags.BOATS});
     }
 
     @Override
