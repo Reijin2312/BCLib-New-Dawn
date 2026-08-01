@@ -25,9 +25,12 @@ public class BaseBlockEntityRenders {
         LayerDefinition chestRaftModel = RaftModel.createChestRaftModel();
 
         BoatTypeOverride.values().forEach(type -> {
-            EntityModelLayerRegistry.registerModelLayer(type.boatModelName, () -> type.isRaft ? raftModel : boatModel);
             EntityModelLayerRegistry.registerModelLayer(
-                    type.chestBoatModelName,
+                    org.betterx.bclib.client.render.BoatRenderer.modelLayer(type, false),
+                    () -> type.isRaft ? raftModel : boatModel
+            );
+            EntityModelLayerRegistry.registerModelLayer(
+                    org.betterx.bclib.client.render.BoatRenderer.modelLayer(type, true),
                     () -> type.isRaft ? chestRaftModel : chestBoatModel
             );
         });

@@ -6,6 +6,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.model.object.boat.BoatModel;
+import net.minecraft.client.model.object.boat.RaftModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -20,13 +23,38 @@ import net.minecraft.util.Unit;
 import org.joml.Quaternionf;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 public class BoatRenderer {
+    private static final String DEFAULT_LAYER = "main";
+    private static final Map<BoatTypeOverride, Object[]> BOAT_MODELS = new IdentityHashMap<>();
     private static @Nullable Model.Simple waterPatchModel;
 
     public static void initialize(EntityRendererProvider.Context context) {
         if (waterPatchModel == null) {
             waterPatchModel = new Model.Simple(context.bakeLayer(ModelLayers.BOAT_WATER_PATCH), p -> RenderTypes.waterMask());
         }
+    }
+
+    public static ModelLayerLocation modelLayer(BoatTypeOverride type, boolean chest) {
+        return new ModelLayerLocation(chest ? type.chestBoatModelName : type.boatModelName, DEFAULT_LAYER);
+    }
+
+    public static void createBoatModels(BoatTypeOverride type, EntityRendererProvider.Context context) {
+        BOAT_MODELS.computeIfAbsent(type, key -> new Object[]{
+                key.isRaft
+                        ? new RaftModel(context.bakeLayer(modelLayer(key, false)))
+                        : new BoatModel(context.bakeLayer(modelLayer(key, false))),
+                key.isRaft
+                        ? new RaftModel(context.bakeLayer(modelLayer(key, true)))
+                        : new BoatModel(context.bakeLayer(modelLayer(key, true)))
+        });
+    }
+
+    private static @Nullable Object getBoatModel(BoatTypeOverride type, boolean chest) {
+        Object[] models = BOAT_MODELS.get(type);
+        return models == null ? null : models[chest ? 1 : 0];
     }
 
     @SuppressWarnings("unchecked")
@@ -45,7 +73,7 @@ public class BoatRenderer {
         }
 
         boolean hasChest = ext.bclib_isChest();
-        Object modelObj = type.getBoatModel(hasChest);
+        Object modelObj = getBoatModel(type, hasChest);
         if (!(modelObj instanceof EntityModel<?> rawModel)) {
             return false;
         }
