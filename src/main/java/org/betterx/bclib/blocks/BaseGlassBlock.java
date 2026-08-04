@@ -28,6 +28,8 @@ public class BaseGlassBlock extends BaseBlockNotFull implements AddMineablePicka
         super(Properties.ofFullCopy(block)
                         .explosionResistance(resistance)
                         .noOcclusion()
+                        .isValidSpawn((state, world, pos, type) -> false)
+                        .isRedstoneConductor((state, world, pos) -> false)
                         .isSuffocating((arg1, arg2, arg3) -> false)
                         .isViewBlocking((arg1, arg2, arg3) -> false));
     }
