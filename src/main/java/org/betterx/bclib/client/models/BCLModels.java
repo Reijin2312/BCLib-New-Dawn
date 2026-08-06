@@ -123,7 +123,7 @@ public class BCLModels {
     public static final ModelTemplate FURNACE_GLOW = new ModelTemplate(
             Optional.of(BCLib.C.mk("block/furnace_glow")),
             Optional.empty(),
-            TextureSlot.TOP, TextureSlot.SIDE, TextureSlot.FRONT, GLOW
+            TextureSlot.TOP, TextureSlot.SIDE, TextureSlot.FRONT, TextureSlot.PARTICLE, GLOW
     );
 
     public static void createBarStoolBlockModel(
