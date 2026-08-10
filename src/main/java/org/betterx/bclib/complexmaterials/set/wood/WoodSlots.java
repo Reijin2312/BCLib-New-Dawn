@@ -24,6 +24,7 @@ public class WoodSlots {
     public static final MaterialSlot<WoodenComplexMaterial> BARREL = new Barrel();
     public static final MaterialSlot<WoodenComplexMaterial> CRAFTING_TABLE = new CraftingTable();
     public static final MaterialSlot<WoodenComplexMaterial> BOOKSHELF = new Bookshelf();
+    public static final MaterialSlot<WoodenComplexMaterial> CHISELED_BOOKSHELF = new ChiseledBookshelf();
     public static final MaterialSlot<WoodenComplexMaterial> COMPOSTER = new Composter();
     public static final MaterialSlot<WoodenComplexMaterial> BOAT = new Boat();
     public static final MaterialSlot<WoodenComplexMaterial> CHEST_BOAT = new ChestBoat();

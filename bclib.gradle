@@ -117,6 +117,9 @@ dependencies {
     compileOnly "maven.modrinth:emi:${emi_version}+neoforge"
     runtimeOnly "maven.modrinth:emi:${emi_version}+neoforge"
 
+    // Optional client integration. Keep OBE out of the published/runtime dependency graph.
+    compileOnly "maven.modrinth:obe:YKyRqrAC"
+
     println "Using local WunderLib: ${local_wunderlib}"
     if (local_wunderlib) {
         implementation project(path: ":wunderlib")

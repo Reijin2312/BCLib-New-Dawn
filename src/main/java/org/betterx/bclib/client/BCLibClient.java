@@ -7,6 +7,7 @@ import org.betterx.bclib.BCLib;
 import org.betterx.bclib.client.models.CustomModelBakery;
 import org.betterx.bclib.client.textures.AtlasSetManager;
 import org.betterx.bclib.client.textures.SpriteLister;
+import org.betterx.bclib.integration.obe.OBEIntegration;
 import org.betterx.bclib.integration.modmenu.ModMenuEntryPoint;
 import org.betterx.bclib.interfaces.CustomColorProvider;
 
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
@@ -41,6 +43,10 @@ public class BCLibClient {
 
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, new SpriteLister("entity/chest"));
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, new SpriteLister("blocks"));
+
+        if (ModList.get().isLoaded("obe")) {
+            event.enqueueWork(OBEIntegration::register);
+        }
     }
 
     @SubscribeEvent

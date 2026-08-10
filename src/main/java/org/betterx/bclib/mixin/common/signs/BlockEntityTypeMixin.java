@@ -6,6 +6,7 @@ import org.betterx.bclib.blocks.signs.BaseWallHangingSignBlock;
 import org.betterx.bclib.blocks.signs.BaseWallSignBlock;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ChiseledBookShelfBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -29,6 +30,9 @@ public class BlockEntityTypeMixin {
             if ((block instanceof BaseHangingSignBlock) || (block instanceof BaseWallHangingSignBlock)) {
                 cir.setReturnValue(true);
             }
+        } else if (self == BlockEntityType.CHISELED_BOOKSHELF
+                && blockState.getBlock() instanceof ChiseledBookShelfBlock) {
+            cir.setReturnValue(true);
         }
     }
 }

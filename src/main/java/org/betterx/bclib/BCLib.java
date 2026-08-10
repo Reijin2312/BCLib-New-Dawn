@@ -37,6 +37,8 @@ public class BCLib {
 
     public static final boolean RUNS_NULLSCAPE = ModList.get().isLoaded("nullscape");
     public static final boolean RUNS_DISTANT_HORIZONS = ModList.get().isLoaded("distanthorizons");
+    public static final boolean RUNS_VOXY = ModList.get().isLoaded("voxy");
+    public static final boolean RUNS_DISTANT_TERRAIN_RENDERER = RUNS_DISTANT_HORIZONS || RUNS_VOXY;
 
     public BCLib(IEventBus modBus) {
         initialize(modBus);
