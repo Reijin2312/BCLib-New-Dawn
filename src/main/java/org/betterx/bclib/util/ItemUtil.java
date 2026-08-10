@@ -72,8 +72,17 @@ public class ItemUtil {
                 Codec.INT.optionalFieldOf("count", 1)
                          .forGetter(o -> getter.apply(o).count()),
                 DataComponentPatch.CODEC.optionalFieldOf("nbt", DataComponentPatch.EMPTY)
-                                        .forGetter(o -> getter.apply(o).components())
-        ).apply(instance, (item, count, nbt) -> factory.apply(new ItemStackTemplate(item, count, nbt))));
+                                        .forGetter(o -> getter.apply(o).components()),
+                // "components" is the modern ItemStackTemplate spelling used by vanilla datagen.
+                // Keep writing the established BetterX "nbt" field, but accept both on input so
+                // recipes copied from newer Minecraft versions do not silently lose their patch.
+                DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY)
+                                        .forGetter(o -> DataComponentPatch.EMPTY)
+        ).apply(instance, (item, count, nbt, components) -> factory.apply(new ItemStackTemplate(
+                item,
+                count,
+                components.equals(DataComponentPatch.EMPTY) ? nbt : components
+        ))));
     }
 
     public static MapCodec<ItemStackTemplate> CODEC_ITEM_STACK_TEMPLATE_WITH_NBT = codecItemStackTemplateWithNBT(
