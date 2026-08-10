@@ -35,6 +35,10 @@ public class BCLib implements ModInitializer {
     public static final boolean RUNS_DISTANT_HORIZONS = FabricLoader.getInstance()
                                                                    .getModContainer("distanthorizons")
                                                                    .isPresent();
+    public static final boolean RUNS_VOXY = FabricLoader.getInstance()
+                                                       .getModContainer("voxy")
+                                                       .isPresent();
+    public static final boolean RUNS_DISTANT_TERRAIN_RENDERER = RUNS_DISTANT_HORIZONS || RUNS_VOXY;
 
     private void onDatagen() {
 

@@ -6,17 +6,20 @@ import org.betterx.bclib.api.v2.dataexchange.DataExchangeAPI;
 import org.betterx.bclib.client.models.CustomModelBakery;
 import org.betterx.bclib.client.textures.AtlasSetManager;
 import org.betterx.bclib.client.textures.SpriteLister;
+import org.betterx.bclib.integration.obe.OBEIntegration;
 import org.betterx.bclib.registry.BaseBlockEntityRenders;
 
 import net.minecraft.client.resources.model.UnbakedModel;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelModifier;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelResolver;
 
 public class BCLibClient implements ClientModInitializer {
     private static CustomModelBakery modelBakery;
+    private static boolean obeRegistered;
 
     public static CustomModelBakery lazyModelbakery() {
         if (modelBakery == null) {
@@ -37,10 +40,17 @@ public class BCLibClient implements ClientModInitializer {
 
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, new SpriteLister("entity/chest"));
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, new SpriteLister("blocks"));
+
     }
 
 
     private static void onInitializeModelLoader(ModelLoadingPlugin.Context pluginContext) {
+        // Model loading begins after every client entrypoint has run, including OBE's registry bootstrap.
+        if (!obeRegistered && FabricLoader.getInstance().isModLoaded("obe")) {
+            OBEIntegration.register();
+            obeRegistered = true;
+        }
+
         modelBakery.registerBlockStateResolvers(pluginContext);
 
         pluginContext.resolveModel().register(BCLibClient::resolveModel);

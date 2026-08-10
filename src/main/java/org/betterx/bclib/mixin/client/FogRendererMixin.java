@@ -40,7 +40,7 @@ public class FogRendererMixin {
             float f,
             CallbackInfo info
     ) {
-        if (BCLib.RUNS_DISTANT_HORIZONS) {
+        if (BCLib.RUNS_DISTANT_TERRAIN_RENDERER) {
             BackgroundInfo.fogColorRed = fogRed;
             BackgroundInfo.fogColorGreen = fogGreen;
             BackgroundInfo.fogColorBlue = fogBlue;
@@ -76,7 +76,7 @@ public class FogRendererMixin {
             float g,
             CallbackInfo ci
     ) {
-        if (BCLib.RUNS_DISTANT_HORIZONS) {
+        if (BCLib.RUNS_DISTANT_TERRAIN_RENDERER) {
             return;
         }
 
