@@ -6,10 +6,12 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import net.minecraft.client.renderer.blockentity.state.ChestRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.Vec3;
 
 
 import com.google.common.collect.Maps;
@@ -27,7 +29,28 @@ public class BaseChestBlockEntityRenderer extends ChestRenderer<BaseChestBlockEn
         super(ctx);
     }
 
-    protected @Nullable Material getCustomMaterial(BaseChestBlockEntity blockEntity, ChestRenderState renderState) {
+    public static class BCLChestRenderState extends ChestRenderState {
+        public @Nullable Material customMaterial;
+    }
+
+    @Override
+    public ChestRenderState createRenderState() {
+        return new BCLChestRenderState();
+    }
+
+    @Override
+    public void extractRenderState(
+            BaseChestBlockEntity blockEntity,
+            ChestRenderState renderState,
+            float partialTick,
+            Vec3 cameraPosition,
+            ModelFeatureRenderer.CrumblingOverlay crumblingOverlay
+    ) {
+        super.extractRenderState(blockEntity, renderState, partialTick, cameraPosition, crumblingOverlay);
+        ((BCLChestRenderState) renderState).customMaterial = getCustomMaterial(blockEntity, renderState);
+    }
+
+    private static @Nullable Material getCustomMaterial(BaseChestBlockEntity blockEntity, ChestRenderState renderState) {
         Material[] materials = CUSTOM_MATERIALS.get(blockEntity.getBlockState().getBlock());
         if (materials == null) {
             return null;
