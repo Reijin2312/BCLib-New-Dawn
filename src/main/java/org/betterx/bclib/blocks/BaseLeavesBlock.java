@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -27,7 +28,7 @@ public abstract class BaseLeavesBlock extends LeavesBlock implements RuntimeBloc
             Block sapling,
             BlockBehaviour.Properties properties
     ) {
-        super(DEFAULT_LEAF_PARTICLE_CHANCE, properties);
+        super(AmbientLeavesBlockSoundPlayer.noAmbientSound(), properties);
         this.sapling = sapling;
     }
 
@@ -37,7 +38,7 @@ public abstract class BaseLeavesBlock extends LeavesBlock implements RuntimeBloc
             MapColor color,
             Consumer<BlockBehaviour.Properties> customizeProperties
     ) {
-        super(DEFAULT_LEAF_PARTICLE_CHANCE, BaseBlock.acceptAndReturn(customizeProperties, BehaviourBuilders.createLeaves(color, true)));
+        super(AmbientLeavesBlockSoundPlayer.noAmbientSound(), BaseBlock.acceptAndReturn(customizeProperties, BehaviourBuilders.createLeaves(color, true)));
         this.sapling = sapling;
     }
 
@@ -49,7 +50,7 @@ public abstract class BaseLeavesBlock extends LeavesBlock implements RuntimeBloc
             Consumer<BlockBehaviour.Properties> customizeProperties
     ) {
         super(
-                DEFAULT_LEAF_PARTICLE_CHANCE,
+                AmbientLeavesBlockSoundPlayer.noAmbientSound(),
                 BaseBlock.acceptAndReturn(
                         customizeProperties,
                         BehaviourBuilders.createLeaves(color, true).lightLevel(state -> light)
@@ -60,13 +61,13 @@ public abstract class BaseLeavesBlock extends LeavesBlock implements RuntimeBloc
 
     @Deprecated(forRemoval = true)
     public BaseLeavesBlock(Block sapling, MapColor color) {
-        super(DEFAULT_LEAF_PARTICLE_CHANCE, BehaviourBuilders.createLeaves(color, true));
+        super(AmbientLeavesBlockSoundPlayer.noAmbientSound(), BehaviourBuilders.createLeaves(color, true));
         this.sapling = sapling;
     }
 
     @Deprecated(forRemoval = true)
     public BaseLeavesBlock(Block sapling, MapColor color, int light) {
-        super(DEFAULT_LEAF_PARTICLE_CHANCE, BehaviourBuilders.createLeaves(color, true).lightLevel(state -> light));
+        super(AmbientLeavesBlockSoundPlayer.noAmbientSound(), BehaviourBuilders.createLeaves(color, true).lightLevel(state -> light));
         this.sapling = sapling;
     }
 

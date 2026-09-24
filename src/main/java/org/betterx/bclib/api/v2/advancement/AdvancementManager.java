@@ -1,16 +1,20 @@
 package org.betterx.bclib.api.v2.advancement;
 
-import org.betterx.bclib.complexmaterials.WoodenComplexMaterial;
-import org.betterx.bclib.complexmaterials.set.wood.WoodSlots;
+
 import org.betterx.wover.complex.api.equipment.ArmorSlot;
 import org.betterx.wover.complex.api.equipment.EquipmentSet;
 import org.betterx.wover.complex.api.equipment.ToolSlot;
+import org.betterx.bclib.complexmaterials.WoodenComplexMaterial;
+import org.betterx.bclib.complexmaterials.set.wood.WoodSlots;
 
+// 26.3 split net.minecraft.advancements.criterion into .predicates (ItemPredicate,
+// LocationPredicate, StatePropertiesPredicate, ...) and .triggers (Criterion, CriterionTrigger,
+// CriteriaTriggers and every *Trigger). CriterionTriggerInstance stayed in net.minecraft.advancements.
 import net.minecraft.advancements.*;
-import net.minecraft.advancements.predicates.ItemPredicate;
-import net.minecraft.advancements.predicates.LocationPredicate;
+import net.minecraft.advancements.predicates.*;
 import net.minecraft.advancements.triggers.*;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeBuilder;
@@ -18,9 +22,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -32,7 +36,6 @@ import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class AdvancementManager {
     static class OrderedBuilder extends Advancement.Builder {
@@ -42,20 +45,6 @@ public class AdvancementManager {
     }
 
     private static final Map<Identifier, Advancement.Builder> ADVANCEMENTS = new LinkedHashMap<>();
-
-    private static ResourceKey<Recipe<?>> recipeKey(Identifier id) {
-        return ResourceKey.create(Registries.RECIPE, id);
-    }
-
-    private static Item getRecipeResultIcon(Recipe<?> recipe) {
-        return recipe.display()
-                     .stream()
-                     .map(display -> display.result().resolveForFirstStack(ContextMap.EMPTY))
-                     .filter(stack -> !stack.isEmpty())
-                     .map(ItemStack::getItem)
-                     .findFirst()
-                     .orElse(Items.KNOWLEDGE_BOOK);
-    }
 
     public static void register(Identifier id, Advancement.Builder builder) {
         ADVANCEMENTS.put(id, builder);
@@ -96,19 +85,19 @@ public class AdvancementManager {
         }
 
 
-        public RewardsBuilder addLootTable(ResourceKey<LootTable> resourceLocation) {
-            builder.addLootTable(resourceLocation);
+        /**
+         * 26.3 retyped {@code AdvancementRewards.Builder#addLootTable} from
+         * {@code ResourceKey<LootTable>} to {@code Holder<LootTable>} (loot tables became a datapack
+         * registry whose rewards are resolved eagerly), so this wrapper follows.
+         */
+        public RewardsBuilder addLootTable(Holder<LootTable> lootTable) {
+            builder.addLootTable(lootTable);
             return this;
         }
 
 
-        public RewardsBuilder addRecipe(Identifier resourceLocation) {
-            builder.addRecipe(recipeKey(resourceLocation));
-            return this;
-        }
-
-        public RewardsBuilder addRecipe(ResourceKey<Recipe<?>> resourceKey) {
-            builder.addRecipe(resourceKey);
+        public RewardsBuilder addRecipe(ResourceKey<Recipe<?>> resourceLocation) {
+            builder.addRecipe(resourceLocation);
             return this;
         }
 
@@ -175,43 +164,18 @@ public class AdvancementManager {
         }
 
         public static Builder create(ItemLike icon, AdvancementType type) {
-            return create(icon, type, (displayBuilder) -> {
-            });
+            return create(new ItemStack(icon), type);
         }
 
         public static Builder create(ItemStack icon, AdvancementType type) {
-            return create(icon, type, (displayBuilder) -> {
-            });
+            return create(
+                    icon, type, (displayBuilder) -> {
+                    }
+            );
         }
 
         public static Builder create(Item icon, AdvancementType type, Consumer<DisplayBuilder> displayAdapter) {
-            return create((ItemLike) icon, type, displayAdapter);
-        }
-
-        public static Builder create(
-                ItemLike icon,
-                AdvancementType type,
-                Consumer<DisplayBuilder> displayAdapter
-        ) {
-            Item item = icon == null ? Items.AIR : icon.asItem();
-            var id = BuiltInRegistries.ITEM.getKey(item);
-            boolean canBuild = true;
-            if (id == null || item == Items.AIR) {
-                canBuild = false;
-                id = BuiltInRegistries.ITEM.getDefaultKey();
-            }
-
-            String baseName = "advancements." + id.getNamespace() + "." + id.getPath() + ".";
-            Builder b = new Builder(id, type);
-            var displayBuilder = b.startDisplay(
-                    item,
-                    Component.translatable(baseName + "title"),
-                    Component.translatable(baseName + "description")
-            );
-            if (displayAdapter != null) displayAdapter.accept(displayBuilder);
-            b = displayBuilder.endDisplay();
-            b.canBuild = canBuild;
-            return b;
+            return create(new ItemStack(icon), type, displayAdapter);
         }
 
         public static Builder create(
@@ -237,20 +201,6 @@ public class AdvancementManager {
             b = displayBuilder.endDisplay();
             b.canBuild = canBuild;
             return b;
-        }
-
-        public static <C extends RecipeInput, T extends RecipeHolder<Recipe<C>>> Builder createRecipe(
-                T recipe,
-                AdvancementType type
-        ) {
-            Item item = getRecipeResultIcon(recipe.value());
-            return create(item, type, displayBuilder -> displayBuilder.hideToast().hideFromChat())
-                    //.awardRecipe(item)
-                    .addRecipeUnlockCriterion("has_the_recipe", recipe)
-                    .startReward()
-                    .addRecipe(recipe.id())
-                    .endReward()
-                    .requirements(AdvancementRequirements.Strategy.OR);
         }
 
         public Builder parent(AdvancementHolder advancement) {
@@ -279,17 +229,10 @@ public class AdvancementManager {
                 Component title,
                 Component description
         ) {
-            Item item = icon == null ? Items.AIR : icon.asItem();
-            if (item == Items.AIR) {
-                canBuild = false;
-            } else {
-                var id = BuiltInRegistries.ITEM.getKey(item);
-                if (id == null) {
-                    canBuild = false;
-                }
-            }
-            DisplayBuilder dp = DISPLAY_BUILDER.get().reset(this);
-            return dp.icon(item).title(title).description(description);
+            // ItemStackTemplate, not ItemStack: this can run during datagen bootstrap, before item
+            // data components are bound (see Display.icon's comment in AdvancementBuilderElements).
+            // ItemStackTemplate's constructor never reads them, unlike ItemStack's.
+            return startDisplay(new ItemStackTemplate(icon.asItem()), title, description);
         }
 
         public DisplayBuilder startDisplay(
@@ -297,10 +240,24 @@ public class AdvancementManager {
                 Component title,
                 Component description
         ) {
+            // Safe here: a caller that already holds a real ItemStack instance had to construct it
+            // (and thus already needed components bound) before it could reach this call.
+            return startDisplay(
+                    icon == null ? null : ItemStackTemplate.fromNonEmptyStack(icon),
+                    title,
+                    description
+            );
+        }
+
+        public DisplayBuilder startDisplay(
+                ItemStackTemplate icon,
+                Component title,
+                Component description
+        ) {
             if (icon == null) {
                 canBuild = false;
             } else {
-                var id = BuiltInRegistries.ITEM.getKey(icon.getItem());
+                var id = BuiltInRegistries.ITEM.getKey(icon.item().value());
                 if (id == null) {
                     canBuild = false;
                 }
@@ -319,7 +276,7 @@ public class AdvancementManager {
             for (ItemLike item : items) {
                 Identifier id = BuiltInRegistries.ITEM.getKey(item.asItem());
                 if (id == null) continue;
-                rewardBuilder.addRecipe(id);
+                rewardBuilder.addRecipe(ResourceKey.create(Registries.RECIPE, id));
             }
             return rewardBuilder.endReward();
         }
@@ -362,13 +319,19 @@ public class AdvancementManager {
             );
         }
 
-        public <C extends RecipeInput, T extends Recipe<C>> Builder addRecipeUnlockCriterion(
+        /**
+         * 26.3 turned recipes into the {@code minecraft:recipe} datapack registry, so
+         * {@code RecipeUnlockedTrigger#unlocked} takes a {@code Holder<Recipe<?>>} rather than a
+         * {@code ResourceKey<Recipe<?>>}. A {@code RecipeHolder} only carries the key, and there is no
+         * lookup available here, so the parameter is the holder itself.
+         */
+        public Builder addRecipeUnlockCriterion(
                 String name,
-                RecipeHolder<T> recipe
+                Holder<Recipe<?>> recipe
         ) {
             return addCriterion(
                     name,
-                    RecipeUnlockedTrigger.unlocked(recipe.id())
+                    RecipeUnlockedTrigger.unlocked(recipe)
             );
         }
 
@@ -381,17 +344,15 @@ public class AdvancementManager {
 
         public Builder addInventoryChangedAnyCriterion(String name, ItemLike... items) {
             final Criterion<InventoryChangeTrigger.TriggerInstance> t =
-                    InventoryChangeTrigger.TriggerInstance.hasItems(
-                            ItemPredicate.Builder.item().of(BuiltInRegistries.ITEM, items)
-                    );
+                    InventoryChangeTrigger.TriggerInstance.hasItems(items);
 
             return addCriterion(name, t);
         }
 
-        public Builder addInventoryChangedCriterion(String name, TagKey<Item> tag) {
+        public Builder addInventoryChangedCriterion(HolderLookup<Item> itemLookup, String name, TagKey<Item> tag) {
             final Criterion<InventoryChangeTrigger.TriggerInstance> t =
                     InventoryChangeTrigger.TriggerInstance.hasItems(
-                            ItemPredicate.Builder.item().of(BuiltInRegistries.ITEM, tag)
+                            ItemPredicate.Builder.item().of(itemLookup, tag)
                     );
 
             return addCriterion(name, t);
@@ -462,14 +423,6 @@ public class AdvancementManager {
             return this;
         }
 
-        @Deprecated(forRemoval = true)
-        public Builder requirements(String[][] strings) {
-            return requirements(Arrays.stream(strings)
-                                      .map(Arrays::asList)
-                                      .map(ArrayList::new)
-                                      .collect(Collectors.toList()));
-        }
-
         public Builder requirements(List<List<String>> strings) {
             builder.requirements(new AdvancementRequirements(strings));
             return this;
@@ -497,12 +450,17 @@ public class AdvancementManager {
         }
 
         public DisplayBuilder icon(ItemLike value) {
-            display.setIcon(value);
+            display.icon = new ItemStackTemplate(value.asItem());
             return this;
         }
 
         public DisplayBuilder icon(ItemStack value) {
-            display.setIcon(value);
+            display.icon = ItemStackTemplate.fromNonEmptyStack(value);
+            return this;
+        }
+
+        public DisplayBuilder icon(ItemStackTemplate value) {
+            display.icon = value;
             return this;
         }
 

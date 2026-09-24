@@ -59,7 +59,9 @@ public class UnbakedQuad {
         quadBaker.setTintIndex(-1);
         quadBaker.setDirection(dir);
         quadBaker.setSprite(material, transparency);
-        quadBaker.setShade(useShading);
+        if (!useShading) {
+            quadBaker.setShadeOverride(Direction.UP);
+        }
         quadBaker.setAmbientOcclusion(true);
 
         for (int i = 0; i < 4; i++) {

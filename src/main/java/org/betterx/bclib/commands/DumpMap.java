@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.Vec3;
 
@@ -54,7 +55,7 @@ public class DumpMap {
                 .normalize();
 
         final RandomState randomState = serverLevel.getChunkSource().randomState();
-        final Climate.Sampler sampler = randomState.sampler();
+        final Climate.Sampler sampler = randomState.createClimateSampler(SamplerContext.EMPTY_UNCACHED);
         int x = QuartPos.fromBlock((int) pos.x);
         int z = QuartPos.fromBlock((int) pos.z);
         int minHeight = QuartPos.fromBlock(serverLevel.getMinY());
@@ -184,7 +185,7 @@ public class DumpMap {
                 .normalize();
 
         final RandomState randomState = serverLevel.getChunkSource().randomState();
-        final Climate.Sampler sampler = randomState.sampler();
+        final Climate.Sampler sampler = randomState.createClimateSampler(SamplerContext.EMPTY_UNCACHED);
         int x = QuartPos.fromBlock((int) pos.x);
         int y = QuartPos.fromBlock((int) pos.y);
         int z = QuartPos.fromBlock((int) pos.z);
@@ -240,12 +241,24 @@ public class DumpMap {
         //scale the values to 0-255
         //write the pixel to the image
 
-        BufferedImage iTemperature = new BufferedImage(2 * maxOffset + 1, 2 * maxOffset + 1, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage iTemperature = new BufferedImage(
+                2 * maxOffset + 1,
+                2 * maxOffset + 1,
+                BufferedImage.TYPE_BYTE_GRAY
+        );
         BufferedImage iHumidity = new BufferedImage(2 * maxOffset + 1, 2 * maxOffset + 1, BufferedImage.TYPE_BYTE_GRAY);
-        BufferedImage iContinentalness = new BufferedImage(2 * maxOffset + 1, 2 * maxOffset + 1, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage iContinentalness = new BufferedImage(
+                2 * maxOffset + 1,
+                2 * maxOffset + 1,
+                BufferedImage.TYPE_BYTE_GRAY
+        );
         BufferedImage iErosion = new BufferedImage(2 * maxOffset + 1, 2 * maxOffset + 1, BufferedImage.TYPE_BYTE_GRAY);
         BufferedImage iDepth = new BufferedImage(2 * maxOffset + 1, 2 * maxOffset + 1, BufferedImage.TYPE_BYTE_GRAY);
-        BufferedImage iWeirdness = new BufferedImage(2 * maxOffset + 1, 2 * maxOffset + 1, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage iWeirdness = new BufferedImage(
+                2 * maxOffset + 1,
+                2 * maxOffset + 1,
+                BufferedImage.TYPE_BYTE_GRAY
+        );
 
         for (int ox = -maxOffset; ox <= maxOffset; ox++)
             for (int oz = -maxOffset; oz <= maxOffset; oz++) {
@@ -257,9 +270,17 @@ public class DumpMap {
                 final int depth = (int) ((t.depth() - minDepth) * 255 / (maxDepth - minDepth));
                 final int weirdness = (int) ((t.weirdness() - minWeirdness) * 255 / (maxWeirdness - minWeirdness));
 
-                iTemperature.setRGB(ox + maxOffset, oz + maxOffset, new Color(temperature, temperature, temperature).getRGB());
+                iTemperature.setRGB(
+                        ox + maxOffset,
+                        oz + maxOffset,
+                        new Color(temperature, temperature, temperature).getRGB()
+                );
                 iHumidity.setRGB(ox + maxOffset, oz + maxOffset, new Color(humidity, humidity, humidity).getRGB());
-                iContinentalness.setRGB(ox + maxOffset, oz + maxOffset, new Color(continentalness, continentalness, continentalness).getRGB());
+                iContinentalness.setRGB(
+                        ox + maxOffset,
+                        oz + maxOffset,
+                        new Color(continentalness, continentalness, continentalness).getRGB()
+                );
                 iErosion.setRGB(ox + maxOffset, oz + maxOffset, new Color(erosion, erosion, erosion).getRGB());
                 iDepth.setRGB(ox + maxOffset, oz + maxOffset, new Color(depth, depth, depth).getRGB());
                 iWeirdness.setRGB(ox + maxOffset, oz + maxOffset, new Color(weirdness, weirdness, weirdness).getRGB());
@@ -277,12 +298,28 @@ public class DumpMap {
             }
         }
 
-        write(iTemperature, new File(basePath.toString() + "/temperature_" + minTemperature + "_" + maxTemperature + ".png"), result);
-        write(iHumidity, new File(basePath.toString() + "/humidity_" + minHumidity + "_" + maxHumidity + ".png"), result);
-        write(iContinentalness, new File(basePath.toString() + "/continentalness_" + minContinentalness + "_" + maxContinentalness + ".png"), result);
+        write(
+                iTemperature,
+                new File(basePath.toString() + "/temperature_" + minTemperature + "_" + maxTemperature + ".png"),
+                result
+        );
+        write(
+                iHumidity,
+                new File(basePath.toString() + "/humidity_" + minHumidity + "_" + maxHumidity + ".png"),
+                result
+        );
+        write(
+                iContinentalness,
+                new File(basePath.toString() + "/continentalness_" + minContinentalness + "_" + maxContinentalness + ".png"),
+                result
+        );
         write(iErosion, new File(basePath.toString() + "/erosion_" + minErosion + "_" + maxErosion + ".png"), result);
         write(iDepth, new File(basePath.toString() + "/depth_" + minDepth + "_" + maxDepth + ".png"), result);
-        write(iWeirdness, new File(basePath.toString() + "/weirdness_" + minWeirdness + "_" + maxWeirdness + ".png"), result);
+        write(
+                iWeirdness,
+                new File(basePath.toString() + "/weirdness_" + minWeirdness + "_" + maxWeirdness + ".png"),
+                result
+        );
 
         ctx.getSource().sendSuccess(() -> result, false);
         return Command.SINGLE_SUCCESS;

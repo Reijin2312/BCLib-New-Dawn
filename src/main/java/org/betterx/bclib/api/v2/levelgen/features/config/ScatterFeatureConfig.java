@@ -16,12 +16,16 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
 import java.util.Optional;
 
-public abstract class ScatterFeatureConfig implements FeatureConfiguration {
+/**
+ * 26.3 deleted the {@code net.minecraft.world.level.levelgen.feature.configurations} package along with
+ * the empty {@code FeatureConfiguration} marker interface this class used to implement. Nothing consumed
+ * the marker (it declared no members), so the {@code implements} clause is simply dropped.
+ */
+public abstract class ScatterFeatureConfig {
     public interface Instancer<T extends ScatterFeatureConfig> extends Function15<BlockStateProvider, Optional<BlockStateProvider>, Optional<BlockStateProvider>, Optional<BlockState>, Float, Float, Float, Float, Integer, Integer, Float, Float, Float, Boolean, IntProvider, T> {
     }
 
@@ -84,25 +88,27 @@ public abstract class ScatterFeatureConfig implements FeatureConfiguration {
 
     public abstract boolean isValidBase(BlockState state);
 
-    public BlockState createBlock(int height, int maxHeight, RandomSource random, BlockPos pos) {
-        return createBlock(null, height, maxHeight, random, pos);
-    }
-
-    public abstract BlockState createBlock(WorldGenLevel level, int height, int maxHeight, RandomSource random, BlockPos pos);
+    public abstract BlockState createBlock(
+            int height,
+            int maxHeight,
+            RandomSource random,
+            BlockPos pos,
+            WorldGenLevel level
+    );
 
     public static <T extends ScatterFeatureConfig> Codec<T> buildCodec(Instancer<T> instancer) {
         return RecordCodecBuilder.create((instance) -> instance
                 .group(
-                        BlockStateProvider.CODEC
+                        BlockStateProvider.DIRECT_CODEC
                                 .fieldOf("cluster_block")
                                 .forGetter((T cfg) -> cfg.clusterBlock),
-                        BlockStateProvider.CODEC
+                        BlockStateProvider.DIRECT_CODEC
                                 .optionalFieldOf("tip_block")
                                 .orElse(Optional.empty())
                                 .forGetter((T cfg) -> cfg.tipBlock == cfg.clusterBlock
                                         ? Optional.empty()
                                         : Optional.of(cfg.tipBlock)),
-                        BlockStateProvider.CODEC
+                        BlockStateProvider.DIRECT_CODEC
                                 .optionalFieldOf("bottom_block")
                                 .orElse(Optional.empty())
                                 .forGetter((T cfg) -> cfg.bottomBlock == cfg.clusterBlock
@@ -205,19 +211,19 @@ public abstract class ScatterFeatureConfig implements FeatureConfiguration {
         }
 
         public Builder<T> block(BlockState s) {
-            this.clusterBlock = BlockStateProvider.simple(s);
-            if (tipBlock == null) tipBlock = BlockStateProvider.simple(s);
-            if (bottomBlock == null) bottomBlock = BlockStateProvider.simple(s);
+            this.clusterBlock = BlockStateProvider.of(s);
+            if (tipBlock == null) tipBlock = BlockStateProvider.of(s);
+            if (bottomBlock == null) bottomBlock = BlockStateProvider.of(s);
             return this;
         }
 
         public Builder<T> tipBlock(BlockState s) {
-            tipBlock = BlockStateProvider.simple(s);
+            tipBlock = BlockStateProvider.of(s);
             return this;
         }
 
         public Builder<T> bottomBlock(BlockState s) {
-            bottomBlock = BlockStateProvider.simple(s);
+            bottomBlock = BlockStateProvider.of(s);
             return this;
         }
 
@@ -426,7 +432,7 @@ public abstract class ScatterFeatureConfig implements FeatureConfiguration {
         }
 
         @Override
-        public BlockState createBlock(WorldGenLevel level, int height, int maxHeight, RandomSource random, BlockPos pos) {
+        public BlockState createBlock(int height, int maxHeight, RandomSource random, BlockPos pos, WorldGenLevel level) {
             if (height == 0) return this.bottomBlock.getState(level, random, pos);
             return height == maxHeight
                     ? this.tipBlock.getState(level, random, pos)
@@ -486,7 +492,7 @@ public abstract class ScatterFeatureConfig implements FeatureConfiguration {
         }
 
         @Override
-        public BlockState createBlock(WorldGenLevel level, int height, int maxHeight, RandomSource random, BlockPos pos) {
+        public BlockState createBlock(int height, int maxHeight, RandomSource random, BlockPos pos, WorldGenLevel level) {
             if (height == 0) return this.bottomBlock.getState(level, random, pos);
             if (height == 1) return this.clusterBlock.getState(level, random, pos);
             return this.tipBlock.getState(level, random, pos);
@@ -544,7 +550,7 @@ public abstract class ScatterFeatureConfig implements FeatureConfiguration {
         }
 
         @Override
-        public BlockState createBlock(WorldGenLevel level, int height, int maxHeight, RandomSource random, BlockPos pos) {
+        public BlockState createBlock(int height, int maxHeight, RandomSource random, BlockPos pos, WorldGenLevel level) {
             if (height == maxHeight) return this.tipBlock.getState(level, random, pos);
             if (height == maxHeight - 1) return this.clusterBlock.getState(level, random, pos);
             return this.bottomBlock.getState(level, random, pos);

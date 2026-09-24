@@ -3,12 +3,14 @@ package org.betterx.bclib.registry;
 import org.betterx.bclib.BCLib;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.item.component.CookingFuel;
+import net.minecraft.world.level.storage.loot.providers.number.floats.ResolvableFloat;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt;
 
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.furnace.FurnaceFuelBurnTimeEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.event.ModifyDefaultComponentsEvent;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -16,7 +18,6 @@ import java.util.Map;
 /**
  * NeoForge fuel registry helper.
  */
-@EventBusSubscriber(modid = BCLib.MOD_ID)
 public final class FuelRegistry {
     public static final FuelRegistry INSTANCE = new FuelRegistry();
 
@@ -25,16 +26,23 @@ public final class FuelRegistry {
     private FuelRegistry() {
     }
 
+    public static void register(IEventBus modBus) {
+        modBus.addListener(FuelRegistry::modifyDefaultComponents);
+    }
+
     public void add(ItemLike item, int burnTime) {
         fuels.put(item.asItem(), burnTime);
     }
 
-    @SubscribeEvent
-    public static void onFuelBurnTime(FurnaceFuelBurnTimeEvent event) {
-        ItemStack stack = event.getItemStack();
-        Integer burnTime = INSTANCE.fuels.get(stack.getItem());
-        if (burnTime != null) {
-            event.setBurnTime(burnTime);
+    private static void modifyDefaultComponents(ModifyDefaultComponentsEvent event) {
+        for (Map.Entry<Item, Integer> entry : INSTANCE.fuels.entrySet()) {
+            event.modify(entry.getKey(), (builder, context, item) -> builder.set(
+                    DataComponents.COOKING_FUEL,
+                    new CookingFuel(
+                            new ResolvableInt.Constant(entry.getValue()),
+                            new ResolvableFloat.Constant(1.0F)
+                    )
+            ));
         }
     }
 }

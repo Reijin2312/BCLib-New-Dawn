@@ -25,31 +25,31 @@ public class BlockLootTableProvider extends LootTableProvider {
             CompletableFuture<HolderLookup.Provider> registryLookup,
             List<String> modIDs
     ) {
-        super(
-                output,
-                Set.of(),
-                List.of(new SubProviderEntry((lookup) -> new BlockLootSubProvider(modIDs), LootContextParamSets.BLOCK)),
-                registryLookup
-        );
+        super(Set.of(), List.of(new SubProviderEntry(
+                context -> new BlockLootSubProvider(modIDs, context),
+                LootContextParamSets.BLOCK
+        )));
         this.modIDs = modIDs;
     }
 
     private static class BlockLootSubProvider implements LootTableSubProvider {
         private final List<String> modIDs;
+        private final LootTableSubProvider.Context context;
 
-        private BlockLootSubProvider(List<String> modIDs) {
+        private BlockLootSubProvider(List<String> modIDs, LootTableSubProvider.Context context) {
             this.modIDs = modIDs;
+            this.context = context;
         }
 
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> biConsumer) {
+        public void run() {
             for (Block block : BuiltInRegistries.BLOCK) {
                 if (block instanceof LootDropProvider dropper) {
                     Identifier id = BuiltInRegistries.BLOCK.getKey(block);
                     if (id != null && shouldInclude(id)) {
                         LootTable.Builder builder = LootTable.lootTable();
                         dropper.getDroppedItemsBCL(builder);
-                        biConsumer.accept(ResourceKey.create(Registries.LOOT_TABLE, id.withPrefix("block/")), builder);
+                        context.accept(ResourceKey.create(Registries.LOOT_TABLE, id.withPrefix("block/")), builder);
                     }
                 }
             }

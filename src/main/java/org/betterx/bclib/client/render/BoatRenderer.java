@@ -58,29 +58,28 @@ public class BoatRenderer {
 
         poseStack.pushPose();
         poseStack.translate(0.0F, 0.375F, 0.0F);
-        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - state.yRot));
+        poseStack.rotateDegrees(Axis.YP, 180.0F - state.yRot);
 
         float hurtTime = state.hurtTime;
         if (hurtTime > 0.0F) {
-            poseStack.mulPose(Axis.XP.rotationDegrees(Mth.sin(hurtTime) * hurtTime * state.damageTime / 10.0F * state.hurtDir));
+            poseStack.rotateDegrees(Axis.XP, Mth.sin(hurtTime) * hurtTime * state.damageTime / 10.0F * state.hurtDir);
         }
 
         if (!state.isUnderWater && !Mth.equal(state.bubbleAngle, 0.0F)) {
-            poseStack.mulPose(new Quaternionf().setAngleAxis(state.bubbleAngle * (float) (Math.PI / 180.0), 1.0F, 0.0F, 1.0F));
+            poseStack.rotate(new Quaternionf().setAngleAxis(state.bubbleAngle * (float) (Math.PI / 180.0), 1.0F, 0.0F, 1.0F));
         }
 
         poseStack.scale(-1.0F, -1.0F, 1.0F);
-        poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+        poseStack.rotateDegrees(Axis.YP, 90.0F);
 
         submitNodeCollector.submitModel(
                 model,
                 state,
                 poseStack,
-                model.renderType(texture),
+                texture,
                 state.lightCoords,
                 OverlayTexture.NO_OVERLAY,
-                state.outlineColor,
-                null
+                state.outlineColor
         );
 
         if (!state.isUnderWater && waterPatchModel != null) {
@@ -88,11 +87,10 @@ public class BoatRenderer {
                     waterPatchModel,
                     Unit.INSTANCE,
                     poseStack,
-                    waterPatchModel.renderType(texture),
+                    texture,
                     state.lightCoords,
                     OverlayTexture.NO_OVERLAY,
-                    state.outlineColor,
-                    null
+                    state.outlineColor
             );
         }
 

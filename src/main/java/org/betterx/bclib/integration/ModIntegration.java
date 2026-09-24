@@ -14,10 +14,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -47,11 +45,11 @@ public abstract class ModIntegration {
     }
 
     public Block getBlock(String name) {
-        return BuiltInRegistries.BLOCK.get(getID(name)).map(Holder.Reference::value).orElse(Blocks.AIR);
+        return BuiltInRegistries.BLOCK.get(getID(name)).map(h -> h.value()).orElse(null);
     }
 
     public Item getItem(String name) {
-        return BuiltInRegistries.ITEM.get(getID(name)).map(Holder.Reference::value).orElse(Items.AIR);
+        return BuiltInRegistries.ITEM.get(getID(name)).map(h -> h.value()).orElse(null);
     }
 
     public BlockState getDefaultState(String name) {
@@ -67,13 +65,16 @@ public abstract class ModIntegration {
     }
 
 
-    public ConfiguredFeature<?, ?> getConfiguredFeature(String name) {
-        //TODO: 1.19.3 find how to change this without having features before a world gets loaded
-        return null; //BuiltInRegistries.CONFIGURED_FEATURE.get(getID(name));
+    /**
+     * 26.3 collapsed {@code ConfiguredFeature<FC, F>} into {@link Feature} and renamed the datapack
+     * registry {@code minecraft:configured_feature} to {@code minecraft:feature}, so the return type
+     * follows. The method has always returned {@code null} (the registry lookup is commented out).
+     */
+    public Feature getConfiguredFeature(String name) {
+        return null; //WorldState.registryAccess().lookupOrThrow(Registries.FEATURE).get(getKey(name));
     }
 
     public Holder<Biome> getBiome(String name) {
-        //TODO: 1.19.3 find how to change this without having features before a world gets loaded
         return null; //BuiltInRegistries.BIOME.getHolder(getKey(name)).orElseThrow();
     }
 

@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.DropExperienceBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
@@ -113,6 +113,6 @@ public class BaseOreBlock extends DropExperienceBlock implements RuntimeBlockMod
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {
-        return provider.dropOre(this, dropItem.get(), UniformGenerator.between(minCount, maxCount));
+        return provider.dropOre(this, dropItem.get(), ContextIntProviders.between(minCount, maxCount));
     }
 }

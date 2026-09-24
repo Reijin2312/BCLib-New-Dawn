@@ -2,6 +2,7 @@ package org.betterx.bclib;
 
 import org.betterx.bclib.api.v2.dataexchange.BCLibNetwork;
 import org.betterx.bclib.api.v2.levelgen.LevelGenEvents;
+import org.betterx.bclib.api.v2.ToolBlockTransformers;
 import org.betterx.bclib.api.v2.levelgen.structures.TemplatePiece;
 import org.betterx.bclib.api.v3.tag.BCLBlockTags;
 import org.betterx.bclib.commands.CommandRegistry;
@@ -10,6 +11,7 @@ import org.betterx.bclib.config.Configs;
 import org.betterx.bclib.recipes.AlloyingRecipe;
 import org.betterx.bclib.recipes.AnvilRecipe;
 import org.betterx.bclib.registry.BaseBlockEntities;
+import org.betterx.bclib.registry.FuelRegistry;
 import org.betterx.bclib.util.BCLAttachments;
 import org.betterx.bclib.util.BCLDataComponents;
 import org.betterx.datagen.bclib.worldgen.BCLAutoBlockTagProvider;
@@ -49,6 +51,8 @@ public class BCLib {
 
     private void initialize(IEventBus modBus) {
         modBus.addListener(BCLibNetwork::registerPayloadHandlers);
+        ToolBlockTransformers.register(modBus);
+        FuelRegistry.register(modBus);
         modBus.addListener(BCLibArguments::register);
         modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, BCLAttachments::register);
         modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, BCLDataComponents::register);

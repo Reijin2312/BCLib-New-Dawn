@@ -11,12 +11,17 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(value = MobSpawnSettings.class)
+/**
+ * 26.3 renamed {@code MobSpawnSettings.spawners} to {@code spawnsByCategory} (same type,
+ * {@code Map<MobCategory, WeightedList<SpawnerData>>}, still {@code private final}). The accessor <em>method</em>
+ * names are deliberately left alone so downstream mods keep compiling.
+ */
+@Mixin(MobSpawnSettings.class)
 public interface MobSpawnSettingsAccessor {
-    @Accessor(value = "spawners")
+    @Accessor("spawnsByCategory")
     Map<MobCategory, WeightedList<SpawnerData>> bcl_getSpawners();
 
-    @Accessor(value = "spawners")
+    @Accessor("spawnsByCategory")
     @Mutable
     void bcl_setSpawners(Map<MobCategory, WeightedList<SpawnerData>> spawners);
 }

@@ -118,46 +118,14 @@ public class StructureNBT {
     }
 
     private static StructureTemplate _readStructureFromJar(Identifier resource) {
-        try (InputStream inputstream = openStructureStream(resource)) {
-            if (inputstream == null) {
-                BCLib.LOGGER.error("Structure not found: " + getStructurePath(resource) + ".nbt");
-                return new StructureTemplate();
-            }
+        try {
+            InputStream inputstream = MinecraftServer.class.getResourceAsStream("/" + getStructurePath(resource) + ".nbt");
             return readStructureFromStream(inputstream);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
-    }
-
-    private static InputStream openStructureStream(Identifier resource) {
-        String path = getStructurePath(resource) + ".nbt";
-        ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
-        if (contextLoader != null) {
-            InputStream stream = contextLoader.getResourceAsStream(path);
-            if (stream != null) {
-                return stream;
-            }
-        }
-
-        ClassLoader bclibLoader = StructureNBT.class.getClassLoader();
-        if (bclibLoader != null) {
-            InputStream stream = bclibLoader.getResourceAsStream(path);
-            if (stream != null) {
-                return stream;
-            }
-        }
-
-        ClassLoader minecraftLoader = MinecraftServer.class.getClassLoader();
-        if (minecraftLoader != null) {
-            InputStream stream = minecraftLoader.getResourceAsStream(path);
-            if (stream != null) {
-                return stream;
-            }
-        }
-
-        return MinecraftServer.class.getResourceAsStream("/" + path);
     }
 
     /**
@@ -247,14 +215,13 @@ public class StructureNBT {
     }
 
     public BlockPos getSize(Rotation rotation) {
+        // 26.3 removed the copy constructor BlockPos(Vec3i); the (int, int, int) one is the only way to
+        // build a BlockPos from a Vec3i now (BlockPos.containing only accepts a double-based Position).
+        final Vec3i size = structure.getSize();
         if (rotation == Rotation.NONE || rotation == Rotation.CLOCKWISE_180)
-            return new BlockPos(structure.getSize());
-        else {
-            Vec3i size = structure.getSize();
-            int x = size.getX();
-            int z = size.getZ();
-            return new BlockPos(z, size.getY(), x);
-        }
+            return new BlockPos(size.getX(), size.getY(), size.getZ());
+        else
+            return new BlockPos(size.getZ(), size.getY(), size.getX());
     }
 
     public String getName() {

@@ -2,28 +2,30 @@ package org.betterx.bclib.recipes;
 
 import org.betterx.bclib.BCLib;
 import org.betterx.wover.config.api.DatapackConfigs;
+import org.betterx.wover.recipe.api.SyncedRecipes;
+import org.betterx.wover.recipe.impl.RecipeLookups;
 
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeMap;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 
-import com.google.gson.JsonElement;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.gson.JsonObject;
+import net.minecraft.resources.ResourceKey;
 
 import java.util.HashSet;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Map;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -32,16 +34,26 @@ public class BCLRecipeManager {
     public static final Identifier RECIPES_CONFIG_FILE = BCLib.C.id("recipes.json");
     private static final Map<Identifier, RecipeSerializer<?>> SERIALIZERS = new LinkedHashMap<>();
     private static final Map<Identifier, RecipeType<?>> TYPES = new LinkedHashMap<>();
+    private static final Map<Identifier, RecipeBookCategory> CATEGORIES = new LinkedHashMap<>();
 
+    /**
+     * Registers a serializer for a custom recipe type, and makes its recipes readable on the client.
+     * <p>
+     * The sync registration is not optional here on purpose: every recipe type that goes through this
+     * method is a modded one that some GUI - the JEI/REI plugins, an in-world recipe book - has to be
+     * able to list, and without it those all come up empty against a dedicated server. See
+     * {@link SyncedRecipes} for why the client cannot read them otherwise.
+     */
     public static <C extends RecipeInput, S extends RecipeSerializer<T>, T extends Recipe<C>> S registerSerializer(
             String modID,
             String id,
             S serializer
     ) {
-        Identifier rl = Identifier.fromNamespaceAndPath(modID, id);
-        @SuppressWarnings("unchecked") S existing = (S) SERIALIZERS.get(rl);
+        Identifier location = Identifier.fromNamespaceAndPath(modID, id);
+        @SuppressWarnings("unchecked") S existing = (S) SERIALIZERS.get(location);
         if (existing != null) return existing;
-        SERIALIZERS.put(rl, serializer);
+        SERIALIZERS.put(location, serializer);
+        SyncedRecipes.register(serializer);
         return serializer;
     }
 
@@ -49,14 +61,18 @@ public class BCLRecipeManager {
         Identifier recipeTypeId = Identifier.fromNamespaceAndPath(modID, type);
         @SuppressWarnings("unchecked") RecipeType<T> existing = (RecipeType<T>) TYPES.get(recipeTypeId);
         if (existing != null) return existing;
-
-        RecipeType<T> res = new RecipeType<T>() {
+        RecipeType<T> result = new RecipeType<>() {
             public String toString() {
                 return type;
             }
         };
-        TYPES.put(recipeTypeId, res);
-        return res;
+        TYPES.put(recipeTypeId, result);
+        SyncedRecipes.registerType(result);
+        return result;
+    }
+
+    public static RecipeBookCategory registerCategory(Identifier location) {
+        return CATEGORIES.computeIfAbsent(location, ignored -> new RecipeBookCategory());
     }
 
     public static boolean exists(ItemLike item) {
@@ -68,6 +84,27 @@ public class BCLRecipeManager {
     }
 
     private final static HashSet<Identifier> disabledRecipes = new HashSet<>();
+
+    /**
+     * The {@link ResourceManager} of the datapack load that is currently in progress, published by
+     * {@code ReloadableServerResourcesMixin}.
+     * <p>
+     * 26.3 removed {@code RecipeManager}'s reload-listener phase, which used to hand the manager in as a
+     * parameter, so it has to be carried across from the one method that starts the load. Volatile because
+     * the {@code RecipeManager} is constructed on a worker thread inside the future
+     * {@code ReloadableServerResources#loadResources} returns.
+     */
+    private static volatile ResourceManager loadingResourceManager = null;
+
+    @ApiStatus.Internal
+    public static void setLoadingResourceManager(ResourceManager manager) {
+        loadingResourceManager = manager;
+    }
+
+    @ApiStatus.Internal
+    public static ResourceManager loadingResourceManager() {
+        return loadingResourceManager;
+    }
 
     private static void clearRecipeConfig() {
         disabledRecipes.clear();
@@ -85,50 +122,42 @@ public class BCLRecipeManager {
         }
     }
 
+    /**
+     * Hides every recipe the {@code recipes.json} datapack config disables from {@code loadedRecipes}.
+     * <p>
+     * 26.3 made recipes a datapack registry, so this filters the {@code HolderLookup<Recipe<?>>} on its way
+     * into {@code RecipeMap.create} rather than subtracting from the finished map. Rebuilding the map and
+     * assigning it over {@code RecipeManager.recipes} would strip Fabric's recipe-sync decoration and break
+     * player connect - see {@code org.betterx.wover.recipe.impl.RecipeLookups}.
+     */
     @ApiStatus.Internal
-    public static void removeDisabledRecipes(ResourceManager manager, Map<Identifier, JsonElement> map) {
+    public static HolderLookup<Recipe<?>> removeDisabledRecipes(
+            ResourceManager manager,
+            HolderLookup<Recipe<?>> loadedRecipes
+    ) {
         clearRecipeConfig();
         DatapackConfigs
                 .instance()
                 .runForResource(manager, RECIPES_CONFIG_FILE, BCLRecipeManager::processRecipeConfig);
 
-        for (Identifier id : disabledRecipes) {
-            BCLib.LOGGER.verbose("Disabling Recipe: {}", id);
+        if (disabledRecipes.isEmpty()) return loadedRecipes;
 
-            map.remove(id);
-        }
-    }
+        final Set<Identifier> disabled = Set.copyOf(disabledRecipes);
+        for (Identifier id : disabled) BCLib.LOGGER.verbose("Disabling Recipe: {}", id);
 
-    @ApiStatus.Internal
-    public static RecipeMap removeDisabledRecipes(ResourceManager manager, RecipeMap recipeMap) {
-        clearRecipeConfig();
-        DatapackConfigs
-                .instance()
-                .runForResource(manager, RECIPES_CONFIG_FILE, BCLRecipeManager::processRecipeConfig);
-
-        if (disabledRecipes.isEmpty()) {
-            return recipeMap;
-        }
-
-        for (Identifier id : disabledRecipes) {
-            BCLib.LOGGER.verbose("Disabling Recipe: {}", id);
-        }
-
-        ArrayList<RecipeHolder<?>> filtered = new ArrayList<>();
-        for (RecipeHolder<?> holder : recipeMap.values()) {
-            if (!disabledRecipes.contains(holder.id().identifier())) {
-                filtered.add(holder);
-            }
-        }
-
-        return RecipeMap.create(filtered);
+        return RecipeLookups.filtered(loadedRecipes, key -> !disabled.contains(key.identifier()));
     }
 
     public static void register(RegisterEvent event) {
-        if (event.getRegistryKey().equals(Registries.RECIPE_SERIALIZER)) {
-            event.register(Registries.RECIPE_SERIALIZER, helper -> SERIALIZERS.forEach(helper::register));
-        } else if (event.getRegistryKey().equals(Registries.RECIPE_TYPE)) {
-            event.register(Registries.RECIPE_TYPE, helper -> TYPES.forEach(helper::register));
+        if (event.getRegistryKey().equals(net.minecraft.core.registries.Registries.RECIPE_SERIALIZER)) {
+            event.register(net.minecraft.core.registries.Registries.RECIPE_SERIALIZER,
+                    helper -> SERIALIZERS.forEach(helper::register));
+        } else if (event.getRegistryKey().equals(net.minecraft.core.registries.Registries.RECIPE_TYPE)) {
+            event.register(net.minecraft.core.registries.Registries.RECIPE_TYPE,
+                    helper -> TYPES.forEach(helper::register));
+        } else if (event.getRegistryKey().equals(net.minecraft.core.registries.Registries.RECIPE_BOOK_CATEGORY)) {
+            event.register(net.minecraft.core.registries.Registries.RECIPE_BOOK_CATEGORY,
+                    helper -> CATEGORIES.forEach(helper::register));
         }
     }
 }
