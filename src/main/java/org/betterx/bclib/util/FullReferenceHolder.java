@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
-public class FullReferenceHolder<T> implements Holder<T> {
+public class FullReferenceHolder<T> extends Holder.Reference<T> {
     final private Set<TagKey<T>> tags = Set.of();
     @Nullable
     final private ResourceKey<T> key;
@@ -29,6 +29,7 @@ public class FullReferenceHolder<T> implements Holder<T> {
             @Nullable ResourceKey<T> resourceKey,
             @Nullable T object
     ) {
+        super(Type.STAND_ALONE, new HolderOwner<>() {}, resourceKey, object);
         this.owner = owner;
         this.key = resourceKey;
         this.value = object;

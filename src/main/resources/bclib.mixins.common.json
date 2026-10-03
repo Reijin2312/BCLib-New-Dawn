@@ -19,7 +19,6 @@
     "LootPoolMixin",
     "MobSpawnSettingsAccessor",
     "PistonBaseBlockMixin",
-    "PortalShapeMixin",
     "RecipeManagerMixin",
     "RecipeMixin",
     "ReloadableServerResourcesMixin",

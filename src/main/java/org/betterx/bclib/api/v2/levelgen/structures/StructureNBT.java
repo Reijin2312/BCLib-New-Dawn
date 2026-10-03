@@ -20,6 +20,10 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforgespi.locating.IModFile;
+
 import com.google.common.collect.Maps;
 
 import java.io.IOException;
@@ -32,6 +36,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 public class StructureNBT {
@@ -118,14 +123,48 @@ public class StructureNBT {
     }
 
     private static StructureTemplate _readStructureFromJar(Identifier resource) {
-        try {
-            InputStream inputstream = MinecraftServer.class.getResourceAsStream("/" + getStructurePath(resource) + ".nbt");
+        try (InputStream inputstream = openStructureStream(resource)) {
+            if (inputstream == null) {
+                BCLib.LOGGER.error("Missing structure template: " + resource);
+                return null;
+            }
             return readStructureFromStream(inputstream);
         } catch (IOException e) {
-            e.printStackTrace();
+            BCLib.LOGGER.error("Unable to read structure template: " + resource, e);
         }
 
         return null;
+    }
+
+    @Nullable
+    private static InputStream openStructureStream(Identifier resource) throws IOException {
+        final String path = getStructurePath(resource) + ".nbt";
+        ModList modList = ModList.get();
+        if (modList != null) {
+            Optional<? extends ModContainer> container = modList.getModContainerById(resource.getNamespace());
+            if (container.isPresent()) {
+                IModFile modFile = container.get().getModInfo().getOwningFile().getFile();
+                String[] parts = resource.getPath().split("/");
+                String[] segments = new String[3 + parts.length];
+                segments[0] = "data";
+                segments[1] = resource.getNamespace();
+                segments[2] = "structure";
+                for (int i = 0; i < parts.length; i++) {
+                    segments[3 + i] = i == parts.length - 1 ? parts[i] + ".nbt" : parts[i];
+                }
+                String modPath = String.join("/", segments);
+                if (modFile.getContents().containsFile(modPath)) {
+                    return modFile.getContents().openFile(modPath);
+                }
+            }
+        }
+
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader != null) {
+            InputStream stream = loader.getResourceAsStream(path);
+            if (stream != null) return stream;
+        }
+        return StructureNBT.class.getClassLoader().getResourceAsStream(path);
     }
 
     /**

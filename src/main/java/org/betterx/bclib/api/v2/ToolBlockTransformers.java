@@ -9,8 +9,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
@@ -37,9 +35,9 @@ public final class ToolBlockTransformers {
         final List<BlockTransformer.BlockTransformData> axeTransforms = axeTransforms();
         if (!axeTransforms.isEmpty()) {
             event.modifyMatching(
-                    (item, components) -> carriesAllOf(
+                    (item, components) -> carriesTransformWithSound(
                             components.get(DataComponents.BLOCK_TRANSFORMER),
-                            Items.DIAMOND_AXE.components().get(DataComponents.BLOCK_TRANSFORMER)
+                            SoundEvents.AXE_STRIP
                     ),
                     (builder, context, item) -> append(builder, axeTransforms)
             );
@@ -48,9 +46,9 @@ public final class ToolBlockTransformers {
         final List<BlockTransformer.BlockTransformData> shovelTransforms = shovelTransforms();
         if (!shovelTransforms.isEmpty()) {
             event.modifyMatching(
-                    (item, components) -> carriesAllOf(
+                    (item, components) -> carriesTransformWithSound(
                             components.get(DataComponents.BLOCK_TRANSFORMER),
-                            Items.DIAMOND_SHOVEL.components().get(DataComponents.BLOCK_TRANSFORMER)
+                            SoundEvents.SHOVEL_FLATTEN
                     ),
                     (builder, context, item) -> append(builder, shovelTransforms)
             );
@@ -108,8 +106,11 @@ public final class ToolBlockTransformers {
         return result;
     }
 
-    private static boolean carriesAllOf(Holder<BlockTransformer> transformer, Holder<BlockTransformer> reference) {
-        return transformer != null && reference != null
-                && transformer.value().transforms().containsAll(reference.value().transforms());
+    private static boolean carriesTransformWithSound(
+            Holder<BlockTransformer> transformer,
+            Holder<net.minecraft.sounds.SoundEvent> sound
+    ) {
+        return transformer != null && transformer.value().transforms().stream()
+                .anyMatch(transform -> transform.sound().equals(sound));
     }
 }
