@@ -1,41 +1,39 @@
 package org.betterx.bclib.blocks;
 
 import org.betterx.bclib.behaviours.BehaviourBuilders;
-import org.betterx.bclib.behaviours.interfaces.BehaviourPlant;
-import org.betterx.bclib.client.render.BCLRenderLayer;
-import org.betterx.bclib.interfaces.RenderLayerProvider;
-import org.betterx.bclib.interfaces.tools.AddMineableShears;
-import org.betterx.wover.loot.api.BlockLootProvider;
-import org.betterx.wover.loot.api.LootLookupProvider;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.RandomSource;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import org.jetbrains.annotations.NotNull;
 
-public abstract class UpDownPlantBlock extends BaseBlockNotFull implements RenderLayerProvider, AddMineableShears, BehaviourPlant, BlockLootProvider {
+/**
+ * Base for plants that grow as a vertical column.
+ * <p>
+ * Deliberately does not declare a loot table. The block's owner attaches one at registration with
+ * {@code BlockTraits.LOOT_TABLE} (historically this class implemented wover's deprecated
+ * {@code BlockLootProvider} and generated {@code dropWithSilkTouch} for every subclass, which
+ * double-generated the table for any block that also carried the trait - the two datagen providers run
+ * independently, with no filter between them).
+ */
+public abstract class UpDownPlantBlock extends BaseBlockNotFull {
     private static final VoxelShape SHAPE = box(4, 0, 4, 12, 16, 12);
 
+    /** Compatibility constructor retained for BCLib's pre-26.3 block API. */
     public UpDownPlantBlock() {
-        this(BehaviourBuilders
-                .createPlant()
-                .sound(SoundType.GRASS)
-        );
+        this(BehaviourBuilders.createPlant().sound(SoundType.GRASS));
     }
 
     public UpDownPlantBlock(BlockBehaviour.Properties properties) {
@@ -64,17 +62,17 @@ public abstract class UpDownPlantBlock extends BaseBlockNotFull implements Rende
 
     @Override
     @SuppressWarnings("deprecation")
-    public BlockState updateShape(
+    protected BlockState updateShape(
             BlockState state,
-            net.minecraft.world.level.LevelReader world,
-            net.minecraft.world.level.ScheduledTickAccess scheduledTickAccess,
+            LevelReader level,
+            ScheduledTickAccess scheduledTickAccess,
             BlockPos pos,
-            Direction facing,
+            Direction neighborDirection,
             BlockPos neighborPos,
             BlockState neighborState,
-            net.minecraft.util.RandomSource randomSource
+            RandomSource randomSource
     ) {
-        if (!canSurvive(state, world, pos)) {
+        if (!canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         } else {
             return state;
@@ -82,29 +80,15 @@ public abstract class UpDownPlantBlock extends BaseBlockNotFull implements Rende
     }
 
     @Override
-    public BCLRenderLayer getRenderLayer() {
-        return BCLRenderLayer.CUTOUT;
-    }
-
-    @Override
     public void playerDestroy(
-            Level world,
-            Player player,
+            ServerLevel world,
+            ServerPlayer player,
             BlockPos pos,
             BlockState state,
             BlockEntity blockEntity,
             ItemStack stack
     ) {
         super.playerDestroy(world, player, pos, state, blockEntity, stack);
-        world.neighborChanged(pos, Blocks.AIR, null);
-    }
-
-    @Override
-    public LootTable.Builder registerBlockLoot(
-            @NotNull Identifier location,
-            @NotNull LootLookupProvider provider,
-            @NotNull ResourceKey<LootTable> tableKey
-    ) {
-        return provider.dropWithSilkTouch(this);
+        world.updateNeighborsAt(pos.below(), Blocks.AIR);
     }
 }

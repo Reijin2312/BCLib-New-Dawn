@@ -7,10 +7,10 @@ import org.betterx.wover.complex.api.equipment.EquipmentSet;
 import org.betterx.wover.complex.api.equipment.ToolSlot;
 
 import net.minecraft.advancements.*;
-import net.minecraft.advancements.predicates.ItemPredicate;
-import net.minecraft.advancements.predicates.LocationPredicate;
+import net.minecraft.advancements.predicates.*;
 import net.minecraft.advancements.triggers.*;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeBuilder;
@@ -18,14 +18,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.context.ContextMap;
-import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -33,11 +30,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class AdvancementManager {
-    private static final ContextMap EMPTY_DISPLAY_CONTEXT = new ContextMap.Builder()
-            .create(new ContextKeySet.Builder().build());
     static class OrderedBuilder extends Advancement.Builder {
         OrderedBuilder() {
             super();
@@ -45,20 +39,6 @@ public class AdvancementManager {
     }
 
     private static final Map<Identifier, Advancement.Builder> ADVANCEMENTS = new LinkedHashMap<>();
-
-    private static ResourceKey<Recipe<?>> recipeKey(Identifier id) {
-        return ResourceKey.create(Registries.RECIPE, id);
-    }
-
-    private static Item getRecipeResultIcon(Recipe<?> recipe) {
-        return recipe.display()
-                     .stream()
-                     .map(display -> display.result().resolveForFirstStack(EMPTY_DISPLAY_CONTEXT))
-                     .filter(stack -> !stack.isEmpty())
-                     .map(ItemStack::getItem)
-                     .findFirst()
-                     .orElse(Items.KNOWLEDGE_BOOK);
-    }
 
     public static void register(Identifier id, Advancement.Builder builder) {
         ADVANCEMENTS.put(id, builder);
@@ -99,19 +79,13 @@ public class AdvancementManager {
         }
 
 
-        public RewardsBuilder addLootTable(ResourceKey<LootTable> resourceLocation) {
-            builder.addLootTable(resourceLocation);
+        public RewardsBuilder addLootTable(Holder<LootTable> lootTable) {
+            builder.addLootTable(lootTable);
             return this;
         }
 
-
-        public RewardsBuilder addRecipe(Identifier resourceLocation) {
-            builder.addRecipe(recipeKey(resourceLocation));
-            return this;
-        }
-
-        public RewardsBuilder addRecipe(ResourceKey<Recipe<?>> resourceKey) {
-            builder.addRecipe(resourceKey);
+        public RewardsBuilder addRecipe(ResourceKey<Recipe<?>> resourceLocation) {
+            builder.addRecipe(resourceLocation);
             return this;
         }
 
@@ -178,8 +152,7 @@ public class AdvancementManager {
         }
 
         public static Builder create(ItemLike icon, AdvancementType type) {
-            return create(icon, type, (displayBuilder) -> {
-            });
+            return create(new ItemStack(icon), type);
         }
 
         public static Builder create(ItemStack icon, AdvancementType type) {
@@ -188,33 +161,7 @@ public class AdvancementManager {
         }
 
         public static Builder create(Item icon, AdvancementType type, Consumer<DisplayBuilder> displayAdapter) {
-            return create((ItemLike) icon, type, displayAdapter);
-        }
-
-        public static Builder create(
-                ItemLike icon,
-                AdvancementType type,
-                Consumer<DisplayBuilder> displayAdapter
-        ) {
-            Item item = icon == null ? Items.AIR : icon.asItem();
-            var id = BuiltInRegistries.ITEM.getKey(item);
-            boolean canBuild = true;
-            if (id == null || item == Items.AIR) {
-                canBuild = false;
-                id = BuiltInRegistries.ITEM.getDefaultKey();
-            }
-
-            String baseName = "advancements." + id.getNamespace() + "." + id.getPath() + ".";
-            Builder b = new Builder(id, type);
-            var displayBuilder = b.startDisplay(
-                    item,
-                    Component.translatable(baseName + "title"),
-                    Component.translatable(baseName + "description")
-            );
-            if (displayAdapter != null) displayAdapter.accept(displayBuilder);
-            b = displayBuilder.endDisplay();
-            b.canBuild = canBuild;
-            return b;
+            return create(new ItemStack(icon), type, displayAdapter);
         }
 
         public static Builder create(
@@ -240,20 +187,6 @@ public class AdvancementManager {
             b = displayBuilder.endDisplay();
             b.canBuild = canBuild;
             return b;
-        }
-
-        public static <C extends RecipeInput, T extends RecipeHolder<Recipe<C>>> Builder createRecipe(
-                T recipe,
-                AdvancementType type
-        ) {
-            Item item = getRecipeResultIcon(recipe.value());
-            return create(item, type, displayBuilder -> displayBuilder.hideToast().hideFromChat())
-                    //.awardRecipe(item)
-                    .addRecipeUnlockCriterion("has_the_recipe", recipe)
-                    .startReward()
-                    .addRecipe(recipe.id())
-                    .endReward()
-                    .requirements(AdvancementRequirements.Strategy.OR);
         }
 
         public Builder parent(AdvancementHolder advancement) {
@@ -282,17 +215,7 @@ public class AdvancementManager {
                 Component title,
                 Component description
         ) {
-            Item item = icon == null ? Items.AIR : icon.asItem();
-            if (item == Items.AIR) {
-                canBuild = false;
-            } else {
-                var id = BuiltInRegistries.ITEM.getKey(item);
-                if (id == null) {
-                    canBuild = false;
-                }
-            }
-            DisplayBuilder dp = DISPLAY_BUILDER.get().reset(this);
-            return dp.icon(item).title(title).description(description);
+            return startDisplay(new ItemStackTemplate(icon.asItem()), title, description);
         }
 
         public DisplayBuilder startDisplay(
@@ -300,10 +223,22 @@ public class AdvancementManager {
                 Component title,
                 Component description
         ) {
+            return startDisplay(
+                    icon == null ? null : ItemStackTemplate.fromNonEmptyStack(icon),
+                    title,
+                    description
+            );
+        }
+
+        public DisplayBuilder startDisplay(
+                ItemStackTemplate icon,
+                Component title,
+                Component description
+        ) {
             if (icon == null) {
                 canBuild = false;
             } else {
-                var id = BuiltInRegistries.ITEM.getKey(icon.getItem());
+                var id = BuiltInRegistries.ITEM.getKey(icon.item().value());
                 if (id == null) {
                     canBuild = false;
                 }
@@ -322,7 +257,7 @@ public class AdvancementManager {
             for (ItemLike item : items) {
                 Identifier id = BuiltInRegistries.ITEM.getKey(item.asItem());
                 if (id == null) continue;
-                rewardBuilder.addRecipe(id);
+                rewardBuilder.addRecipe(ResourceKey.create(Registries.RECIPE, id));
             }
             return rewardBuilder.endReward();
         }
@@ -365,13 +300,13 @@ public class AdvancementManager {
             );
         }
 
-        public <C extends RecipeInput, T extends Recipe<C>> Builder addRecipeUnlockCriterion(
+        public Builder addRecipeUnlockCriterion(
                 String name,
-                RecipeHolder<T> recipe
+                Holder<Recipe<?>> recipe
         ) {
             return addCriterion(
                     name,
-                    RecipeUnlockedTrigger.unlocked(recipe.id())
+                    RecipeUnlockedTrigger.unlocked(recipe)
             );
         }
 
@@ -384,17 +319,15 @@ public class AdvancementManager {
 
         public Builder addInventoryChangedAnyCriterion(String name, ItemLike... items) {
             final Criterion<InventoryChangeTrigger.TriggerInstance> t =
-                    InventoryChangeTrigger.TriggerInstance.hasItems(
-                            ItemPredicate.Builder.item().of(BuiltInRegistries.ITEM, items)
-                    );
+                    InventoryChangeTrigger.TriggerInstance.hasItems(items);
 
             return addCriterion(name, t);
         }
 
-        public Builder addInventoryChangedCriterion(String name, TagKey<Item> tag) {
+        public Builder addInventoryChangedCriterion(HolderLookup<Item> itemLookup, String name, TagKey<Item> tag) {
             final Criterion<InventoryChangeTrigger.TriggerInstance> t =
                     InventoryChangeTrigger.TriggerInstance.hasItems(
-                            ItemPredicate.Builder.item().of(BuiltInRegistries.ITEM, tag)
+                            ItemPredicate.Builder.item().of(itemLookup, tag)
                     );
 
             return addCriterion(name, t);
@@ -465,14 +398,6 @@ public class AdvancementManager {
             return this;
         }
 
-        @Deprecated(forRemoval = true)
-        public Builder requirements(String[][] strings) {
-            return requirements(Arrays.stream(strings)
-                                      .map(Arrays::asList)
-                                      .map(ArrayList::new)
-                                      .collect(Collectors.toList()));
-        }
-
         public Builder requirements(List<List<String>> strings) {
             builder.requirements(new AdvancementRequirements(strings));
             return this;
@@ -500,12 +425,17 @@ public class AdvancementManager {
         }
 
         public DisplayBuilder icon(ItemLike value) {
-            display.setIcon(value);
+            display.icon = new ItemStackTemplate(value.asItem());
             return this;
         }
 
         public DisplayBuilder icon(ItemStack value) {
-            display.setIcon(value);
+            display.icon = ItemStackTemplate.fromNonEmptyStack(value);
+            return this;
+        }
+
+        public DisplayBuilder icon(ItemStackTemplate value) {
+            display.icon = value;
             return this;
         }
 

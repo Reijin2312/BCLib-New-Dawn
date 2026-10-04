@@ -247,10 +247,10 @@ public class StructureNBT {
     }
 
     public BlockPos getSize(Rotation rotation) {
+        Vec3i size = structure.getSize();
         if (rotation == Rotation.NONE || rotation == Rotation.CLOCKWISE_180)
-            return new BlockPos(structure.getSize());
+            return new BlockPos(size.getX(), size.getY(), size.getZ());
         else {
-            Vec3i size = structure.getSize();
             int x = size.getX();
             int z = size.getZ();
             return new BlockPos(z, size.getY(), x);

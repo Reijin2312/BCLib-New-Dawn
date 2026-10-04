@@ -35,7 +35,7 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
@@ -85,7 +85,7 @@ public abstract class BaseChestBlock extends ChestBlock implements BlockModelPro
     ) {
         LootTable.Builder builder = LootTable.lootTable();
         var pool = LootPool.lootPool()
-                           .setRolls(ConstantValue.exactly(1.0f))
+                           .setRolls(ContextIntProviders.exactly(1))
                            .add(LootItem.lootTableItem(this).apply(CopyComponentsFunction
                                    .copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY)
                                    .include(DataComponents.CUSTOM_NAME)

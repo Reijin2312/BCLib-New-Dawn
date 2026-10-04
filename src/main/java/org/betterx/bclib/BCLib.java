@@ -1,5 +1,6 @@
 package org.betterx.bclib;
 
+import org.betterx.bclib.api.v2.ToolBlockTransformers;
 import org.betterx.bclib.api.v2.levelgen.LevelGenEvents;
 import org.betterx.bclib.api.v2.levelgen.structures.TemplatePiece;
 import org.betterx.bclib.api.v3.tag.BCLBlockTags;
@@ -44,6 +45,7 @@ public class BCLib implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        ToolBlockTransformers.register();
         BCLibArguments.register();
         LevelGenEvents.register();
         BCLAttachments.ensureStaticInitialization();

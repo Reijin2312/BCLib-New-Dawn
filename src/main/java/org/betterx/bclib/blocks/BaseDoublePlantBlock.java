@@ -1,18 +1,11 @@
 package org.betterx.bclib.blocks;
 
 import org.betterx.bclib.behaviours.BehaviourBuilders;
-import org.betterx.bclib.client.render.BCLRenderLayer;
-import org.betterx.bclib.interfaces.RenderLayerProvider;
 import org.betterx.bclib.util.BlocksHelper;
-import org.betterx.wover.block.api.model.BlockModelProvider;
-import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
-import org.betterx.wover.loot.api.BlockLootProvider;
 import org.betterx.wover.loot.api.LootLookupProvider;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,10 +14,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -35,31 +30,23 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-
 import org.jetbrains.annotations.NotNull;
 
-public abstract class BaseDoublePlantBlock extends BaseBlockNotFull implements RenderLayerProvider, BonemealableBlock, BlockLootProvider, BlockModelProvider {
+public abstract class BaseDoublePlantBlock extends BaseBlockNotFull implements BonemealableBlock {
     private static final VoxelShape SHAPE = box(4, 2, 4, 12, 16, 12);
     public static final IntegerProperty ROTATION = org.betterx.wover.block.api.BlockProperties.ROTATION;
     public static final BooleanProperty TOP = BooleanProperty.create("top");
 
+    /** Compatibility constructors retained for BCLib's pre-26.3 block API. */
     public BaseDoublePlantBlock() {
-        this(
-                BehaviourBuilders
-                        .createPlant()
-                        .sound(SoundType.GRASS)
-                        .offsetType(BlockBehaviour.OffsetType.NONE)
-        );
+        this(BehaviourBuilders.createPlant().sound(SoundType.GRASS).offsetType(BlockBehaviour.OffsetType.NONE));
     }
 
     public BaseDoublePlantBlock(int light) {
-        this(
-                BehaviourBuilders
-                        .createPlant()
-                        .sound(SoundType.GRASS)
-                        .lightLevel((state) -> state.getValue(TOP) ? light : 0)
-                        .offsetType(BlockBehaviour.OffsetType.NONE)
-        );
+        this(BehaviourBuilders.createPlant()
+                .sound(SoundType.GRASS)
+                .lightLevel(state -> state.getValue(TOP) ? light : 0)
+                .offsetType(BlockBehaviour.OffsetType.NONE));
     }
 
     public BaseDoublePlantBlock(BlockBehaviour.Properties properties) {
@@ -73,14 +60,12 @@ public abstract class BaseDoublePlantBlock extends BaseBlockNotFull implements R
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public VoxelShape getShape(BlockState state, BlockGetter view, BlockPos pos, CollisionContext ePos) {
+    public @NotNull VoxelShape getShape(BlockState state, BlockGetter view, BlockPos pos, CollisionContext ePos) {
         Vec3 vec3d = state.getOffset(pos);
         return SHAPE.move(vec3d.x, vec3d.y, vec3d.z);
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
         BlockState down = world.getBlockState(pos.below());
         BlockState up = world.getBlockState(pos.above());
@@ -93,21 +78,31 @@ public abstract class BaseDoublePlantBlock extends BaseBlockNotFull implements R
         return state.getValue(TOP) ? down.getBlock() == this : isTerrain(down) && (up.getBlock() == this);
     }
 
+    /**
+     * Whether {@code state} (the block below the bottom half) is valid ground. Defaults to the block's
+     * {@link SurvivesOnBlockTrait}; subclasses may override. Runtime-only, so order-safe with traits.
+     */
     protected abstract boolean isTerrain(BlockState state);
 
+    /**
+     * Tall/double plants drop with ANY tool (like their single counterparts), not shears-only.
+     */
+    public static LootTable.Builder buildLoot(Block block, LootLookupProvider provider) {
+        return provider.dropDoublePlant(block);
+    }
+
     @Override
-    @SuppressWarnings("deprecation")
-    public BlockState updateShape(
+    protected @NotNull BlockState updateShape(
             BlockState state,
-            net.minecraft.world.level.LevelReader world,
-            net.minecraft.world.level.ScheduledTickAccess scheduledTickAccess,
+            LevelReader level,
+            ScheduledTickAccess scheduledTickAccess,
             BlockPos pos,
-            Direction facing,
+            Direction neighborDirection,
             BlockPos neighborPos,
             BlockState neighborState,
-            net.minecraft.util.RandomSource randomSource
+            RandomSource randomSource
     ) {
-        if (!canStayAt(state, world, pos)) {
+        if (!canStayAt(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         } else {
             return state;
@@ -115,22 +110,48 @@ public abstract class BaseDoublePlantBlock extends BaseBlockNotFull implements R
     }
 
     @Override
-    public BCLRenderLayer getRenderLayer() {
-        return BCLRenderLayer.CUTOUT;
+    public boolean isValidBonemealTarget(
+            LevelReader levelReader,
+            BlockPos blockPos,
+            BlockState blockState,
+            BonemealSource bonemealSource
+    ) {
+        return isValidBonemealTarget(levelReader, blockPos, blockState);
     }
 
-
-    @Override
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public boolean isValidBonemealTarget(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
         return true;
     }
 
     @Override
+    public boolean isBonemealSuccess(
+            Level level,
+            RandomSource random,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        return isBonemealSuccess(level, random, pos, state);
+    }
+
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
         return true;
     }
 
     @Override
+    public void performBonemeal(
+            ServerLevel level,
+            RandomSource random,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        performBonemeal(level, random, pos, state);
+    }
+
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
         ItemEntity item = new ItemEntity(
                 level,
@@ -148,21 +169,5 @@ public abstract class BaseDoublePlantBlock extends BaseBlockNotFull implements R
         BlockState bs = this.defaultBlockState().setValue(ROTATION, rot);
         BlocksHelper.setWithoutUpdate(world, pos, bs);
         BlocksHelper.setWithoutUpdate(world, pos.above(), bs.setValue(TOP, true));
-    }
-
-    @Override
-    public LootTable.Builder registerBlockLoot(
-            @NotNull Identifier location,
-            @NotNull LootLookupProvider provider,
-            @NotNull ResourceKey<LootTable> tableKey
-    ) {
-        return provider.dropDoublePlant(this);
-    }
-
-    @Override
-    public void provideBlockModels(Object modelGenerator) {
-    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        generator.createCubeModel(this);
-        generator.createFlatItem(this);
     }
 }

@@ -1,17 +1,11 @@
 package org.betterx.bclib.blocks;
 
 import org.betterx.bclib.client.sound.BlockSounds;
-import org.betterx.wover.block.api.model.BlockModelProvider;
-import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
-import org.betterx.wover.loot.api.BlockLootProvider;
-import org.betterx.wover.loot.api.LootLookupProvider;
 import org.betterx.wover.tag.api.TagManager;
 import org.betterx.wover.tag.api.predefined.MineableTags;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -24,28 +18,31 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowLayerBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.lighting.LightEngine;
 import net.minecraft.world.phys.BlockHitResult;
 
 
-import org.jetbrains.annotations.NotNull;
-
 @SuppressWarnings("deprecation")
-public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, BlockModelProvider {
+public class BaseTerrainBlock extends Block {
     private final Block baseBlock;
     private Block pathBlock;
 
+    /** Compatibility constructor retained for BCLib's pre-26.3 block API. */
     public BaseTerrainBlock(Block baseBlock, MapColor color) {
-        super(Properties
-                .ofFullCopy(baseBlock)
-                .mapColor(color)
-                .sound(BlockSounds.TERRAIN_SOUND)
-                .randomTicks()
+        this(
+                BlockBehaviour.Properties.ofFullCopy(baseBlock)
+                        .mapColor(color)
+                        .sound(BlockSounds.TERRAIN_SOUND)
+                        .randomTicks(),
+                baseBlock
         );
+    }
+
+    public BaseTerrainBlock(BlockBehaviour.Properties props, Block baseBlock) {
+        super(props);
         this.baseBlock = baseBlock;
     }
 
@@ -66,12 +63,16 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
             BlockHitResult hit
     ) {
         if (pathBlock != null && TagManager.isToolWithMineableTag(player.getMainHandItem(), MineableTags.SHOVEL)) {
-            level.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0F, 1.0F);
+            // 26.3 dropped the Holder<SoundEvent> overload of Level#playSound(Entity, BlockPos, ...);
+            // the surviving one takes a bare SoundEvent, and SoundEvents constants are Holder.Reference.
+            level.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN.value(), SoundSource.BLOCKS, 1.0F, 1.0F);
             if (!level.isClientSide()) {
                 level.setBlockAndUpdate(pos, pathBlock.defaultBlockState());
                 if (!player.isCreative()) {
-                    player.getMainHandItem().hurtAndBreak(1, (ServerLevel) level, (ServerPlayer) player, i -> {
-                    });
+                    player.getMainHandItem().hurtAndBreak(
+                            1, (ServerLevel) level, (ServerPlayer) player, i -> {
+                            }
+                    );
                 }
             }
             return InteractionResult.SUCCESS;
@@ -87,13 +88,18 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
     }
 
     public boolean canStay(BlockState state, LevelReader worldView, BlockPos pos) {
-        BlockPos blockPos = pos.above();
-        BlockState blockState = worldView.getBlockState(blockPos);
+        return willSurvive(state, worldView, pos);
+    }
+
+    public static boolean willSurvive(BlockState state, LevelReader worldView, BlockPos pos) {
+        BlockState blockState = worldView.getBlockState(pos.above());
         if (blockState.is(Blocks.SNOW) && blockState.getValue(SnowLayerBlock.LAYERS) == 1) {
             return true;
         } else if (blockState.getFluidState().getAmount() == 8) {
             return false;
         } else {
+            // 26.3 renamed LightEngine.getLightBlockInto -> getLightDampeningInto; the body is
+            // byte-for-byte identical (verified against the 26.3 jar).
             int i = LightEngine.getLightDampeningInto(
                     state,
                     blockState,
@@ -102,20 +108,5 @@ public class BaseTerrainBlock extends BaseBlock implements BlockLootProvider, Bl
             );
             return i < 5;
         }
-    }
-
-    @Override
-    public void provideBlockModels(Object modelGenerator) {
-    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        generator.createBlockTopSideBottom(getBaseBlock(), this, true);
-    }
-
-    @Override
-    public LootTable.Builder registerBlockLoot(
-            @NotNull Identifier location,
-            @NotNull LootLookupProvider provider,
-            @NotNull ResourceKey<LootTable> tableKey
-    ) {
-        return provider.dropWithSilkTouch(this, getBaseBlock(), ConstantValue.exactly(1));
     }
 }

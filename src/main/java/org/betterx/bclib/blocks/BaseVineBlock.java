@@ -16,6 +16,7 @@ import java.util.function.Function;
 public class BaseVineBlock extends AbstractVineBlock {
     public static final EnumProperty<TripleShape> SHAPE = BlockProperties.TRIPLE_SHAPE;
 
+    /** Compatibility constructors retained for BCLib's pre-26.3 block API. */
     public BaseVineBlock() {
         this(0, false);
     }
@@ -25,23 +26,24 @@ public class BaseVineBlock extends AbstractVineBlock {
     }
 
     public BaseVineBlock(int light, boolean onlyBottomIsLit) {
-        this(light, onlyBottomIsLit, p -> p);
+        this(light, onlyBottomIsLit, properties -> properties);
     }
 
-    public BaseVineBlock(int light, boolean onlyBottomIsLit, Function<Properties, Properties> propMod) {
+    public BaseVineBlock(int light, boolean onlyBottomIsLit, Function<BlockBehaviour.Properties, BlockBehaviour.Properties> modifier) {
         this(
-                propMod.apply(BehaviourBuilders
-                        .createPlant()
+                modifier.apply(BehaviourBuilders.createPlant()
                         .sound(SoundType.GRASS)
-                        .lightLevel((state) -> onlyBottomIsLit
-                                ? state.getValue(SHAPE) == TripleShape.BOTTOM
-                                ? light
-                                : 0
+                        .lightLevel(state -> onlyBottomIsLit
+                                ? state.getValue(SHAPE) == TripleShape.BOTTOM ? light : 0
                                 : light)
                         .offsetType(BlockBehaviour.OffsetType.XZ)),
                 32,
                 0
         );
+    }
+
+    public BaseVineBlock(BlockBehaviour.Properties props) {
+        this(props, 32, 0);
     }
 
     public BaseVineBlock(BlockBehaviour.Properties properties, int maxGrowLength, int spaceBeneath) {
@@ -77,7 +79,7 @@ public class BaseVineBlock extends AbstractVineBlock {
                 int spaceBeneath,
                 int growChance
         ) {
-            super(properties.randomTicks(), maxGrowLength, spaceBeneath, growChance);
+            super(properties, maxGrowLength, spaceBeneath, growChance);
         }
 
 

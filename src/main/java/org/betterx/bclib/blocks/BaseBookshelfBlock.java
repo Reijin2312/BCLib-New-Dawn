@@ -15,7 +15,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +56,7 @@ public abstract class BaseBookshelfBlock extends BaseBlock implements BlockTagPr
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {
-        return provider.dropWithSilkTouch(this, Items.BOOK, ConstantValue.exactly(3));
+        return provider.dropWithSilkTouch(this, Items.BOOK, ContextIntProviders.exactly(3));
     }
 
     public static class Wood extends BaseBookshelfBlock implements BehaviourWood {

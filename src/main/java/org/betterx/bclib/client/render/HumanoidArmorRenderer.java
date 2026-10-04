@@ -57,12 +57,9 @@ public abstract class HumanoidArmorRenderer {
                 model,
                 renderState,
                 getTextureForSlot(slot, usesInnerModel(slot)),
-                0xFFFFFFFF
+                0xFFFFFFFF,
+                stack.hasFoil()
         );
-
-        if (stack.hasFoil()) {
-            renderGlint(pose, submitNodeCollector, light, model, renderState);
-        }
     }
 
     @NotNull
@@ -81,34 +78,17 @@ public abstract class HumanoidArmorRenderer {
             HumanoidModel<?> humanoidModel,
             HumanoidRenderState renderState,
             Identifier texture,
-            int color
+            int color,
+            boolean glint
     ) {
         submitModel(
                 submitNodeCollector,
                 humanoidModel,
                 renderState,
                 pose,
-                RenderTypes.armorCutoutNoCull(texture),
+                glint ? RenderTypes.armorCutoutNoCullGlint(texture) : RenderTypes.armorCutoutNoCull(texture),
                 light,
                 color
-        );
-    }
-
-    protected void renderGlint(
-            PoseStack pose,
-            SubmitNodeCollector submitNodeCollector,
-            int light,
-            HumanoidModel<?> humanoidModel,
-            HumanoidRenderState renderState
-    ) {
-        submitModel(
-                submitNodeCollector,
-                humanoidModel,
-                renderState,
-                pose,
-                RenderTypes.armorEntityGlint(),
-                light,
-                0xFFFFFFFF
         );
     }
 
@@ -131,8 +111,7 @@ public abstract class HumanoidArmorRenderer {
                 OverlayTexture.NO_OVERLAY,
                 color,
                 null,
-                0,
-                null
+                0
         );
     }
 

@@ -2,9 +2,10 @@ package org.betterx.bclib.api.v3.datagen;
 
 import org.betterx.bclib.BCLib;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.world.item.crafting.Recipe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +20,10 @@ public class RecipeDataProvider extends RecipeProvider {
 
     public RecipeDataProvider(
             @Nullable List<String> modIDs,
-            HolderLookup.Provider registries,
-            RecipeOutput output
+            BootstrapContext<Recipe<?>> recipes,
+            BootstrapContext<Advancement> advancements
     ) {
-        super(registries, output);
+        super(recipes, advancements);
         this.modIDs = modIDs;
     }
 

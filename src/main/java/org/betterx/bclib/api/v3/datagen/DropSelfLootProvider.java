@@ -12,7 +12,7 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +29,7 @@ public interface DropSelfLootProvider<B extends ItemLike> extends BlockLootProvi
 
         LootTable.Builder builder = LootTable.lootTable();
         var pool = LootPool.lootPool()
-                           .setRolls(ConstantValue.exactly(1.0f))
+                           .setRolls(ContextIntProviders.exactly(1))
                            .add(LootItem.lootTableItem((B) this));
 
         if (this instanceof BehaviourExplosionResistant) {

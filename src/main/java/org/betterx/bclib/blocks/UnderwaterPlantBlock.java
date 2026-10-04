@@ -1,29 +1,21 @@
 package org.betterx.bclib.blocks;
 
-import org.betterx.bclib.client.render.BCLRenderLayer;
-import org.betterx.bclib.interfaces.RenderLayerProvider;
-import org.betterx.wover.loot.api.BlockLootProvider;
-import org.betterx.wover.loot.api.LootLookupProvider;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -31,7 +23,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class UnderwaterPlantBlock extends BaseBlockNotFull implements RenderLayerProvider, BonemealableBlock, LiquidBlockContainer, BlockLootProvider {
+public abstract class UnderwaterPlantBlock extends BaseBlockNotFull implements BonemealableBlock, LiquidBlockContainer {
     private static final VoxelShape SHAPE = box(4, 0, 4, 12, 14, 12);
 
     public UnderwaterPlantBlock(Properties settings) {
@@ -39,20 +31,23 @@ public abstract class UnderwaterPlantBlock extends BaseBlockNotFull implements R
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public VoxelShape getShape(BlockState state, BlockGetter view, BlockPos pos, CollisionContext ePos) {
+    public @NotNull VoxelShape getShape(BlockState state, BlockGetter view, BlockPos pos, CollisionContext ePos) {
         Vec3 vec3d = state.getOffset(pos);
         return SHAPE.move(vec3d.x, vec3d.y, vec3d.z);
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
         BlockState down = world.getBlockState(pos.below());
         state = world.getBlockState(pos);
         return isTerrain(down) && state.getFluidState().getType().equals(Fluids.WATER.getSource());
     }
 
+    /**
+     * Whether {@code state} (the block below) is valid ground for this plant. Defaults to the block's
+     * {@link SurvivesOnBlockTrait}; subclasses with a non-tag-expressible rule (e.g. "any solid") override
+     * this. Runtime-only, so order-safe with traits.
+     */
     protected abstract boolean isTerrain(BlockState state);
 
     @Override
@@ -63,18 +58,17 @@ public abstract class UnderwaterPlantBlock extends BaseBlockNotFull implements R
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public @NotNull BlockState updateShape(
+    protected @NotNull BlockState updateShape(
             BlockState state,
-            net.minecraft.world.level.LevelReader world,
-            net.minecraft.world.level.ScheduledTickAccess scheduledTickAccess,
+            LevelReader level,
+            ScheduledTickAccess scheduledTickAccess,
             BlockPos pos,
-            Direction facing,
+            Direction neighborDirection,
             BlockPos neighborPos,
             BlockState neighborState,
-            net.minecraft.util.RandomSource randomSource
+            RandomSource randomSource
     ) {
-        if (!canSurvive(state, world, pos)) {
+        if (!canSurvive(state, level, pos)) {
             scheduledTickAccess.scheduleTick(pos, this, 1);
         }
 
@@ -82,21 +76,48 @@ public abstract class UnderwaterPlantBlock extends BaseBlockNotFull implements R
     }
 
     @Override
-    public BCLRenderLayer getRenderLayer() {
-        return BCLRenderLayer.CUTOUT;
+    public boolean isValidBonemealTarget(
+            LevelReader world,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        return isValidBonemealTarget(world, pos, state);
     }
 
-    @Override
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public boolean isValidBonemealTarget(LevelReader world, BlockPos pos, BlockState state) {
         return true;
     }
 
     @Override
+    public boolean isBonemealSuccess(
+            Level level,
+            RandomSource random,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        return isBonemealSuccess(level, random, pos, state);
+    }
+
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
         return true;
     }
 
     @Override
+    public void performBonemeal(
+            ServerLevel level,
+            RandomSource random,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        performBonemeal(level, random, pos, state);
+    }
+
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
         ItemEntity item = new ItemEntity(
                 level,
@@ -111,10 +132,10 @@ public abstract class UnderwaterPlantBlock extends BaseBlockNotFull implements R
 
     @Override
     public boolean canPlaceLiquid(
-            @Nullable net.minecraft.world.entity.LivingEntity player,
-            BlockGetter world,
-            BlockPos pos,
-            BlockState state,
+            @Nullable LivingEntity livingEntity,
+            BlockGetter blockGetter,
+            BlockPos blockPos,
+            BlockState blockState,
             Fluid fluid
     ) {
         return false;
@@ -126,17 +147,7 @@ public abstract class UnderwaterPlantBlock extends BaseBlockNotFull implements R
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public FluidState getFluidState(BlockState state) {
+    public @NotNull FluidState getFluidState(BlockState state) {
         return Fluids.WATER.getSource(false);
-    }
-
-    @Override
-    public LootTable.Builder registerBlockLoot(
-            @NotNull Identifier location,
-            @NotNull LootLookupProvider provider,
-            @NotNull ResourceKey<LootTable> tableKey
-    ) {
-        return provider.dropWithSilkTouch(this);
     }
 }

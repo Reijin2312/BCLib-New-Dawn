@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
 
 /**
- * NeoForge helper for flammable blocks.
+ * Loader-neutral helper for flammable blocks.
  */
 public final class FlammableBlockRegistry {
     private static final FlammableBlockRegistry INSTANCE = new FlammableBlockRegistry();

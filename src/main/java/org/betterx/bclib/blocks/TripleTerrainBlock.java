@@ -3,6 +3,7 @@ package org.betterx.bclib.blocks;
 import org.betterx.bclib.client.models.BasePatterns;
 import org.betterx.bclib.client.models.ModelsHelper;
 import org.betterx.bclib.client.models.PatternsHelper;
+import org.betterx.bclib.client.sound.BlockSounds;
 import org.betterx.bclib.interfaces.RuntimeBlockModelProvider;
 import org.betterx.wover.block.api.BlockProperties.TripleShape;
 
@@ -39,12 +40,11 @@ public class TripleTerrainBlock extends BaseTerrainBlock implements RuntimeBlock
     public static final EnumProperty<TripleShape> SHAPE = org.betterx.wover.block.api.BlockProperties.TRIPLE_SHAPE;
 
     public TripleTerrainBlock(Block baseBlock) {
-        super(baseBlock, baseBlock.defaultMapColor());
-        this.registerDefaultState(defaultBlockState().setValue(SHAPE, TripleShape.BOTTOM));
+        this(baseBlock, baseBlock.defaultMapColor());
     }
 
     public TripleTerrainBlock(Block baseBlock, MapColor color) {
-        super(baseBlock, color);
+        super(Properties.ofFullCopy(baseBlock).mapColor(color).sound(BlockSounds.TERRAIN_SOUND).randomTicks(), baseBlock);
         this.registerDefaultState(defaultBlockState().setValue(SHAPE, TripleShape.BOTTOM));
     }
 

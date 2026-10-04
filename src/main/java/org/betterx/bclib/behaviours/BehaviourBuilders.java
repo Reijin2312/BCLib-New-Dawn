@@ -38,7 +38,7 @@ public class BehaviourBuilders {
                 .instabreak()
                 .sound(SoundType.GRASS)
                 .offsetType(offsetType)
-                .pushReaction(PushReaction.DESTROY);
+                .pushReaction(PushReaction.POPPED);
     }
 
     public static BlockBehaviour.Properties createVine() {
@@ -98,7 +98,7 @@ public class BehaviourBuilders {
                                         .noCollision()
                                         .sound(SoundType.WET_GRASS)
                                         .offsetType(BlockBehaviour.OffsetType.XZ)
-                                        .pushReaction(PushReaction.DESTROY);
+                                        .pushReaction(PushReaction.POPPED);
 
     }
 
@@ -121,10 +121,10 @@ public class BehaviourBuilders {
                 .strength(0.2f)
                 .noOcclusion()
                 .isValidSpawn(Blocks::ocelotOrParrot)
-                .isSuffocating(Blocks::never)
-                .isViewBlocking(Blocks::never)
-                .pushReaction(PushReaction.DESTROY)
-                .isRedstoneConductor(Blocks::never)
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos, box) -> false)
+                .pushReaction(PushReaction.POPPED)
+                .isRedstoneConductor((state, level, pos) -> false)
                 .sound(SoundType.GRASS);
         if (flammable) {
             p.ignitedByLava();
@@ -143,7 +143,7 @@ public class BehaviourBuilders {
                 .randomTicks()
                 .strength(0.4F)
                 .sound(SoundType.WOOL)
-                .pushReaction(PushReaction.DESTROY)
+                .pushReaction(PushReaction.POPPED)
                 .noOcclusion();
         if (flammable) {
             p.ignitedByLava();
@@ -218,7 +218,7 @@ public class BehaviourBuilders {
                 .instrument(NoteBlockInstrument.BASS)
                 .strength(3.0F)
                 .noOcclusion()
-                .isValidSpawn(Blocks::never);
+                .isValidSpawn((state, level, pos, entity) -> false);
         if (flammable) {
             p.ignitedByLava();
         }
@@ -232,10 +232,10 @@ public class BehaviourBuilders {
                 .strength(0.3F)
                 .sound(SoundType.GLASS)
                 .noOcclusion()
-                .isValidSpawn(Blocks::never)
-                .isRedstoneConductor(Blocks::never)
-                .isSuffocating(Blocks::never)
-                .isViewBlocking(Blocks::never);
+                .isValidSpawn((state, level, pos, entity) -> false)
+                .isRedstoneConductor((state, level, pos) -> false)
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos, box) -> false);
     }
 
     public static BlockBehaviour.Properties createSnow() {

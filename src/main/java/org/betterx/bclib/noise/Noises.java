@@ -2,7 +2,6 @@ package org.betterx.bclib.noise;
 
 import org.betterx.bclib.BCLib;
 
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -15,29 +14,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Noises {
-    private static final Map<ResourceKey<NormalNoise.NoiseParameters>, NormalNoise> noiseIntances = new HashMap<>();
-    public static final ResourceKey<NormalNoise.NoiseParameters> ROUGHNESS_NOISE = createKey(BCLib.makeID(
+    private static final Map<ResourceKey<NormalNoise>, NormalNoise> noiseInstances = new HashMap<>();
+    public static final ResourceKey<NormalNoise> ROUGHNESS_NOISE = createKey(BCLib.makeID(
             "roughness_noise"));
 
-    public static ResourceKey<NormalNoise.NoiseParameters> createKey(Identifier loc) {
+    public static ResourceKey<NormalNoise> createKey(Identifier loc) {
         return ResourceKey.create(Registries.NOISE, loc);
     }
 
     public static NormalNoise createNoise(
-            Registry<NormalNoise.NoiseParameters> registry,
+            Registry<NormalNoise> registry,
             RandomSource randomSource,
-            ResourceKey<NormalNoise.NoiseParameters> resourceKey
+            ResourceKey<NormalNoise> resourceKey
     ) {
-        Holder<NormalNoise.NoiseParameters> holder = registry.getOrThrow(resourceKey);
-        return NormalNoise.create(randomSource, holder.value());
+        return registry.getOrThrow(resourceKey).value();
     }
 
     public static NormalNoise getOrCreateNoise(
             RegistryAccess registryAccess,
             RandomSource randomSource,
-            ResourceKey<NormalNoise.NoiseParameters> noise
+            ResourceKey<NormalNoise> noise
     ) {
-        final Registry<NormalNoise.NoiseParameters> registry = registryAccess.lookupOrThrow(Registries.NOISE);
-        return noiseIntances.computeIfAbsent(noise, (key) -> createNoise(registry, randomSource, noise));
+        final Registry<NormalNoise> registry = registryAccess.lookupOrThrow(Registries.NOISE);
+        return noiseInstances.computeIfAbsent(noise, key -> createNoise(registry, randomSource, key));
     }
 }

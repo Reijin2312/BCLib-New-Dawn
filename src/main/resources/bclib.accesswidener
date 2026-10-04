@@ -5,25 +5,15 @@ accessible method net/minecraft/world/level/block/entity/BlockEntityType <init> 
 
 # Classes
 accessible class net/minecraft/server/MinecraftServer$ReloadableResources
-accessible	class	net/minecraft/world/level/levelgen/SurfaceRules$Context
-accessible	class	net/minecraft/world/level/levelgen/SurfaceRules$Condition
-accessible	class	net/minecraft/world/level/levelgen/SurfaceRules$SurfaceRule
-accessible	class	net/minecraft/world/level/levelgen/SurfaceRules$LazyXZCondition
-accessible	class	net/minecraft/world/level/levelgen/SurfaceRules$LazyCondition
-accessible	class	net/minecraft/world/level/levelgen/SurfaceRules$SequenceRuleSource
 accessible  class   net/minecraft/world/level/levelgen/presets/WorldPresets$Bootstrap
 extendable  class   net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator
 accessible  class    net/minecraft/core/registries/BuiltInRegistries$RegistryBootstrap
-accessible  class    net/minecraft/world/level/levelgen/SurfaceRules$SequenceRuleSource
 accessible  class    net/minecraft/server/dedicated/DedicatedServerProperties$WorldDimensionData
 extendable  class   net/minecraft/world/level/block/state/properties/WoodType
-accessible class net/minecraft/world/level/levelgen/SurfaceRules$BiomeConditionSource
-accessible class net/minecraft/world/level/levelgen/SurfaceRules$TestRuleSource
 
 #Methods
-accessible method net/minecraft/world/level/storage/loot/LootPool <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Lnet/minecraft/world/level/storage/loot/providers/number/NumberProvider;Lnet/minecraft/world/level/storage/loot/providers/number/NumberProvider;)V
+accessible method net/minecraft/world/level/storage/loot/LootPool <init> (Ljava/util/List;Ljava/util/Optional;Ljava/util/Optional;Lnet/minecraft/core/Holder;Lnet/minecraft/core/Holder;)V
 accessible method net/minecraft/world/entity/ai/village/poi/PoiTypes register (Lnet/minecraft/core/Registry;Lnet/minecraft/resources/ResourceKey;Ljava/util/Set;II)Lnet/minecraft/world/entity/ai/village/poi/PoiType;
-accessible method net/minecraft/world/level/levelgen/SurfaceRules$SequenceRuleSource <init> (Ljava/util/List;)V
 accessible method net/minecraft/core/registries/BuiltInRegistries registerSimple (Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/core/registries/BuiltInRegistries$RegistryBootstrap;)Lnet/minecraft/core/Registry;
 # accessible method net/minecraft/world/entity/SpawnPlacements register (Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/entity/SpawnPlacements$Type;Lnet/minecraft/world/level/levelgen/Heightmap$Types;Lnet/minecraft/world/entity/SpawnPlacements$SpawnPredicate;)V
 accessible method net/minecraft/world/level/block/state/properties/WoodType register (Lnet/minecraft/world/level/block/state/properties/WoodType;)Lnet/minecraft/world/level/block/state/properties/WoodType;

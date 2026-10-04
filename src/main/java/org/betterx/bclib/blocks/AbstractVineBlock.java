@@ -1,41 +1,30 @@
 package org.betterx.bclib.blocks;
 
-import org.betterx.bclib.behaviours.interfaces.BehaviourVine;
-import org.betterx.bclib.client.render.BCLRenderLayer;
-import org.betterx.bclib.interfaces.RenderLayerProvider;
 import org.betterx.bclib.util.BlocksHelper;
-import org.betterx.wover.block.api.model.BlockModelProvider;
-import org.betterx.wover.block.api.model.WoverBlockModelGenerators;
-import org.betterx.wover.loot.api.BlockLootProvider;
-import org.betterx.wover.loot.api.LootLookupProvider;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractVineBlock extends BaseBlockNotFull implements RenderLayerProvider, BonemealableBlock, BehaviourVine, BlockLootProvider, BlockModelProvider {
+public abstract class AbstractVineBlock extends BaseBlockNotFull implements BonemealableBlock {
     private static final VoxelShape VOXEL_SHAPE = box(2, 0, 2, 14, 16, 14);
     protected final int maxGrowLength;
     protected final int spaceBeneath;
@@ -82,36 +71,44 @@ public abstract class AbstractVineBlock extends BaseBlockNotFull implements Rend
 
     protected boolean isSupport(BlockState state, LevelReader world, BlockPos pos) {
         BlockState up = world.getBlockState(pos.above());
+        // Deliberately the plain leaves tag, not BlocksHelper.isCubeLeaves - see BaseAttachedBlock#canSurvive:
+        // vines are generated with setWithoutUpdate, so a stricter rule here cannot prevent a vine hanging off
+        // a thin fur block, it can only delete one that already generated.
         return up.is(this) || up.is(BlockTags.LEAVES) || canSupportCenter(world, pos.above(), Direction.DOWN);
     }
 
     @Override
-    final public BlockState updateShape(
+    protected BlockState updateShape(
             BlockState state,
-            net.minecraft.world.level.LevelReader world,
-            net.minecraft.world.level.ScheduledTickAccess scheduledTickAccess,
+            LevelReader level,
+            ScheduledTickAccess scheduledTickAccess,
             BlockPos pos,
-            Direction facing,
+            Direction neighborDirection,
             BlockPos neighborPos,
             BlockState neighborState,
-            net.minecraft.util.RandomSource randomSource
+            RandomSource randomSource
     ) {
-        if (!canSurvive(state, world, pos)) {
+        if (!canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         } else {
-            if (world.getBlockState(pos.below()).getBlock() != this) return makeBottomState(state);
-            else if (world.getBlockState(pos.above()).getBlock() != this) return makeTopState(state);
+            if (level.getBlockState(pos.below()).getBlock() != this) return makeBottomState(state);
+            else if (level.getBlockState(pos.above()).getBlock() != this) return makeTopState(state);
             return makeMiddleState(state);
         }
     }
 
 
     @Override
-    public BCLRenderLayer getRenderLayer() {
-        return BCLRenderLayer.CUTOUT;
+    public boolean isValidBonemealTarget(
+            LevelReader level,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        return isValidBonemealTarget(level, pos, state);
     }
 
-    @Override
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
         return canGrow(level, pos, null);
     }
@@ -151,29 +148,35 @@ public abstract class AbstractVineBlock extends BaseBlockNotFull implements Rend
     }
 
     @Override
+    public boolean isBonemealSuccess(
+            Level level,
+            RandomSource random,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        return isBonemealSuccess(level, random, pos, state);
+    }
+
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
         return canGrow(level, pos, null);
     }
 
     @Override
+    public void performBonemeal(
+            ServerLevel level,
+            RandomSource random,
+            BlockPos pos,
+            BlockState state,
+            BonemealSource bonemealSource
+    ) {
+        performBonemeal(level, random, pos, state);
+    }
+
+    /** Compatibility hook retained for blocks implemented against the pre-26.3 API. */
     public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
         grow(level, pos);
-    }
-
-    @Override
-    public LootTable.Builder registerBlockLoot(
-            @NotNull Identifier location,
-            @NotNull LootLookupProvider provider,
-            @NotNull ResourceKey<LootTable> tableKey
-    ) {
-        return provider.dropWithSilkTouchOrHoeOrShears(this, UniformGenerator.between(1, 2));
-    }
-
-    @Override
-    public void provideBlockModels(Object modelGenerator) {
-    WoverBlockModelGenerators generator = (WoverBlockModelGenerators) modelGenerator;
-        generator.createCubeModel(this);
-        generator.createFlatItem(this);
     }
 
     @Override

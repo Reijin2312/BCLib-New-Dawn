@@ -12,7 +12,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -65,7 +65,7 @@ public abstract class BasePathBlock extends BaseBlockNotFull implements BlockLoo
             @NotNull LootLookupProvider provider,
             @NotNull ResourceKey<LootTable> tableKey
     ) {
-        return provider.dropWithSilkTouch(this, this.baseBlock, ConstantValue.exactly(1));
+        return provider.dropWithSilkTouch(this, this.baseBlock, ContextIntProviders.exactly(1));
     }
 
     public static class Stone extends BasePathBlock implements BehaviourStone {

@@ -15,11 +15,12 @@ import org.betterx.wover.tag.api.event.context.ItemTagBootstrapContext;
 import org.betterx.wover.tag.api.event.context.TagBootstrapContext;
 
 import net.minecraft.resources.Identifier;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SignItem;
+import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -64,7 +65,12 @@ public abstract class BaseSignBlock extends StandingSignBlock implements BlockMo
     @Override
     public BlockItem getCustomBlockItem(Identifier blockID, Item.Properties settings) {
         if (customItem == null) {
-            customItem = new SignItem(this, BlockRegistry.withConstructionId(getWallSignId(blockID), this::getWallSignBlock), settings);
+            customItem = new StandingAndWallBlockItem(
+                    this,
+                    BlockRegistry.withConstructionId(getWallSignId(blockID), this::getWallSignBlock),
+                    Direction.DOWN,
+                    settings
+            );
         }
         return customItem;
     }
