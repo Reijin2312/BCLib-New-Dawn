@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SaplingBlock;
@@ -94,6 +95,21 @@ public class FeatureSaplingBlock<F extends Feature<FC>, FC extends FeatureConfig
     ) {
         if (!canSurvive(state, world, pos)) return Blocks.AIR.defaultBlockState();
         else return state;
+    }
+
+    /**
+     * Feature saplings deliberately do not use vanilla's {@code TreeGrower}: their feature supplier
+     * owns placement and rolls the world back when generation cannot succeed. Starting with 26.1,
+     * {@link SaplingBlock#isValidBonemealTarget} dereferences that grower, so inheriting the vanilla
+     * implementation crashes before our growth code is reached.
+     *
+     * <p>This check is intentionally side-effect free and gives the same answer on client and server.
+     * Exact headroom is still validated by the feature during placement; trying to generate it here
+     * would mutate the world during an applicability query.</p>
+     */
+    @Override
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state) {
+        return feature != null && state.is(this) && canSurvive(state, level, pos);
     }
 
     @Override
