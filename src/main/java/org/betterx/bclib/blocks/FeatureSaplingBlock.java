@@ -190,8 +190,8 @@ public class FeatureSaplingBlock extends SaplingBlock implements RenderLayerProv
      * feature sapling, from a player or a dispenser alike, and takes the server down with it.
      * <p>
      * There is no height to report without a grower: the feature decides its own size at generation
-     * time and does its own room checks. Accepting any server-side position restores the behaviour
-     * these saplings had before the vanilla method started consulting the grower.
+     * time and does its own room checks. The applicability check therefore stays side-effect free and
+     * consistent between client and server; the feature performs the exact room check during placement.
      */
     @Override
     public boolean isValidBonemealTarget(
@@ -200,7 +200,9 @@ public class FeatureSaplingBlock extends SaplingBlock implements RenderLayerProv
             BlockState state,
             BonemealSource bonemealSource
     ) {
-        return level instanceof ServerLevel;
+        return state.is(this)
+                && (feature != null || megaFeature != null)
+                && canSurvive(state, level, pos);
     }
 
     @Override
