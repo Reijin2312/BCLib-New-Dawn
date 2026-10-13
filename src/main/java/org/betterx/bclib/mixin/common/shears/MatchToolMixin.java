@@ -49,7 +49,8 @@ public class MatchToolMixin {
         }
         if ((bcl_isShears & BCL_SHEARS) != 0) {
             ItemInstance itemStack = lootContext.getOptional(LootContextParams.TOOL);
-            cir.setReturnValue(itemStack != null && itemStack.is(CommonItemTags.SHEARS));
+            cir.setReturnValue(itemStack != null
+                    && (itemStack.is(Items.SHEARS) || itemStack.is(CommonItemTags.SHEARS)));
         }
     }
 }
