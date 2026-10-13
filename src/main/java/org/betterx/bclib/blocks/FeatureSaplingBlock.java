@@ -2,6 +2,7 @@ package org.betterx.bclib.blocks;
 
 import org.betterx.bclib.api.v3.datagen.DropSelfLootProvider;
 import org.betterx.bclib.behaviours.BehaviourBuilders;
+import org.betterx.bclib.behaviours.interfaces.BehaviourSapling;
 import org.betterx.bclib.client.models.BasePatterns;
 import org.betterx.bclib.client.models.ModelsHelper;
 import org.betterx.bclib.client.models.PatternsHelper;
@@ -42,7 +43,7 @@ import java.util.Optional;
  * {@link FeatureSupplier} referenced {@code F} or {@code FC} in a signature - so both are dropped rather
  * than replaced.
  */
-public class FeatureSaplingBlock extends SaplingBlock implements RenderLayerProvider, RuntimeBlockModelProvider, DropSelfLootProvider<FeatureSaplingBlock> {
+public class FeatureSaplingBlock extends SaplingBlock implements RenderLayerProvider, RuntimeBlockModelProvider, DropSelfLootProvider<FeatureSaplingBlock>, BehaviourSapling {
 
     @FunctionalInterface
     public interface FeatureSupplier {
