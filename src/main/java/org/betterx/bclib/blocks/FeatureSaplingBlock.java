@@ -2,6 +2,7 @@ package org.betterx.bclib.blocks;
 
 import org.betterx.bclib.api.v3.datagen.DropSelfLootProvider;
 import org.betterx.bclib.behaviours.BehaviourBuilders;
+import org.betterx.bclib.behaviours.interfaces.BehaviourSapling;
 import org.betterx.bclib.client.models.BasePatterns;
 import org.betterx.bclib.client.models.ModelsHelper;
 import org.betterx.bclib.client.models.PatternsHelper;
@@ -36,7 +37,7 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FeatureSaplingBlock<F extends Feature<FC>, FC extends FeatureConfiguration> extends SaplingBlock implements RenderLayerProvider, RuntimeBlockModelProvider, DropSelfLootProvider<FeatureSaplingBlock> {
+public class FeatureSaplingBlock<F extends Feature<FC>, FC extends FeatureConfiguration> extends SaplingBlock implements RenderLayerProvider, RuntimeBlockModelProvider, DropSelfLootProvider<FeatureSaplingBlock>, BehaviourSapling {
 
     @FunctionalInterface
     public interface FeatureSupplier<F extends Feature<FC>, FC extends FeatureConfiguration> {
