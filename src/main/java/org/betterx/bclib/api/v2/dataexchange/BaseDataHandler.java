@@ -111,4 +111,3 @@ public abstract class BaseDataHandler<T extends CustomPacketPayload> {
         return Objects.hash(originatesOnServer, identifier);
     }
 }
-

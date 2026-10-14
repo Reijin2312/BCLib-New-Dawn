@@ -120,4 +120,3 @@ public abstract class EMIAbstractAlloyingRecipe<C extends RecipeInput, T extends
         return true;
     }
 }
-

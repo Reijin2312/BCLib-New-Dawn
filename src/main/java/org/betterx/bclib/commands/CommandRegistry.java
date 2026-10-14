@@ -217,4 +217,3 @@ public class CommandRegistry {
         return Command.SINGLE_SUCCESS;
     }
 }
-

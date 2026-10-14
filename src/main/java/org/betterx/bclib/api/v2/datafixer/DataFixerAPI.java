@@ -595,8 +595,8 @@ public class DataFixerAPI {
             if (entityTag.contains("BlockEntityTag")) {
                 CompoundTag blockEntityTag = (CompoundTag) entityTag.get("BlockEntityTag");
                 fixID(blockEntityTag, changed, data, recursive);
-				/*ListTag items = blockEntityTag.getList("Items", Tag.TAG_COMPOUND);
-				fixItemArrayWithID(items, changed, data, recursive);*/
+                /*ListTag items = blockEntityTag.getList("Items", Tag.TAG_COMPOUND);
+                fixItemArrayWithID(items, changed, data, recursive);*/
             }
         }
     }
