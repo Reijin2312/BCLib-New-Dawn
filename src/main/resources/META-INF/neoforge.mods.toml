@@ -8,7 +8,7 @@ modId="${mod_id}"
 version="${version}"
 displayName="BCLib"
 description="A library for BetterX team mods"
-authors="Quiqueck, paulevs, Bulldog83, Raijin"
+authors="Quiqueck, paulevs, Bulldog83, Raijin2312"
 displayURL="https://modrinth.com/mod/bclib"
 logoFile="assets/bclib/icon.png"
 
