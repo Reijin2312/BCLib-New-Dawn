@@ -125,10 +125,7 @@ public class StructureHelper {
             Rotation rotation,
             Mirror mirror
     ) {
-        Vec3i max = structure.getSize();
-        Vec3 min = StructureTemplate.transform(Vec3.atCenterOf(structure.getSize()), mirror, rotation, BlockPos.ZERO);
-        max = max.offset((int) -min.x, (int) -min.y, (int) -min.z);
-        return BoundingBox.fromCorners(pos.offset((int) min.x, (int) min.y, (int) min.z), max.offset(pos));
+        return structure.getBoundingBox(new StructurePlaceSettings().setRotation(rotation).setMirror(mirror), pos);
     }
 
     public static BoundingBox intersectBoxes(BoundingBox box1, BoundingBox box2) {

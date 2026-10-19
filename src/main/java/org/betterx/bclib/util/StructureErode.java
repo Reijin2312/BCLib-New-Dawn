@@ -22,6 +22,7 @@ public class StructureErode {
     private static final Direction[] DIR = BlocksHelper.makeHorizontal();
 
     public static void erode(WorldGenLevel world, BoundingBox bounds, int iterations, RandomSource random) {
+        final Direction[] dirs = DIR.clone();
         MutableBlockPos mut = new MutableBlockPos();
         boolean canDestruct = true;
         for (int i = 0; i < iterations; i++) {
@@ -80,8 +81,8 @@ public class StructureErode {
                             continue;
                         }
                         if (!state.isAir() && random.nextBoolean()) {
-                            MHelper.shuffle(DIR, random);
-                            for (Direction dir : DIR) {
+                            MHelper.shuffle(dirs, random);
+                            for (Direction dir : dirs) {
                                 if (world.isEmptyBlock(mut.relative(dir)) && world.isEmptyBlock(mut.below()
                                                                                                    .relative(dir))) {
                                     BlocksHelper.setWithoutUpdate(world, mut, Blocks.AIR);
