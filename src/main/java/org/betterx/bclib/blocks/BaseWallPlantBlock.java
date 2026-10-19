@@ -18,10 +18,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-import java.util.EnumMap;
+import java.util.Map;
 
 public abstract class BaseWallPlantBlock extends BasePlantBlock {
-    private static final EnumMap<Direction, VoxelShape> SHAPES = Maps.newEnumMap(ImmutableMap.of(
+    private static final Map<Direction, VoxelShape> DEFAULT_SHAPES = Maps.newEnumMap(ImmutableMap.of(
             Direction.NORTH, box(1, 1, 8, 15, 15, 16),
             Direction.SOUTH, box(1, 1, 0, 15, 15, 8),
             Direction.WEST, box(8, 1, 1, 16, 15, 15),
@@ -29,8 +29,25 @@ public abstract class BaseWallPlantBlock extends BasePlantBlock {
     ));
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
+    private final Map<Direction, VoxelShape> shapes;
+
     protected BaseWallPlantBlock(Properties settings) {
+        this(settings, DEFAULT_SHAPES);
+    }
+
+    protected BaseWallPlantBlock(Properties settings, Map<Direction, VoxelShape> shapes) {
         super(settings.offsetType(OffsetType.NONE));
+        this.shapes = shapes;
+    }
+
+    public static Map<Direction, VoxelShape> createShapes(int inset, int depth) {
+        final int max = 16 - inset;
+        return Maps.newEnumMap(ImmutableMap.of(
+                Direction.NORTH, box(inset, inset, 16 - depth, max, max, 16),
+                Direction.SOUTH, box(inset, inset, 0, max, max, depth),
+                Direction.WEST, box(16 - depth, inset, inset, 16, max, max),
+                Direction.EAST, box(0, inset, inset, depth, max, max)
+        ));
     }
 
 
@@ -41,7 +58,7 @@ public abstract class BaseWallPlantBlock extends BasePlantBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter view, BlockPos pos, CollisionContext ePos) {
-        return SHAPES.get(state.getValue(FACING));
+        return shapes.get(state.getValue(FACING));
     }
 
     @Override

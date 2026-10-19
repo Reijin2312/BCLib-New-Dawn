@@ -44,6 +44,8 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
 
     @Unique
     private DataSlot bcl_anvilLevel;
+    @Unique
+    private DataSlot bcl_hasActiveRecipe;
 
 
     public AnvilMenuMixin(
@@ -66,6 +68,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
     )
     public void be_initAnvilLevel(int syncId, Inventory inventory, ContainerLevelAccess context, CallbackInfo info) {
         this.bcl_anvilLevel = addDataSlot(DataSlot.standalone());
+        this.bcl_hasActiveRecipe = addDataSlot(DataSlot.standalone());
         if (context != ContainerLevelAccess.NULL) {
             int level = context.evaluate((world, blockPos) -> {
                 Block anvilBlock = world.getBlockState(blockPos).getBlock();
@@ -75,6 +78,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         } else {
             bcl_anvilLevel.set(0);
         }
+        bcl_hasActiveRecipe.set(0);
     }
 
     @Shadow
@@ -132,6 +136,14 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
     @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
     public void bcl_updateOutput(CallbackInfo info) {
         AnvilRecipeInput recipeInput = this.bcl_AnvilRecipeInput(null);
+        if (this.player.level().isClientSide) {
+            this.bcl_recipes = Collections.emptyList();
+            this.bcl_currentRecipe = null;
+            if (this.bcl_hasActiveRecipe.get() > 0) {
+                info.cancel();
+            }
+            return;
+        }
         RecipeManager recipeManager = this.player.level().getRecipeManager();
         bcl_recipes = recipeManager.getRecipesFor(AnvilRecipe.TYPE, recipeInput, player.level());
         if (!bcl_recipes.isEmpty()) {
@@ -144,10 +156,15 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
                     bcl_currentRecipe = bcl_recipes.get(0);
                 }
                 bcl_updateResult();
+                bcl_hasActiveRecipe.set(1);
                 info.cancel();
             } else {
                 bcl_currentRecipe = null;
+                bcl_hasActiveRecipe.set(0);
             }
+        } else {
+            bcl_currentRecipe = null;
+            bcl_hasActiveRecipe.set(0);
         }
     }
 
