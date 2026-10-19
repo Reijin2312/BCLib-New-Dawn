@@ -268,8 +268,9 @@ public class MHelper {
     }
 
     public static Vec3i[] getOffsets(RandomSource random) {
-        shuffle(RANDOM_OFFSETS, random);
-        return RANDOM_OFFSETS;
+        final Vec3i[] offsets = RANDOM_OFFSETS.clone();
+        shuffle(offsets, random);
+        return offsets;
     }
 
     static {

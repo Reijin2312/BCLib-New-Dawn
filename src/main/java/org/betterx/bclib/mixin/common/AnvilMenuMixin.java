@@ -164,6 +164,9 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
             // Client level uses ClientRecipeContainer, custom anvil recipes are resolved on server side.
             this.bcl_recipes = Collections.emptyList();
             this.bcl_currentRecipe = null;
+            if (this.bcl_hasActiveRecipe.get() > 0) {
+                info.cancel();
+            }
             return;
         }
 
