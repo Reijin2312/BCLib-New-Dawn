@@ -20,7 +20,7 @@ public abstract class WallMushroomBlock extends BaseWallPlantBlock {
         super(BehaviourBuilders.createPlant()
                                .destroyTime(0.2F)
                                .lightLevel(state -> light)
-                               .sound(SoundType.WOOD)
+                               .sound(SoundType.SHELF_MUSHROOM)
         );
     }
 
