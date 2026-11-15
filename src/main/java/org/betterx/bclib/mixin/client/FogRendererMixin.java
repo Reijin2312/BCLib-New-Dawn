@@ -27,6 +27,6 @@ public class FogRendererMixin {
             ClientLevel level,
             CallbackInfoReturnable<FogData> cir
     ) {
-        CustomFogRenderer.applyFogDensity(camera, renderDistance * 16.0F, cir.getReturnValue());
+        CustomFogRenderer.updateBackgroundInfo(camera);
     }
 }
