@@ -21,7 +21,7 @@ public class FogRendererMixin {
             ordinal = 0
     )
     private FogData bclib_customFog(FogData fogData, Camera camera, int renderDistance) {
-        CustomFogRenderer.applyFogDensity(camera, renderDistance * 16.0F, fogData);
+        CustomFogRenderer.updateBackgroundInfo(camera);
         return fogData;
     }
 }
