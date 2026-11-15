@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "AnvilScreenMixin",
+    "AtmosphericFogEnvironmentMixin",
     "AtlasSetMixin",
     "BlockMixin",
     "ClientHooksMixin",
