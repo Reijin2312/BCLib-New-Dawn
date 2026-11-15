@@ -8,17 +8,17 @@ import org.betterx.wover.biome.api.BiomeManager;
 import org.betterx.wover.biome.api.data.BiomeData;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.ModList;
 
 public class CustomFogRenderer {
@@ -26,122 +26,93 @@ public class CustomFogRenderer {
     private static final MutableBlockPos MUT_POS = new MutableBlockPos();
     private static final float[] FOG_DENSITY = new float[8];
     private static final int GRID_SIZE = 32;
-    private static float fogStart = 0;
-    private static float fogEnd = 192;
+    private static final float MIN_END_FACTOR = 0.5F;
+    private static final float START_FACTOR = 0.25F;
+    private static boolean atmosphericApplied;
+    private static float atmosphericDensity = 1.0F;
 
     private static boolean hasDistantHorizons() {
         return BCLib.RUNS_DISTANT_HORIZONS || ModList.get().isLoaded("distanthorizons");
     }
 
-    public static void applyFogDensity(Camera camera, float viewDistance, FogData fogData) {
-        boolean thickFog = isThickFog(fogData, viewDistance);
-        if (applyFogDensity(camera, viewDistance, thickFog) && fogData != null) {
-            fogData.environmentalStart = fogStart;
-            fogData.renderDistanceStart = fogStart;
-            fogData.environmentalEnd = fogEnd;
-            fogData.renderDistanceEnd = fogEnd;
-            fogData.skyEnd = fogEnd;
-            fogData.cloudEnd = fogEnd;
-        }
-    }
-
-    private static boolean isThickFog(FogData fogData, float viewDistance) {
-        if (fogData == null || viewDistance <= 0.0F) {
-            return false;
-        }
-
-        float endInBlocks = normalizeFogDistance(fogData.environmentalEnd, viewDistance);
-        if (endInBlocks <= 0.0F) {
-            return false;
-        }
-
-        return endInBlocks < viewDistance * 0.95F;
-    }
-
-    private static float normalizeFogDistance(float distance, float viewDistance) {
-        if (distance <= 0.0F || viewDistance <= 0.0F) {
-            return distance;
-        }
-
-        // 1.21.11 can provide fog distances either in blocks or in chunks depending on the path.
-        float blocks = distance;
-        float fromChunks = distance * 16.0F;
-        return Math.abs(viewDistance - fromChunks) < Math.abs(viewDistance - blocks) ? fromChunks : blocks;
-    }
-
-    public static boolean applyFogDensity(Camera camera, float viewDistance, boolean thickFog) {
+    public static void applyAtmosphericFog(
+            FogData fogData,
+            Camera camera,
+            ClientLevel level,
+            float renderDistance
+    ) {
         if (hasDistantHorizons()) {
-            // DH handles fog blending for LOD/world transitions.
-            return false;
+            return;
         }
 
         if (!Configs.CLIENT_CONFIG.renderCustomFog()) {
-            return false;
+            return;
         }
 
-        FogType fogType = camera.getFluidInCamera();
-        if (fogType != FogType.NONE) {
-            BackgroundInfo.fogDensity = 1;
-            return false;
+        float configDensity = Configs.CLIENT_CONFIG.fogDensity();
+        if (!(configDensity > 0.0F)) {
+            return;
         }
-        Entity entity = camera.entity();
 
-        if (!isForcedDimension(entity.level()) && shouldIgnoreArea(
-                entity.level(),
-                (int) entity.getX(),
-                (int) entity.getEyeY(),
-                (int) entity.getZ()
+        Vec3 pos = camera.position();
+        if (!isForcedDimension(level) && shouldIgnoreArea(
+                level,
+                MHelper.floor(pos.x),
+                MHelper.floor(pos.y),
+                MHelper.floor(pos.z)
         )) {
-            BackgroundInfo.fogDensity = 1;
-            return false;
+            return;
         }
 
-        float fog = getFogDensity(
-                entity.level(),
-                entity.getX(),
-                entity.getEyeY(),
-                entity.getZ()
-        ) * Configs.CLIENT_CONFIG.fogDensity();
-        BackgroundInfo.fogDensity = fog;
+        float density = getFogDensity(level, pos.x, pos.y, pos.z) * configDensity;
+        atmosphericApplied = true;
+        atmosphericDensity = density;
 
-        if (thickFog(thickFog, entity.level())) {
-            fogStart = viewDistance * 0.05F / fog;
-            fogEnd = Math.min(viewDistance, 192.0F) * 0.5F / fog;
-        } else {
-            fogStart = viewDistance * 0.25F / fog; // In vanilla - 0
-            fogEnd = viewDistance / fog;
+        float vanillaStart = fogData.environmentalStart;
+        float vanillaEnd = fogData.environmentalEnd;
+        if (level.dimension() == Level.NETHER && !Configs.CLIENT_CONFIG.netherThickFog()) {
+            vanillaStart = 0.0F;
+            vanillaEnd = Float.MAX_VALUE;
         }
 
-        if (entity instanceof LivingEntity) {
-            LivingEntity livingEntity = (LivingEntity) entity;
+        float fogEnd = Math.min(vanillaEnd, renderDistance) * endFactor(density);
+        if (fogEnd >= vanillaEnd) {
+            return;
+        }
+
+        float fogStart = fogEnd * START_FACTOR;
+        fogStart = vanillaStart > 0.0F ? Math.min(fogStart, vanillaStart) : fogStart + vanillaStart;
+
+        fogData.environmentalStart = fogStart;
+        fogData.environmentalEnd = fogEnd;
+        fogData.skyEnd = Math.min(fogData.skyEnd, fogEnd);
+        fogData.cloudEnd = Math.min(fogData.cloudEnd, fogEnd);
+    }
+
+    private static float endFactor(float density) {
+        if (density <= 1.0F) {
+            return 1.0F;
+        }
+        return MIN_END_FACTOR + (1.0F - MIN_END_FACTOR) / density;
+    }
+
+    public static void updateBackgroundInfo(Camera camera) {
+        BackgroundInfo.fogDensity = atmosphericApplied ? atmosphericDensity : 1.0F;
+        atmosphericApplied = false;
+        BackgroundInfo.blindness = 0.0F;
+
+        if (camera.entity() instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) camera.entity();
             MobEffectInstance effect = livingEntity.getEffect(MobEffects.BLINDNESS);
             if (effect != null) {
                 int duration = effect.getDuration();
                 if (duration > 20) {
-                    fogStart = 0;
-                    fogEnd *= 0.03F;
                     BackgroundInfo.blindness = 1;
                 } else {
-                    float delta = (float) duration / 20F;
-                    BackgroundInfo.blindness = delta;
-                    fogStart = Mth.lerp(delta, fogStart, 0);
-                    fogEnd = Mth.lerp(delta, fogEnd, fogEnd * 0.03F);
+                    BackgroundInfo.blindness = (float) duration / 20.0F;
                 }
-            } else {
-                BackgroundInfo.blindness = 0;
             }
         }
-        return true;
-    }
-
-    private static boolean thickFog(boolean thickFog, Level level) {
-        if (!thickFog) {
-            return false;
-        }
-        if (level.dimension() == Level.NETHER) {
-            return Configs.CLIENT_CONFIG.netherThickFog();
-        }
-        return true;
     }
 
     private static boolean isForcedDimension(Level level) {

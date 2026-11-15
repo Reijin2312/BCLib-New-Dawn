@@ -97,11 +97,6 @@ public class ClientHooksMixin {
             FogData fogData,
             CallbackInfo ci
     ) {
-        if (hasDistantHorizons()) {
-            return;
-        }
-
-        // NeoForge passes fog render distance in chunks; custom fog math expects blocks.
-        CustomFogRenderer.applyFogDensity(camera, renderDistance * 16.0F, fogData);
+        CustomFogRenderer.updateBackgroundInfo(camera);
     }
 }
