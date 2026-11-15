@@ -66,7 +66,9 @@ public class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
                               .bounds(x + 154, y + 45, 15, 20)
                               .build());
 
+        bcl_buttons.forEach(button -> button.visible = false);
         bcl_buttons.forEach(this::addWidget);
+        bcl_refreshRecipeButtons();
     }
 
     @Inject(method = "renderFg", at = @At("TAIL"))
@@ -77,23 +79,29 @@ public class AnvilScreenMixin extends ItemCombinerScreen<AnvilMenu> {
             float delta,
             CallbackInfo info
     ) {
+        bcl_refreshRecipeButtons();
         bcl_buttons.forEach(button -> button.render(guiGraphics, mouseX, mouseY, delta));
     }
 
     @Inject(method = "slotChanged", at = @At("HEAD"), cancellable = true)
     public void be_onSlotUpdate(AbstractContainerMenu handler, int slotId, ItemStack stack, CallbackInfo info) {
-        AnvilScreenHandlerExtended anvilHandler = (AnvilScreenHandlerExtended) handler;
-        if (anvilHandler.bcl_getCurrentRecipe() != null) {
-            if (anvilHandler.bcl_getRecipes().size() > 1) {
-                bcl_buttons.forEach(button -> button.visible = true);
-            } else {
-                bcl_buttons.forEach(button -> button.visible = false);
-            }
+        if (bcl_refreshRecipeButtons()) {
             name.setValue("");
             info.cancel();
-        } else {
-            bcl_buttons.forEach(button -> button.visible = false);
         }
+    }
+
+    @Unique
+    private boolean bcl_refreshRecipeButtons() {
+        if (bcl_buttons.isEmpty()) {
+            return false;
+        }
+
+        AnvilScreenHandlerExtended anvilHandler = (AnvilScreenHandlerExtended) menu;
+        boolean hasRecipe = anvilHandler.bcl_hasActiveRecipe();
+        boolean visible = hasRecipe && anvilHandler.bcl_getSyncedRecipeCount() > 1;
+        bcl_buttons.forEach(button -> button.visible = visible);
+        return hasRecipe;
     }
 
     @Unique
