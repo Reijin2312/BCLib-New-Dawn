@@ -45,6 +45,8 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
     @Unique
     private DataSlot bcl_anvilLevel;
     @Unique
+    private DataSlot bcl_recipeCount;
+    @Unique
     private DataSlot bcl_hasActiveRecipe;
 
 
@@ -68,6 +70,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
     )
     public void be_initAnvilLevel(int syncId, Inventory inventory, ContainerLevelAccess context, CallbackInfo info) {
         this.bcl_anvilLevel = addDataSlot(DataSlot.standalone());
+        this.bcl_recipeCount = addDataSlot(DataSlot.standalone());
         this.bcl_hasActiveRecipe = addDataSlot(DataSlot.standalone());
         if (context != ContainerLevelAccess.NULL) {
             int level = context.evaluate((world, blockPos) -> {
@@ -78,6 +81,7 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
         } else {
             bcl_anvilLevel.set(0);
         }
+        bcl_recipeCount.set(0);
         bcl_hasActiveRecipe.set(0);
     }
 
@@ -155,15 +159,18 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
                 if (bcl_currentRecipe == null || !bcl_recipes.contains(bcl_currentRecipe)) {
                     bcl_currentRecipe = bcl_recipes.get(0);
                 }
+                bcl_recipeCount.set(bcl_recipes.size());
                 bcl_updateResult();
                 bcl_hasActiveRecipe.set(1);
                 info.cancel();
             } else {
                 bcl_currentRecipe = null;
+                bcl_recipeCount.set(0);
                 bcl_hasActiveRecipe.set(0);
             }
         } else {
             bcl_currentRecipe = null;
+            bcl_recipeCount.set(0);
             bcl_hasActiveRecipe.set(0);
         }
     }
@@ -210,6 +217,16 @@ public abstract class AnvilMenuMixin extends ItemCombinerMenu implements AnvilSc
     @Override
     public List<RecipeHolder<AnvilRecipe>> bcl_getRecipes() {
         return bcl_recipes;
+    }
+
+    @Override
+    public boolean bcl_hasActiveRecipe() {
+        return bcl_currentRecipe != null || bcl_hasActiveRecipe.get() > 0;
+    }
+
+    @Override
+    public int bcl_getSyncedRecipeCount() {
+        return Math.max(bcl_recipes.size(), bcl_recipeCount.get());
     }
 }
 
