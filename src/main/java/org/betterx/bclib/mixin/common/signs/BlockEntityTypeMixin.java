@@ -6,34 +6,45 @@ import org.betterx.bclib.blocks.signs.BaseWallHangingSignBlock;
 import org.betterx.bclib.blocks.signs.BaseWallSignBlock;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.WallHangingSignBlock;
+import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Set;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(value = BlockEntityType.class)
 public class BlockEntityTypeMixin {
-    @Inject(method = "isValid", at = @At("HEAD"), cancellable = true)
-    void bcl_isValid(BlockState blockState, CallbackInfoReturnable<Boolean> cir) {
-        final BlockEntityType self = (BlockEntityType) (Object) this;
-        if (self == BlockEntityType.SIGN) {
-            final Block block = blockState.getBlock();
-            if ((block instanceof BaseSignBlock) || (block instanceof BaseWallSignBlock)) {
-                cir.setReturnValue(true);
-            }
-        } else if (self == BlockEntityType.HANGING_SIGN) {
-            final Block block = blockState.getBlock();
-            if ((block instanceof BaseHangingSignBlock) || (block instanceof BaseWallHangingSignBlock)) {
-                cir.setReturnValue(true);
-            }
-        } else if (self == BlockEntityType.CHISELED_BOOKSHELF
-                && blockState.getBlock() instanceof ChiseledBookShelfBlock) {
-            cir.setReturnValue(true);
+    @Redirect(
+            method = "isValid",
+            at = @At(value = "INVOKE", target = "Ljava/util/Set;contains(Ljava/lang/Object;)Z")
+    )
+    private boolean bcl_isValid(Set<Block> validBlocks, Object candidate) {
+        if (validBlocks.contains(candidate)) {
+            return true;
         }
+
+        final BlockEntityType self = (BlockEntityType) (Object) this;
+        final Block block = (Block) candidate;
+        if (self == BlockEntityType.SIGN) {
+            return block instanceof BaseSignBlock
+                    || block instanceof BaseWallSignBlock
+                    || block instanceof StandingSignBlock
+                    || block instanceof WallSignBlock;
+        } else if (self == BlockEntityType.HANGING_SIGN) {
+            return block instanceof BaseHangingSignBlock
+                    || block instanceof BaseWallHangingSignBlock
+                    || block instanceof CeilingHangingSignBlock
+                    || block instanceof WallHangingSignBlock;
+        }
+
+        return self == BlockEntityType.CHISELED_BOOKSHELF && block instanceof ChiseledBookShelfBlock;
     }
 }
 
