@@ -6,4 +6,8 @@ public class BackgroundInfo {
     public static float fogColorBlue;
     public static float fogDensity = 1;
     public static float blindness;
+    public static float skyHorizonRed;
+    public static float skyHorizonGreen;
+    public static float skyHorizonBlue;
+    public static boolean hasSkyHorizonColor;
 }
