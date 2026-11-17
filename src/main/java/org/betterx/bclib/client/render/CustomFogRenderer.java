@@ -28,6 +28,7 @@ public class CustomFogRenderer {
     private static final int GRID_SIZE = 32;
     private static final float MIN_END_FACTOR = 0.5F;
     private static final float START_FACTOR = 0.25F;
+    private static final float THIN_START_FACTOR = 0.7F;
     private static boolean atmosphericApplied;
     private static float atmosphericDensity = 1.0F;
 
@@ -67,6 +68,7 @@ public class CustomFogRenderer {
         float density = getFogDensity(level, pos.x, pos.y, pos.z) * configDensity;
         atmosphericApplied = true;
         atmosphericDensity = density;
+        blendFogColorToSkyHorizon(fogData, level, density);
 
         float vanillaStart = fogData.environmentalStart;
         float vanillaEnd = fogData.environmentalEnd;
@@ -80,13 +82,30 @@ public class CustomFogRenderer {
             return;
         }
 
-        float fogStart = fogEnd * START_FACTOR;
+        float fogStart = fogEnd * startFactor(level, density);
         fogStart = vanillaStart > 0.0F ? Math.min(fogStart, vanillaStart) : fogStart + vanillaStart;
 
         fogData.environmentalStart = fogStart;
         fogData.environmentalEnd = fogEnd;
         fogData.skyEnd = Math.min(fogData.skyEnd, fogEnd);
         fogData.cloudEnd = Math.min(fogData.cloudEnd, fogEnd);
+    }
+
+    private static void blendFogColorToSkyHorizon(FogData fog, Level level, float density) {
+        if (level.dimension() != Level.END || !BackgroundInfo.hasSkyHorizonColor) return;
+        final float t = 1.0F - Mth.clamp(density - 1.0F, 0.0F, 1.0F);
+        if (t <= 0.0F) return;
+        fog.color.set(
+                Mth.lerp(t, fog.color.x(), BackgroundInfo.skyHorizonRed),
+                Mth.lerp(t, fog.color.y(), BackgroundInfo.skyHorizonGreen),
+                Mth.lerp(t, fog.color.z(), BackgroundInfo.skyHorizonBlue),
+                fog.color.w()
+        );
+    }
+
+    private static float startFactor(Level level, float density) {
+        if (level.dimension() != Level.END) return START_FACTOR;
+        return Mth.lerp(Mth.clamp(density - 1.0F, 0.0F, 1.0F), THIN_START_FACTOR, START_FACTOR);
     }
 
     private static float endFactor(float density) {
