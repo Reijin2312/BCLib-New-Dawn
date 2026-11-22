@@ -8,6 +8,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -64,6 +65,7 @@ abstract public class DataExchange {
         ServerPlayConnectionEvents.INIT.register(server::onPlayInit);
         ServerPlayConnectionEvents.JOIN.register(server::onPlayReady);
         ServerPlayConnectionEvents.DISCONNECT.register(server::onPlayDisconnect);
+        ServerLifecycleEvents.SERVER_STOPPED.register(server::onServerStopped);
     }
 
     /**
