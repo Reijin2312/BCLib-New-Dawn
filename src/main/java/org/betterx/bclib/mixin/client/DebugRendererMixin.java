@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = DebugRenderer.class)
 public class DebugRendererMixin {
-    @Inject(method = "emitGizmos", at = @At("TAIL"))
+    @Inject(method = "emitGizmos", at = @At("TAIL"), remap = false)
     void bcl_render(
             Frustum frustum,
             double camX,

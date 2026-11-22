@@ -44,7 +44,6 @@ public class BCLibClient {
         PostInitAPI.postInit(true);
         ModMenuEntryPoint.register();
 
-        AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, SpriteLister.of("entity/chest"));
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, SpriteLister.of("blocks"));
     }
 
