@@ -40,7 +40,7 @@ import java.util.concurrent.Executor;
  */
 @Mixin(ReloadableServerResources.class)
 public class ReloadableServerResourcesMixin {
-    @Inject(method = "loadResources", at = @At("HEAD"))
+    @Inject(method = "loadResources", at = @At("HEAD"), remap = false)
     private static void bcl_captureResourceManager(
             ResourceManager resourceManager,
             LayeredRegistryAccess<RegistryLayer> layers,
