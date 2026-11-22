@@ -20,17 +20,17 @@ public class PortalShapeMixin {
     @Unique
     private static final String FRAME_TEST = "Lnet/minecraft/world/level/block/state/BlockBehaviour$StatePredicate;test(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Z";
 
-    @WrapOperation(method = "getDistanceUntilEdgeAboveFrame", at = @At(value = "INVOKE", target = FRAME_TEST), remap = false)
+    @WrapOperation(method = "getDistanceUntilEdgeAboveFrame", at = @At(value = "INVOKE", target = FRAME_TEST))
     private static boolean be_getDistanceUntilEdgeAboveFrame(StatePredicate predicate, BlockState state, BlockGetter level, BlockPos pos, Operation<Boolean> original) {
         return be_FRAME(predicate, state, level, pos, original);
     }
 
-    @WrapOperation(method = "hasTopFrame", at = @At(value = "INVOKE", target = FRAME_TEST), remap = false)
+    @WrapOperation(method = "hasTopFrame", at = @At(value = "INVOKE", target = FRAME_TEST))
     private static boolean be_hasTopFrame(StatePredicate predicate, BlockState state, BlockGetter level, BlockPos pos, Operation<Boolean> original) {
         return be_FRAME(predicate, state, level, pos, original);
     }
 
-    @WrapOperation(method = "getDistanceUntilTop", at = @At(value = "INVOKE", target = FRAME_TEST), remap = false)
+    @WrapOperation(method = "getDistanceUntilTop", at = @At(value = "INVOKE", target = FRAME_TEST))
     private static boolean be_getDistanceUntilTop(StatePredicate predicate, BlockState state, BlockGetter level, BlockPos pos, Operation<Boolean> original) {
         return be_FRAME(predicate, state, level, pos, original);
     }
