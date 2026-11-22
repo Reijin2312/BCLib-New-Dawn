@@ -17,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class AtmosphericFogEnvironmentMixin {
     @Inject(
             method = "setupFog(Lnet/minecraft/client/renderer/fog/FogData;Lnet/minecraft/client/Camera;Lnet/minecraft/client/multiplayer/ClientLevel;FLnet/minecraft/client/DeltaTracker;)V",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void bclib_applyBiomeFog(
             FogData fogData,
@@ -30,4 +31,3 @@ public class AtmosphericFogEnvironmentMixin {
         CustomFogRenderer.applyAtmosphericFog(fogData, camera, level, renderDistance);
     }
 }
-
