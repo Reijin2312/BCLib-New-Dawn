@@ -55,7 +55,6 @@ public class BCLibClient implements ClientModInitializer {
         BaseBlockEntityRenders.register();
         DataExchangeAPI.prepareClientside();
         PostInitAPI.postInit(true);
-        AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, SpriteLister.of("entity/chest"));
         AtlasSetManager.addSource(AtlasSetManager.VANILLA_BLOCKS, SpriteLister.of("blocks"));
     }
 //    @Override
