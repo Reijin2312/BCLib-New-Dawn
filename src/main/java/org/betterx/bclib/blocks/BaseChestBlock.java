@@ -45,6 +45,11 @@ public abstract class BaseChestBlock extends ChestBlock implements BlockModelPro
         this.parent = source;
     }
 
+    /** Returns the plank block this chest belongs to. */
+    public Block getMaterialBlock() {
+        return parent;
+    }
+
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return BaseBlockEntities.CHEST.create(blockPos, blockState);
@@ -83,10 +88,7 @@ public abstract class BaseChestBlock extends ChestBlock implements BlockModelPro
                            .setRolls(ConstantValue.exactly(1.0f))
                            .add(LootItem.lootTableItem(this).apply(CopyComponentsFunction
                                    .copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
-                                   .include(DataComponents.CUSTOM_NAME)
-                                   .include(DataComponents.CONTAINER)
-                                   .include(DataComponents.LOCK)
-                                   .include(DataComponents.CONTAINER_LOOT)))
+                                   .include(DataComponents.CUSTOM_NAME)))
                            .when(ExplosionCondition.survivesExplosion());
         builder.setRandomSequence(this.asItem().builtInRegistryHolder().unwrapKey().orElseThrow().location());
 

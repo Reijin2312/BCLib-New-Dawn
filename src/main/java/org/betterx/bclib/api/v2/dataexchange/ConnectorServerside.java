@@ -44,6 +44,12 @@ public class ConnectorServerside extends Connector {
     public void onPlayDisconnect(ServerGamePacketListenerImpl handler, MinecraftServer server) {
     }
 
+    public void onServerStopped(MinecraftServer stoppedServer) {
+        if (server == stoppedServer) {
+            server = null;
+        }
+    }
+
     public void sendToClient(BaseDataHandler<?> h) {
         if (server == null) {
             throw new RuntimeException("[internal error] Server not initialized yet!");

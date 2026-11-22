@@ -9,6 +9,7 @@ import org.betterx.bclib.commands.arguments.BCLibArguments;
 import org.betterx.bclib.config.Configs;
 import org.betterx.bclib.recipes.AlloyingRecipe;
 import org.betterx.bclib.recipes.AnvilRecipe;
+import org.betterx.bclib.recipes.WoodenChestRecipe;
 import org.betterx.bclib.registry.BaseBlockEntities;
 import org.betterx.bclib.util.BCLDataComponents;
 import org.betterx.datagen.bclib.BCLibDatagen;
@@ -54,6 +55,7 @@ public class BCLib {
         modBus.addListener(BCLibArguments::register);
         modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, BCLDataComponents::register);
         modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, org.betterx.bclib.registry.BaseBlockEntities::register);
+        modBus.addListener(org.betterx.bclib.registry.BaseBlockEntities::registerCapabilities);
         modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, org.betterx.bclib.recipes.BCLRecipeManager::register);
         modBus.addListener(net.neoforged.neoforge.registries.RegisterEvent.class, org.betterx.bclib.api.v2.levelgen.structures.TemplatePiece::register);
         org.betterx.wover.block.api.BlockRegistry.hook(modBus);
@@ -64,6 +66,7 @@ public class BCLib {
         WorldConfig.registerMod(C);
         AnvilRecipe.register();
         AlloyingRecipe.register();
+        WoodenChestRecipe.register();
         CommandRegistry.register();
         BCLBlockTags.ensureStaticallyLoaded();
 

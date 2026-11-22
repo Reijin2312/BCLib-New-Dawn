@@ -22,6 +22,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.items.wrapper.InvWrapper;
 
 public class BaseBlockEntities {
     private static final ResourceLocation CHEST_ID = BCLib.makeID("chest");
@@ -67,6 +70,24 @@ public class BaseBlockEntities {
     }
 
     public static void register() {
+    }
+
+    /** Exposes custom chests to Create and other NeoForge item-transfer consumers. */
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        Block[] chests = getChests();
+        if (chests.length == 0) return;
+
+        event.registerBlock(Capabilities.ItemHandler.BLOCK, (level, pos, state, blockEntity, side) -> {
+            if (!(state.getBlock() instanceof net.minecraft.world.level.block.ChestBlock chestBlock)) return null;
+            var container = net.minecraft.world.level.block.ChestBlock.getContainer(
+                    chestBlock,
+                    state,
+                    level,
+                    pos,
+                    true
+            );
+            return container == null ? null : new InvWrapper(container);
+        }, chests);
     }
 
     public static void registerChestBlock(Block block) {

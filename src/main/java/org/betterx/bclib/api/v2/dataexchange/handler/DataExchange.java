@@ -10,6 +10,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -122,6 +123,14 @@ abstract public class DataExchange {
         DataExchange api = getInstance();
         ServerPlayer player = (ServerPlayer) event.getEntity();
         api.server.onPlayDisconnect(player.connection, player.server);
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        DataExchange api = getInstance();
+        if (api.server != null) {
+            api.server.onServerStopped(event.getServer());
+        }
     }
 
 
