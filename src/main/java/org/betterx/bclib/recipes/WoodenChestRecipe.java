@@ -1,5 +1,6 @@
 package org.betterx.bclib.recipes;
 
+import net.minecraft.world.item.crafting.*;
 import org.betterx.bclib.BCLib;
 import org.betterx.bclib.blocks.BaseChestBlock;
 
@@ -9,26 +10,32 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 /**
  * Replaces vanilla's broad chest recipe with an equivalent recipe that preserves the wood
  * variant when all eight planks belong to a BCLib chest material.
  */
-public final class WoodenChestRecipe extends CustomRecipe {
+public final class WoodenChestRecipe extends ShapedRecipe {
     public static final SimpleCraftingRecipeSerializer<WoodenChestRecipe> SERIALIZER =
             new SimpleCraftingRecipeSerializer<>(WoodenChestRecipe::new);
 
     public WoodenChestRecipe(CraftingBookCategory category) {
-        super(category);
+        super("", category, createPattern(), new ItemStack(Items.CHEST), true);
+    }
+
+    private static ShapedRecipePattern createPattern(){
+        return ShapedRecipePattern.of(
+                Map.of('#', Ingredient.of(ItemTags.PLANKS)),
+                "###",
+                "# #",
+                "###"
+        );
     }
 
     public static void register() {
@@ -59,8 +66,6 @@ public final class WoodenChestRecipe extends CustomRecipe {
 
     /** Returns AIR for a valid mixed-plank recipe and null for an invalid shape. */
     private static Item getPlank(CraftingInput input) {
-        if (input.width() != 3 || input.height() != 3 || input.ingredientCount() != 8) return null;
-
         Item plank = null;
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
